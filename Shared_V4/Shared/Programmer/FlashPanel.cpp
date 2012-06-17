@@ -664,7 +664,7 @@ bool FlashPanel::CreateControls() {
 
    //------------------------------------------------------------------------
    itemBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   itemStaticBoxSizer->Add(itemBoxSizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+   itemStaticBoxSizer->Add(itemBoxSizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 0);
 
    loadFileButtonControl = new wxButton( panel, ID_LOAD_FILE_BUTTON, _("&Load Hex Files"), wxDefaultPosition, wxDefaultSize, 0 );
    itemBoxSizer->Add(loadFileButtonControl, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
@@ -696,7 +696,7 @@ bool FlashPanel::CreateControls() {
    wxFlexGridSizer *flexGridSizer = new wxFlexGridSizer(0,2,0,0);
 //   flexGridSizer->SetFlexibleDirection(wxHORIZONTAL);
 //   flexGridSizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_NONE);
-   itemStaticBoxSizer->Add(flexGridSizer, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+   itemStaticBoxSizer->Add(flexGridSizer, 1, wxALIGN_CENTER_VERTICAL|wxALL, 0);
 
    deviceTypeChoiceControl = new wxChoice(panel, ID_DEVICE_TYPE_CHOICE, wxDefaultPosition, wxSize(180,-1), 0, NULL, 0); //wxDefaultSize);
    flexGridSizer->Add(deviceTypeChoiceControl, 0, wxALIGN_CENTER_HORIZONTAL|wxEXPAND|wxALL, 5);
@@ -731,7 +731,7 @@ bool FlashPanel::CreateControls() {
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("kHz"), wxDefaultPosition, wxDefaultSize, 0 );
    itemStaticBoxSizer->Add(itemStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 #endif
-
+#if 0
    //======================================================================
 
    itemStaticBox = new wxStaticBox(panel, wxID_ANY, _("RAM Buffer"));
@@ -769,6 +769,7 @@ bool FlashPanel::CreateControls() {
 
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("(hex)"), wxDefaultPosition, wxDefaultSize, 0 );
    panelSizer25->Add(itemStaticText, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 5);
+#endif
 
    //====================================================================
 
@@ -778,7 +779,7 @@ bool FlashPanel::CreateControls() {
 
    //------------------------------------------------------------------------
    gridBagSizer = new wxGridBagSizer(0,0);
-   itemStaticBoxSizer->Add(gridBagSizer, 0, wxEXPAND|wxALL, 5);
+   itemStaticBoxSizer->Add(gridBagSizer, 0, wxEXPAND|wxALL, 0);
 
    //------------------------------------------------------------------------
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("Clock Module"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -918,8 +919,10 @@ bool FlashPanel::TransferDataToWindow() {
    deviceTypeChoiceControl->Enable(!deviceSet);
 
    bool customChip = (currentDeviceIndex == 0);
+#if 0
    ramStartAddressTextControl->Enable(customChip);
    ramEndAddressTextControl->Enable(customChip);
+#endif
    clockModuleTypeChoiceControl->Enable(customChip);
 
    clockModuleAddressTextControl->Enable(customChip);
@@ -941,11 +944,11 @@ bool FlashPanel::TransferDataToWindow() {
    trimFrequencyTextControl->Enable(trimEnabled);
    trimAddressStaticControl->Enable(trimEnabled);
    trimAddressTextControl->Enable(trimEnabled);
-
+#if 0
    // Update dialogue values
    ramStartAddressTextControl->SetHexValue(currentDevice.getRamStart());
    ramEndAddressTextControl->SetHexValue(currentDevice.getRamEnd());
-
+#endif
    clockModuleTypeChoiceControl->SetStringSelection(wxString(ClockTypes::getClockName(currentDevice.getClockType()).c_str(), wxConvUTF8));
 
    clockModuleAddressTextControl->SetHexValue(currentDevice.getClockAddress());
@@ -1008,10 +1011,10 @@ IMPLEMENT_CLASS( FlashPanel, wxPanel )
  */
 BEGIN_EVENT_TABLE( FlashPanel, wxPanel )
    EVT_CHOICE( ID_DEVICE_TYPE_CHOICE,               FlashPanel::OnDeviceTypeChoiceSelected )
-
+#if 0
    EVT_TEXT( ID_RAM_BEGIN_ADDRESS_TEXT,             FlashPanel::OnRamBeginAddressTextTextUpdated )
    EVT_TEXT( ID_RAM_END_ADDRESS_TEXT,               FlashPanel::OnRamEndAddressTextTextUpdated )
-
+#endif
    EVT_CHOICE( ID_CLOCK_MODULE_TYPE_CHOICE,         FlashPanel::OnClockModuleTypeChoiceSelected )
    EVT_TEXT( ID_CLOCK_MODULE_ADDRESS_TEXT,          FlashPanel::OnClockModuleAddressTextTextUpdated )
    EVT_CHECKBOX( ID_TRIM_FREQUENCY_CHECKBOX,        FlashPanel::OnTrimFrequencyCheckboxClick )

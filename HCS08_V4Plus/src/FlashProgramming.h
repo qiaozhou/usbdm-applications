@@ -167,7 +167,7 @@ public:
    USBDM_ErrorCode runTCLCommand(const char *command);
    USBDM_ErrorCode massEraseTarget();
    USBDM_ErrorCode programFlash(FlashImage *flashImageDescription, CallBackT errorCallBack=NULL, bool doRamWrites=false);
-   USBDM_ErrorCode verifyFlash(FlashImage  *flashImageDescription, CallBackT errorCallBack=NULL, bool doRamWrites=false);
+   USBDM_ErrorCode verifyFlash(FlashImage  *flashImageDescription, CallBackT errorCallBack=NULL);
    USBDM_ErrorCode readTargetChipId(uint32_t *targetSDID, bool doInit=false);
    USBDM_ErrorCode confirmSDID(void);
    

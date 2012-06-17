@@ -75,11 +75,11 @@ private:
    bool                    useTCLScript;
    bool                    flashReady;       //!< Safety check - only TRUE when flash is ready for programming
    bool                    initTargetDone;   //! Indicates initTarget() has been done.
-   MemoryRegionPtr         flashRegion;
    uint32_t                targetBusFrequency;  //! kHz
    FlashProgramPtr         currentFlashProgram;
    ProgressTimer          *progressTimer;
    bool                    doRamWrites;
+   MemoryRegionPtr         flashMemoryRegionPtr;
 
    USBDM_ErrorCode initialiseTargetFlash();
    USBDM_ErrorCode initialiseTarget();
@@ -113,8 +113,8 @@ private:
                                  unsigned const char *data,
                                  uint8_t                  delayValue);
    USBDM_ErrorCode programBlock(FlashImage    *flashImageDescription,
-                             unsigned int   blockSize,
-                             uint32_t            flashAddress);
+                                unsigned int   blockSize,
+                                uint32_t       flashAddress);
    USBDM_ErrorCode doVerify(FlashImage *flashImageDescription);
    USBDM_ErrorCode blankCheckBlock(FlashImage   *flashImageDescription,
                                 unsigned int  blockSize,
@@ -122,6 +122,7 @@ private:
    void RS08_doFixups(uint8_t buffer[]);
    USBDM_ErrorCode loadAndStartExecutingTargetProgram();
    USBDM_ErrorCode setPPAGE(uint32_t address);
+   USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImageDescription);
    USBDM_ErrorCode bulkEraseMemoryRegion(MemoryRegionPtr memoryRegion);
 
 public:
@@ -133,7 +134,7 @@ public:
    USBDM_ErrorCode runTCLCommand(const char *command);
    USBDM_ErrorCode massEraseTarget();
    USBDM_ErrorCode programFlash(FlashImage *flashImageDescription, CallBackT errorCallBack=NULL, bool doRamWrites=false);
-   USBDM_ErrorCode verifyFlash(FlashImage  *flashImageDescription, CallBackT errorCallBack=NULL, bool doRamWrites=false);
+   USBDM_ErrorCode verifyFlash(FlashImage  *flashImageDescription, CallBackT errorCallBack=NULL);
    USBDM_ErrorCode readTargetChipId(uint32_t *targetSDID, bool doInit=false);
    USBDM_ErrorCode confirmSDID(void);
    

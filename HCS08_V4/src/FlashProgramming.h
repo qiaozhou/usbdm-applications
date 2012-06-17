@@ -78,6 +78,7 @@ private:
    uint32_t                targetBusFrequency;  //! kHz
    FlashProgramPtr         currentFlashProgram;
    ProgressTimer          *progressTimer;
+   bool                    doRamWrites;
 
    USBDM_ErrorCode initialiseTargetFlash();
    USBDM_ErrorCode initialiseTarget();
@@ -103,16 +104,16 @@ private:
    USBDM_ErrorCode configureTargetClock(unsigned long  *busFrequency);
    USBDM_ErrorCode configureExternal_Clock(unsigned long  *busFrequency);
    USBDM_ErrorCode programBlock(FlashImage    *flashImageDescription,
-                             unsigned int   blockSize,
-                             uint32_t            flashAddress);
+                                unsigned int   blockSize,
+                                uint32_t       flashAddress);
    USBDM_ErrorCode doVerify(FlashImage *flashImageDescription);
    USBDM_ErrorCode blankCheckBlock(FlashImage   *flashImageDescription,
                                 unsigned int  blockSize,
                                 unsigned int  flashAddress);
    USBDM_ErrorCode loadTargetProgram();
-   USBDM_ErrorCode setPageRegisters(uint32_t physicalAddress);
-   USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImageDescription);
    USBDM_ErrorCode probeMemory(MemorySpace_t memorySpace, uint32_t address);
+   USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImageDescription);
+   USBDM_ErrorCode setPageRegisters(uint32_t physicalAddress);
 
 public:
    USBDM_ErrorCode initTCL(void);
@@ -122,7 +123,7 @@ public:
    USBDM_ErrorCode runTCLScript(TclScriptPtr script);
    USBDM_ErrorCode runTCLCommand(const char *command);
    USBDM_ErrorCode massEraseTarget();
-   USBDM_ErrorCode programFlash(FlashImage *flashImageDescription, CallBackT errorCallBack=NULL);
+   USBDM_ErrorCode programFlash(FlashImage *flashImageDescription, CallBackT errorCallBack=NULL, bool doRamWrites=false);
    USBDM_ErrorCode verifyFlash(FlashImage  *flashImageDescription, CallBackT errorCallBack=NULL);
    USBDM_ErrorCode readTargetChipId(uint32_t *targetSDID, bool doInit=false);
    USBDM_ErrorCode confirmSDID(void);
@@ -138,7 +139,8 @@ public:
       flashReady(false),
       initTargetDone(false),
       targetBusFrequency(0),
-      progressTimer(NULL) {
+      progressTimer(NULL),
+      doRamWrites(false) {
 //      print("FlashProgrammer()\n");
    }
    ~FlashProgrammer();

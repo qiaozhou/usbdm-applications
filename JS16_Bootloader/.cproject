@@ -14,7 +14,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.mingw.exe.debug.473129658" name="Debug" parent="cdt.managedbuild.config.gnu.mingw.exe.debug">
+				<configuration artifactName="${ProjName}-debug" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.mingw.exe.debug.473129658" name="Debug" parent="cdt.managedbuild.config.gnu.mingw.exe.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.473129658." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.exe.debug.202841932" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.41570921" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
@@ -67,7 +67,7 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.473129658.124811675" name="Version.rc" rcbsApplicability="override" resourcePath="src/Version.rc" toolsToInvoke="org.eclipse.cdt.managedbuilder.ui.rcbs.884928705">
-						<tool command="windres ..\src\Version.rc -o src\Version.o" customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.884928705" name="Resource Custom Build Step">
+						<tool command="windres -DINTERACTIVE ..\src\Version.rc -o src\Version.o" customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.884928705" name="Resource Custom Build Step">
 							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1683774603" name="Resource Custom Build Step Input Type">
 								<additionalInput kind="additionalinputdependency" paths=""/>
 							</inputType>
@@ -145,7 +145,7 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.mingw.exe.release.2000245616.677233721" name="Version.rc" rcbsApplicability="override" resourcePath="src/Version.rc" toolsToInvoke="org.eclipse.cdt.managedbuilder.ui.rcbs.1745767756">
-						<tool command="windres ..\src\Version.rc -o src\Version.o" customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1745767756" name="Resource Custom Build Step">
+						<tool command="windres -DINTERACTIVE ..\src\Version.rc -o src\Version.o" customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1745767756" name="Resource Custom Build Step">
 							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.2073530673" name="Resource Custom Build Step Input Type">
 								<additionalInput kind="additionalinputdependency" paths=""/>
 							</inputType>

@@ -786,6 +786,7 @@ USBDM_ErrorCode FlashProgrammer::probeMemory(MemorySpace_t memorySpace, uint32_t
 
 //=======================================================================
 //! Programs a block of Target Flash memory
+//! The data is subdivided based upon buffer size and Flash alignment
 //!
 //! @param flashImage Description of flash contents to be programmed.
 //! @param blockSize             Size of block to program (bytes)
@@ -794,7 +795,6 @@ USBDM_ErrorCode FlashProgrammer::probeMemory(MemorySpace_t memorySpace, uint32_t
 //! @return error code see \ref USBDM_ErrorCode.
 //!
 //! @note - Assumes flash programming code has already been loaded to target.
-//! @note - The memory range must be within one page for paged devices.
 //!
 USBDM_ErrorCode FlashProgrammer::programBlock(FlashImage    *flashImage,
                                               unsigned int   blockSize,
@@ -823,7 +823,7 @@ USBDM_ErrorCode FlashProgrammer::programBlock(FlashImage    *flashImage,
    }
    // Maximum split block size must be made less than buffer RAM available
    maxSplitBlockSize = parameters.getRamEnd()-parameters.getRamStart()+1 -
-                     sizeof(HCS08_flashProgram)-FLASH_PARAMETER_SIZE;
+                       sizeof(HCS08_flashProgram)-FLASH_PARAMETER_SIZE;
 
    // Maximum split block size must be made less than above buffer
    if (maxSplitBlockSize > MaxSplitBlockSize) {
@@ -993,66 +993,6 @@ USBDM_ErrorCode FlashProgrammer::programBlock(FlashImage    *flashImage,
    }
    return PROGRAMMING_RC_OK;
 }
-
-#if (TARGET == HCS08) || (TARGET == CFV1)
-//=======================================================================
-//! Updates the memory image from the target flash Clock trim location(s)
-//!
-//! @param flashImage   = Flash image
-//!
-USBDM_ErrorCode FlashProgrammer::dummyTrimLocations(FlashImage *flashImage) {
-
-unsigned size  = 0;
-uint32_t start = 0;
-
-   // Not using trim -> do nothing
-   if ((parameters.getClockTrimNVAddress() == 0) ||
-       (parameters.getClockTrimFreq() == 0)) {
-      //print("Not using trim\n");
-      return PROGRAMMING_RC_OK;
-   }
-   switch (parameters.getClockType()) {
-      case S08ICGV1:
-      case S08ICGV2:
-      case S08ICGV3:
-      case S08ICGV4:
-         start = parameters.getClockTrimNVAddress();
-         size  = 2;
-         break;
-      case S08ICSV1:
-      case S08ICSV2:
-      case S08ICSV2x512:
-      case S08ICSV3:
-      case S08MCGV1:
-      case S08MCGV2:
-      case S08MCGV3:
-      case RS08ICSOSCV1:
-      case RS08ICSV1:
-         start = parameters.getClockTrimNVAddress();
-         size  = 2;
-         break;
-      case CLKEXT:
-      default:
-         break;
-   }
-   if (size == 0) {
-      return PROGRAMMING_RC_OK;
-   }
-   // Read existing trim information from target
-   uint8_t data[10];
-   USBDM_ErrorCode rc = ReadMemory(1,size,start,data);
-   if (rc != BDM_RC_OK) {
-      return PROGRAMMING_RC_ERROR_BDM_READ;
-   }
-   print("FlashProgrammer::dummyTrimLocations() - Modifying image[0x%06X..0x%06X]\n",
-         start, start+size-1);
-   // Update image
-   for(uint32_t index=0; index < size; index++ ) {
-      flashImage->setValue(start+index, data[index]);
-   }
-   return PROGRAMMING_RC_OK;
-}
-#endif
 
 //=======================================================================
 //! Check security state of target
@@ -1435,6 +1375,8 @@ USBDM_ErrorCode FlashProgrammer::verifyFlash(FlashImage  *flashImage,
          DeviceData::getEraseOptionName(parameters.getEraseOption()),
          secValues[parameters.getSecurity()]);
 
+   this->doRamWrites = false;
+
    if (progressTimer != NULL) {
       delete progressTimer;
    }
@@ -1493,7 +1435,8 @@ USBDM_ErrorCode FlashProgrammer::verifyFlash(FlashImage  *flashImage,
 //! @note Security locations within the flash image may be modified to effect the protection options.
 //!
 USBDM_ErrorCode FlashProgrammer::programFlash(FlashImage  *flashImage, 
-                                              CallBackT progressCallBack) {
+                                              CallBackT    progressCallBack, 
+                                              bool         doRamWrites) {
    USBDM_ErrorCode rc;
    bool targetBlank = false;
    if ((this == NULL) || (parameters.getTargetName().empty())) {
@@ -1540,6 +1483,7 @@ USBDM_ErrorCode FlashProgrammer::programFlash(FlashImage  *flashImage,
          flashImage->getByteCount());
 #endif
 
+   this->doRamWrites = doRamWrites;
    if (progressTimer != NULL) {
       delete progressTimer;
    }

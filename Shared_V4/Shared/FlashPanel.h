@@ -81,8 +81,8 @@ private:
       ID_DEVICE_TYPE_CHOICE,
       ID_FILTER_BY_CHIP_ID_CHECKBOX,
       ID_DETECT_CHIP_ID_BUTTON,
-      ID_RAM_BEGIN_ADDRESS_TEXT,
-      ID_RAM_END_ADDRESS_TEXT,
+//      ID_RAM_BEGIN_ADDRESS_TEXT,
+//      ID_RAM_END_ADDRESS_TEXT,
       ID_CLOCK_MODULE_TYPE_CHOICE,
       ID_CLOCK_MODULE_ADDRESS_TEXT,
       ID_TRIM_FREQUENCY_CHECKBOX,
@@ -114,8 +114,8 @@ private:
 
    NumberTextEditCtrl*     busFrequencyTextControl;
    wxChoice*               deviceTypeChoiceControl;
-   NumberTextEditCtrl*     ramStartAddressTextControl;
-   NumberTextEditCtrl*     ramEndAddressTextControl;
+//   NumberTextEditCtrl*     ramStartAddressTextControl;
+//   NumberTextEditCtrl*     ramEndAddressTextControl;
    wxChoice*               clockModuleTypeChoiceControl;
    wxStaticText*           clockModuleAddressStaticControl;
    NumberTextEditCtrl*     clockModuleAddressTextControl;
