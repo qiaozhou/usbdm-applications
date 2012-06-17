@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+   <?define CW_Ver="2" ?> 
+
+   <?define Manufacturer="pgo" ?>
+   <?define ProductName="USBDM" ?>
+   <!--?define ProductVersion="4.9.0" ?-->                        <!-- Defined on command line -->
+   <?define ProductCode="17b2306b-6310-4c23-8e96-fdac4c922b3d" ?> <!-- Don't change        -->
+   <?define UpgradeCode="9bd8ce56-449a-4787-9c20-feb701416411" ?> <!-- Don't change        -->
+   <?define InfoURL="http://usbdm.sourceforge.net" ?>
+   
+   <?define DescSRecord="Freescale S-Record binary file" ?>
+   <?define ExplorerMenuOpen="Open" ?>
+
+   <Fragment>
+      <!--======================================================
+               Directory structure
+      =======================================================-->
+      <DirectoryRef Id='TARGETDIR'>
+         <!-- Freescale FreeMASTER directory structure-->
+         <Directory Id="D.FREEMASTER_V1_3" Name="NotFound12">
+            <Directory Id="D.FREEMASTER_V1_3_Plugins" Name="plugins">
+               <Directory Id="D.FREEMASTER_V1_3_Plugins_bdm" Name="bdm"/>
+            </Directory>
+         </Directory>
+      </DirectoryRef>
+     
+      <!--======================================================
+               Registry searches
+      =======================================================-->
+     
+      <!-- Check for presence of FreeMASTER 1.3 -->
+      <Property Id="P.FREEMASTER_V1_3">
+         <RegistrySearch Id="Rs.FREEMASTER_V1_3"
+                    Root="HKLM"
+                    Win64="no"
+                    Key="SOFTWARE\Freescale\FreeMASTER\1.3"
+                    Name="Path"
+                    Type="directory" />
+      </Property>
+
+      <!-- Modify default install path for FreeMASTER 1.3 -->
+      <Property Id="D.FREEMASTER_V1_3">
+         <RegistrySearchRef Id="Rs.FREEMASTER_V1_3" />
+      </Property>
+            
+      <!--=================================================================================
+           Actions
+      ==================================================================================-->
+
+      <!-- None -->
+
+      <!--======================================================
+               Components
+      =======================================================-->
+
+      <!-- USBDM Installed Marker -->
+      <DirectoryRef Id="D.FREEMASTER_V1_3">
+         <Component Id='C.FREEMASTER_V1_3.Marker' Guid='f4ec9f6f-5471-4880-bff1-29b15f2ecb0a' >
+            <File Id='FREEMASTER_V1_3' DiskId='1' Source='USBDM_Installed.txt' KeyPath='yes' />
+         </Component>
+      </DirectoryRef>
+
+      <!-- Freemaster V1.3 Support -->
+      <DirectoryRef Id="D.FREEMASTER_V1_3_Plugins_bdm">
+         <Component Id='C.FREEMASTER_V1_3.Files' Guid='63c671e0-0672-4e34-9114-78f006b1f811' >
+            <File Id='FREEMASTER_V1_3Files1' DiskId='1' Source='bin\usbdm.4.dll'  KeyPath='yes'  />
+            <File Id='FREEMASTER_V1_3Files2' DiskId='1' Source='bin\usbdm-arm.4.dll' />
+            <File Id='FREEMASTER_V1_3Files3' DiskId='1' Source='bin\libusb-1.0.dll' />
+
+            <File Id='FREEMASTER_V1_3Files4' DiskId='1' Source='bin\libgcc_s_dw2-1.dll' />
+            <File Id='FREEMASTER_V1_3Files5' DiskId='1' Source='bin\libstdc++-6.dll' />
+         </Component>
+      </DirectoryRef>
+
+      <Feature Id='F.FREEMASTER_V1_3'
+            Title='FreeMASTER V1.3'
+            Description="USBDM support for FreeMASTER V1.3."
+            ConfigurableDirectory="D.FREEMASTER_V1_3"
+            AllowAdvertise="no"
+            Level='100'>
+         <Condition Level='1'>
+            <![CDATA[Installed OR P.FREEMASTER_V1_3]]>
+         </Condition>
+         <ComponentRef Id='C.FREEMASTER_V1_3.Marker' />
+         <ComponentRef Id='C.FREEMASTER_V1_3.Files' />
+      </Feature>
+
+   </Fragment>
+</Wix>

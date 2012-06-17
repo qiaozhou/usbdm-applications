@@ -1,0 +1,103 @@
+# setup environment
+#
+SHARED_ROOT = ../Shared_V4
+
+WIN_LIBS  = -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwinspool -lwinmm -lshell32 -lcomctl32
+WIN_LIBS += -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
+
+WX_LIBS  = -lwx_mswu_richtext-2.9 -lwx_mswu_aui-2.9 -lwx_mswu_html-2.9 -lwx_mswu_xrc-2.9 
+WX_LIBS += -lwx_mswu_adv-2.9 -lwx_mswu_core-2.9 -lwx_baseu-2.9 -lwx_baseu_net-2.9 
+WX_LIBS += -lwx_baseu_xml-2.9 -lwxtiff-2.9 -lwxjpeg-2.9 -lwxpng-2.9 -lwxzlib-2.9 
+WX_LIBS += -lwxregexu-2.9 -lwxexpat-2.9
+
+WX_INCLUDE = -I/c/Apps/MinGW/include/wx-2.9
+
+WIN_OPTS  = -Wl,--subsystem,windows -mwindows 
+GCC_OPTS  = -static-libstdc++ -static-libgcc  
+
+LIBRARIES = $(WIN_LIBS) $(WX_LIBS)
+
+# All the directories containing source & headers
+DIRECTORIES  = $(SHARED_ROOT)/Shared
+DIRECTORIES += src
+
+VPATH        = $(DIRECTORIES)
+INCLUDE_DIRS = $(patsubst %,-I%,$(DIRECTORIES)) $(WX_INCLUDE)
+
+LIB_OBJS  = USBDM_GDI.o
+LIB_OBJS += FlashProgramming.o
+LIB_OBJS += ApplicationFiles.o
+LIB_OBJS += AppSettings.o
+LIB_OBJS += DeviceData.o
+LIB_OBJS += DeviceXmlParser.o
+LIB_OBJS += FlashImage.o
+LIB_OBJS += FlashPanel.o
+LIB_OBJS += FlashProgrammerApp.o
+LIB_OBJS += GdbBreakpoints.o
+LIB_OBJS += GdbHandler.o
+LIB_OBJS += GdbSerialConnection.o
+LIB_OBJS += GdbServer.o
+LIB_OBJS += GDI_Aux.o
+LIB_OBJS += helper-classes.o
+LIB_OBJS += Log.o
+LIB_OBJS += MessagePanel.o
+LIB_OBJS += MetrowerksInterface.o
+LIB_OBJS += Names.o
+LIB_OBJS += USBDMDialogue.o
+LIB_OBJS += USBDMPanel.o
+LIB_OBJS += USBDM_AUX.o
+LIB_OBJS += Utils.o
+
+HEADER_FILES = $(sort \
+ $(notdir $(wildcard $(addsuffix /*.h,$(DIRECTORIES)))) \
+)
+
+BUILD_OPTS = -DLOG -DTARGET=CFV1 -DPACK_STRUCTS=1 -DUNICODE -D__GNUWIN32__ 
+COMPILE_OPTS = $(WARNINGS) $(TARGET_OPTS) $(MESSAGES) $(F_NO_STRICT_ALIASING) $(INCLUDE_DIRS) 
+WARNINGS = -Wall -W -Wshadow -Wwrite-strings -Winline
+
+# needed to safely build the library (until proven otherwise)
+F_NO_STRICT_ALIASING = -fno-strict-aliasing
+
+ifdef DEBUG
+ TARGET_OPTS = -O0 -g3
+ DEBUG_MACRO = -DDEBUG
+else
+ TARGET_OPTS = -O2 $(F_INLINE) $(F_INLINE_ONCE) $(F_UNROLL_LOOPS)
+ F_INLINE = -finline
+ F_INLINE_ONCE = -finline-functions-called-once
+ #F_UNROLL_LOOPS = -funroll-loops
+endif
+
+CPPFLAGS = $(DEBUG_MACRO)
+
+CC = gcc
+CPP = g++
+CPPFLAGS = $(COMPILE_OPTS)
+
+AS = $(CC) -x assembler-with-cpp -c
+ASFLAGS = $(COMPILE_OPTS)
+
+AR = ar
+ARFLAGS = cr
+
+LIB_OUT = a.exe
+
+.PHONY: all
+all: $(LIB_OUT)
+
+# lib
+
+$(LIB_OUT): $(LIB_OBJS)
+	$(CC) $(CCFLAGS) $@ $(LIB_OBJS)
+
+$(LIB_OBJS): $(HEADER_FILES)
+
+# clean
+
+.PHONY: clean install
+clean:
+	-rm -f $(LIB_OBJS) $(LIB_OUT)
+
+#install:
+#	$(foreach file,$(HEADER_FILES),echo $(file))

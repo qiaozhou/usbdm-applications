@@ -1,0 +1,2823 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE DeviceList SYSTEM "usbdmDeviceSchema.dtd"
+[
+<!ENTITY HCS12-FTS-flash-scripts          SYSTEM "HCS12/HCS12-FTS-flash-scripts.tcl">
+<!ENTITY HCS12-XFTMRK-flash-scripts       SYSTEM "HCS12/HCS12-XFTMRK-flash-scripts.tcl">
+<!ENTITY HCS12-FTMRCK-flash-scripts       SYSTEM "HCS12/HCS12-FTMRCK-flash-scripts.tcl">
+
+<!ENTITY HCS12-MMCV4-FTS-flash-program    SYSTEM "HCS12/HCS12-MMCV4-FTS-flash-program.s19">
+<!ENTITY HCS12-MMCV4-FTS_2-flash-program  SYSTEM "HCS12/HCS12-MMCV4-FTS_2-flash-program.s19">
+<!ENTITY HCS12-PMMC-FTMRCK-flash-program  SYSTEM "HCS12/HCS12-PMMC-FTMRCK-flash-program.s19">
+<!ENTITY HCS12-XMMC-XFTMRK-flash-program  SYSTEM "HCS12/HCS12-XMMC-XFTMRK-flash-program.s19">
+<!ENTITY HCS12-XMMC-XFTXK-flash-program   SYSTEM "HCS12/HCS12-XMMC-XFTXK-flash-program.s19">
+
+<!ENTITY Custom-Devices                   SYSTEM "Custom/custom-hcs12.xml">
+]>
+<root version="4.8.0">
+   <description>HCS12 Device characteristics v4.9.0 9/2/2012</description>
+   <sharedInformation>
+<!-- TCL Scripts -->
+      <tclScript id="HCS12-FTS-flash-scripts">
+         &HCS12-FTS-flash-scripts;
+      </tclScript>
+      <tclScript id="HCS12-XFTMRK-flash-scripts">
+         &HCS12-XFTMRK-flash-scripts;
+      </tclScript>
+      <tclScript id="HCS12-FTMRCK-flash-scripts">
+         &HCS12-FTMRCK-flash-scripts;
+      </tclScript>
+<!-- Flash programming code -->
+      <flashProgram id="HCS12-MMCV4-FTS-flash-program">
+         &HCS12-MMCV4-FTS-flash-program;
+      </flashProgram>
+      <flashProgram id="HCS12-MMCV4-FTS_2-flash-program">
+         &HCS12-MMCV4-FTS_2-flash-program;
+      </flashProgram>
+      <flashProgram id="HCS12-PMMC-FTMRCK-flash-program">
+         &HCS12-PMMC-FTMRCK-flash-program;
+      </flashProgram>
+      <flashProgram id="HCS12-XMMC-XFTMRK-flash-program">
+         &HCS12-XMMC-XFTMRK-flash-program;
+      </flashProgram>
+      <flashProgram id="HCS12-XMMC-XFTXK-flash-program">
+         &HCS12-XMMC-XFTXK-flash-program;
+      </flashProgram>
+<!-- Security Values for Flash -->
+      <!-- HCS12 Unsecured value = backdoor[0-7],RES[0-4],FPROT,RES,FSEC -->
+      <securityInfo size="16" type="off" id="HCS12-default-security-off">
+         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE
+      </securityInfo>
+      <!-- HCS12 Secured value = backdoor[0-7],RES[0-4],FPROT,RES,FSEC -->
+      <securityInfo size="16" type="on" id="HCS12-default-security-on">
+         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD
+      </securityInfo>
+   </sharedInformation>
+   <deviceList>
+      <device family="HCS12" name="_Default" isDefault="true">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom" sectorSize="4">
+            <memoryRange end="0x17FF" start="0x400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" pageNo="0x3E" />
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" pageNo="0x3F" />
+         </memory>
+         <copctlAddress value="0x003C" />
+         <sdidAddress value="0x001A" />
+         <sdidMask value="0xFFFF" />
+         <sdid value="0x0000" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTS-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Default HCS12 Device</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      &Custom-Devices;
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12A32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x17FF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x3E" />  <!--  Reset default 0x3E -->
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0200" />
+         <sdid value="0x0201" />
+         <sdid value="0x203" />
+         <sdid value="0x204" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM mapped to 0x1000</note>
+      </device>
+      <device family="HCS12" name="MC9S12A64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange  end="0x07FF"  start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" >
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0200" />
+         <sdid value="0x0201" />
+         <sdid value="0x0203" />
+         <sdid value="0x0204" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM not visible as hidden by RAM</note>
+      </device>
+      <device family="HCS12" name="MC9S12A64Alt">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x17FF" start="0x1000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x0200" />
+         <sdid value="0x0201" />
+         <sdid value="0x0203" />
+         <sdid value="0x0204" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM re-mapped to 0x1000</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12A128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x17FF" start="0x1000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0110" />
+         <sdid value="0x0111" />
+         <sdid value="0x0113" />
+         <sdid value="0x0114" />
+         <sdid value="0x0115" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM mapped to 0x1000</note>
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12A256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0030" />
+         <sdid value="0x0031" />
+         <sdid value="0x0032" />
+         <sdid value="0x0033" />
+         <sdid value="0x0034" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12A512">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x07FF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x20" />  <!--  Reset default 0x20 -->
+            <memoryRange end="0x20BFFF" start="0x208000" />
+            <memoryRange end="0x21BFFF" start="0x218000" />
+            <memoryRange end="0x22BFFF" start="0x228000" />
+            <memoryRange end="0x23BFFF" start="0x238000" />
+            <memoryRange end="0x24BFFF" start="0x248000" />
+            <memoryRange end="0x25BFFF" start="0x258000" />
+            <memoryRange end="0x26BFFF" start="0x268000" />
+            <memoryRange end="0x27BFFF" start="0x278000" />
+            <memoryRange end="0x28BFFF" start="0x288000" />
+            <memoryRange end="0x29BFFF" start="0x298000" />
+            <memoryRange end="0x2ABFFF" start="0x2A8000" />
+            <memoryRange end="0x2BBFFF" start="0x2B8000" />
+            <memoryRange end="0x2CBFFF" start="0x2C8000" />
+            <memoryRange end="0x2DBFFF" start="0x2D8000" />
+            <memoryRange end="0x2EBFFF" start="0x2E8000" />
+            <memoryRange end="0x2FBFFF" start="0x2F8000" />
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0400" />
+         <sdid value="0x0401" />
+         <sdid value="0x0402" />
+         <sdid value="0x0403" />
+         <sdid value="0x0404" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS_2-flash-program" />
+         <note>Untested</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12B128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x07FF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x2100" />
+         <sdid value="0x2101" />
+         <sdid value="0x2102" />
+         <sdid value="0x2103" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+         <note>EEPROM Hidden</note>
+      </device>
+ <!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12C32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" >
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x3E" />  <!--  Reset default 0x3E -->
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3300" />
+         <sdid value="0x3302" />
+         <sdid value="0x3311" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12C64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024" >
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <sdid value="0x3103" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12C96">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <sdid value="0x3103" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12C128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <sdid value="0x3103" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12D32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x17FF" start="0x1000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x3E" />  <!--  Reset default 0x3E -->
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0200" />
+         <sdid value="0x0201" />
+         <sdid value="0x0203" />
+         <sdid value="0x0204" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM mapped to 0x1000</note>
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12D64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x17FF" start="0x1000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0200" />
+         <sdid value="0x0201" />
+         <sdid value="0x0203" />
+         <sdid value="0x0204" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM mapped to 0x1000</note>
+         <note>Untested</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12DB128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0110" />
+         <sdid value="0x0111" />
+         <sdid value="0x0113" />
+         <sdid value="0x0114" />
+         <sdid value="0x0115" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DB128B">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0100" />
+         <sdid value="0x0101" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DG128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0110" />
+         <sdid value="0x0111" />
+         <sdid value="0x0113" />
+         <sdid value="0x0114" />
+         <sdid value="0x0115" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM Not usable</note>
+      </device>
+      <device family="HCS12" name="MC9S12DG128Alt">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x27FF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0110" />
+         <sdid value="0x0111" />
+         <sdid value="0x0113" />
+         <sdid value="0x0114" />
+         <sdid value="0x0115" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM re-mapped to 0x2000</note>
+      </device>
+      <device family="HCS12" name="MC9S12DG128B">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0100" />
+         <sdid value="0x0101" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DG256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0030" />
+         <sdid value="0x0031" />
+         <sdid value="0x0032" />
+         <sdid value="0x0033" />
+         <sdid value="0x0034" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DG256B">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0010" />
+         <sdid value="0x0011" />
+         <sdid value="0x0012" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DG256C">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0010" />
+         <sdid value="0x0011" />
+         <sdid value="0x0012" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12DJ64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x07FF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0200" />
+         <sdid value="0x0201" />
+         <sdid value="0x0203" />
+         <sdid value="0x0204" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12DJ128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0110" />
+         <sdid value="0x0111" />
+         <sdid value="0x0113" />
+         <sdid value="0x0114" />
+         <sdid value="0x0115" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DJ128B">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0100" />
+         <sdid value="0x0101" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DJ256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0030" />
+         <sdid value="0x0031" />
+         <sdid value="0x0032" />
+         <sdid value="0x0033" />
+         <sdid value="0x0034" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DJ256B">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0010" />
+         <sdid value="0x0011" />
+         <sdid value="0x0012" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DJ256C">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0010" />
+         <sdid value="0x0011" />
+         <sdid value="0x0012" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DJ512">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x07FF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x20" />  <!--  Reset default 0x20 -->
+            <memoryRange end="0x20BFFF" start="0x208000" />
+            <memoryRange end="0x21BFFF" start="0x218000" />
+            <memoryRange end="0x22BFFF" start="0x228000" />
+            <memoryRange end="0x23BFFF" start="0x238000" />
+            <memoryRange end="0x24BFFF" start="0x248000" />
+            <memoryRange end="0x25BFFF" start="0x258000" />
+            <memoryRange end="0x26BFFF" start="0x268000" />
+            <memoryRange end="0x27BFFF" start="0x278000" />
+            <memoryRange end="0x28BFFF" start="0x288000" />
+            <memoryRange end="0x29BFFF" start="0x298000" />
+            <memoryRange end="0x2ABFFF" start="0x2A8000" />
+            <memoryRange end="0x2BBFFF" start="0x2B8000" />
+            <memoryRange end="0x2CBFFF" start="0x2C8000" />
+            <memoryRange end="0x2DBFFF" start="0x2D8000" />
+            <memoryRange end="0x2EBFFF" start="0x2E8000" />
+            <memoryRange end="0x2FBFFF" start="0x2F8000" />
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0400" />
+         <sdid value="0x0401" />
+         <sdid value="0x0402" />
+         <sdid value="0x0403" />
+         <sdid value="0x0404" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS_2-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DP256B">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom" sectorSize="4">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" >
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0010" />
+         <sdid value="0x0011" />
+         <sdid value="0x0012" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12DP512">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x07FF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x20" />  <!--  Reset default 0x20 -->
+            <memoryRange end="0x20BFFF" start="0x208000" />
+            <memoryRange end="0x21BFFF" start="0x218000" />
+            <memoryRange end="0x22BFFF" start="0x228000" />
+            <memoryRange end="0x23BFFF" start="0x238000" />
+            <memoryRange end="0x24BFFF" start="0x248000" />
+            <memoryRange end="0x25BFFF" start="0x258000" />
+            <memoryRange end="0x26BFFF" start="0x268000" />
+            <memoryRange end="0x27BFFF" start="0x278000" />
+            <memoryRange end="0x28BFFF" start="0x288000" />
+            <memoryRange end="0x29BFFF" start="0x298000" />
+            <memoryRange end="0x2ABFFF" start="0x2A8000" />
+            <memoryRange end="0x2BBFFF" start="0x2B8000" />
+            <memoryRange end="0x2CBFFF" start="0x2C8000" />
+            <memoryRange end="0x2DBFFF" start="0x2D8000" />
+            <memoryRange end="0x2EBFFF" start="0x2E8000" />
+            <memoryRange end="0x2FBFFF" start="0x2F8000" />
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0400" />
+         <sdid value="0x0401" />
+         <sdid value="0x0402" />
+         <sdid value="0x0403" />
+         <sdid value="0x0404" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS_2-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DT128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0110" />
+         <sdid value="0x0111" />
+         <sdid value="0x0113" />
+         <sdid value="0x0114" />
+         <sdid value="0x0115" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DT128B">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0100" />
+         <sdid value="0x0101" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12DT256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0030" />
+         <sdid value="0x0031" />
+         <sdid value="0x0032" />
+         <sdid value="0x0033" />
+         <sdid value="0x0034" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM partially hidden</note>
+      </device>
+      <device family="HCS12" name="MC9S12DT256B">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0010" />
+         <sdid value="0x0011" />
+         <sdid value="0x0012" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM partially hidden</note>
+      </device>
+      <device family="HCS12" name="MC9S12DT256C">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x0FFF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30 -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0010" />
+         <sdid value="0x0011" />
+         <sdid value="0x0012" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>EEPROM partially hidden</note>
+      </device>
+      <device family="HCS12" name="MC9S12DT512">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x1000" />
+         </memory>
+         <memory registerAddress="0x0110" type="eeprom">
+            <memoryRange end="0x07FF" start="0x0000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x20" />  <!--  Reset default 0x20 -->
+            <memoryRange end="0x20BFFF" start="0x208000" />
+            <memoryRange end="0x21BFFF" start="0x218000" />
+            <memoryRange end="0x22BFFF" start="0x228000" />
+            <memoryRange end="0x23BFFF" start="0x238000" />
+            <memoryRange end="0x24BFFF" start="0x248000" />
+            <memoryRange end="0x25BFFF" start="0x258000" />
+            <memoryRange end="0x26BFFF" start="0x268000" />
+            <memoryRange end="0x27BFFF" start="0x278000" />
+            <memoryRange end="0x28BFFF" start="0x288000" />
+            <memoryRange end="0x29BFFF" start="0x298000" />
+            <memoryRange end="0x2ABFFF" start="0x2A8000" />
+            <memoryRange end="0x2BBFFF" start="0x2B8000" />
+            <memoryRange end="0x2CBFFF" start="0x2C8000" />
+            <memoryRange end="0x2DBFFF" start="0x2D8000" />
+            <memoryRange end="0x2EBFFF" start="0x2E8000" />
+            <memoryRange end="0x2FBFFF" start="0x2F8000" />
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x0400" />
+         <sdid value="0x0401" />
+         <sdid value="0x0402" />
+         <sdid value="0x0403" />
+         <sdid value="0x0404" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS_2-flash-program" />
+         <note>Untested</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12E32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x07FF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x3E" />  <!--  Reset default 0x3E -->
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x5102" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12E64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x5102" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12E128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x2000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x5102" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12E256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x30" />  <!--  Reset default 0x30? -->
+            <memoryRange end="0x30BFFF" start="0x308000" />
+            <memoryRange end="0x31BFFF" start="0x318000" />
+            <memoryRange end="0x32BFFF" start="0x328000" />
+            <memoryRange end="0x33BFFF" start="0x338000" />
+            <memoryRange end="0x34BFFF" start="0x348000" />
+            <memoryRange end="0x35BFFF" start="0x358000" />
+            <memoryRange end="0x36BFFF" start="0x368000" />
+            <memoryRange end="0x37BFFF" start="0x378000" />
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x5000" />
+         <sdid value="0x5002" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS_2-flash-program" />
+         <note>Untested</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12GC16">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0C00" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3302" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12GC32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" >
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x3E" />  <!--  Reset default 0x3E -->
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3302" />
+         <sdid value="0x3311" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12GC64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024" >
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <sdid value="0x3103" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12GC96">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <sdid value="0x3103" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12GC128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <sdid value="0x3103" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+      </device>
+<!-- 
+===================================================================================
+-->      
+      <device family="HCS12" name="MC9S12HA32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x3800" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x1A80" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12HA48">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x3000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x7FFF"   start="0x4000" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0DBFFF" start="0x0D8000" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x1A80" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12HA64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x3000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x2FFF"   start="0x1400" />
+            <memoryRange end="0x7FFF"   start="0x4000" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0CBFFF" start="0x0C8000" />
+            <memoryRange end="0x0DBFFF" start="0x0D8000" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x1A80" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12HY32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x3800" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x1A80" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12HY48">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x3000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x7FFF"   start="0x4000" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0DBFFF" start="0x0D8000" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x1A80" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12HY64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x3000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x2FFF"   start="0x1400" />
+            <memoryRange end="0x7FFF"   start="0x4000" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0CBFFF" start="0x0C8000" />
+            <memoryRange end="0x0DBFFF" start="0x0D8000" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x1A80" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+<!-- 
+===================================================================================
+-->      
+      <device family="HCS12" name="MC9S12P32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x3800" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x3980" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12P64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x3000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x2FFF" start=  "0x1400" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0CBFFF" start="0x0C8000" />
+            <memoryRange end="0x0DBFFF" start="0x0D8000" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x3980" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12P96">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2800" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x27FF" start=  "0x1400" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x0ABFFF" start="0x0A8000" />
+            <memoryRange end="0x0BBFFF" start="0x0B8000" />
+            <memoryRange end="0x0CBFFF" start="0x0C8000" />
+            <memoryRange end="0x0DBFFF" start="0x0D8000" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x3980" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12P128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2800" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x0013FF" start="0x000400" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x27FF" start=  "0x1400" /> <!-- Part of page 0x0C -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" /> <!-- Page 0x0D -->
+            <memoryRange end="0x00BFFF" start="0x008000" pageNo="0x0E" />
+            <memoryRange end="0x08BFFF" start="0x088000" />
+            <memoryRange end="0x09BFFF" start="0x098000" />
+            <memoryRange end="0x0ABFFF" start="0x0A8000" />
+            <memoryRange end="0x0BBFFF" start="0x0B8000" />
+            <memoryRange end="0x0CBFFF" start="0x0C8000" />
+            <memoryRange end="0x0DBFFF" start="0x0D8000" />
+            <memoryRange end="0x0EBFFF" start="0x0E8000" />
+            <memoryRange end="0x0FBFFF" start="0x0F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" /> <!-- Page 0x0F -->
+         </memory>
+         <sdid value="0x3980" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-PMMC-FTMRCK-flash-program" />
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12NE64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x8200" />
+         <sdid value="0x8201" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12Q32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0C00" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x3E" />  <!--  Reset default 0x3E -->
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3302" />
+         <sdid value="0x3311" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12Q64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12Q96">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12Q128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x0FFF" start="0x0400" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x3FFF" start=  "0x1000" />                <!--  Fixed 0x3D partial -->
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />                <!--  Fixed 0x3E -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0x38" />  <!--  Reset default 0x38 -->
+            <memoryRange end="0x38BFFF" start="0x388000" />
+            <memoryRange end="0x39BFFF" start="0x398000" />
+            <memoryRange end="0x3ABFFF" start="0x3A8000" />
+            <memoryRange end="0x3BBFFF" start="0x3B8000" />
+            <memoryRange end="0x3CBFFF" start="0x3C8000" />
+            <memoryRange end="0x3DBFFF" start="0x3D8000" />
+            <memoryRange end="0x3EBFFF" start="0x3E8000" />
+            <memoryRange end="0x3FBFFF" start="0x3F8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />                <!--  Fixed 0x3F -->
+         </memory>
+         <sdid value="0x3102" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12UF32">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x1FFF" start="0x1BC4" />
+         </memory>
+         <memory registerAddress="0x0100" type="flash" securityAddress="0xFF00">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0xBFFF" start=  "0x8000" />
+            <memoryRange end="0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0x6300" />
+         <sdid value="0x6310" />
+         <sdid value="0x6311" />
+         <flashProgramRef ref="HCS12-MMCV4-FTS-flash-program" />
+         <note>Untested</note>
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12XA_B_D-linear">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom" addressMode="linear">
+            <memoryRange end="0x13FFFF" start="0x13F000" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0x7FFF00" sectorSize="1024" addressMode="linear">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x7FFFFF" start="0x780000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC000" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12XA128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC100" />
+         <sdid value="0xC101" />
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XA256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFC0BFF" start="0xFC0800" />
+            <memoryRange end="0xFD0BFF" start="0xFD0800" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC000" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XA512">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFC0BFF" start="0xFC0800" />
+            <memoryRange end="0xFD0BFF" start="0xFD0800" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xE8BFFF" start="0xE88000" />
+            <memoryRange end="0xE9BFFF" start="0xE98000" />
+            <memoryRange end="0xEABFFF" start="0xEA8000" />
+            <memoryRange end="0xEBBFFF" start="0xEB8000" />
+            <memoryRange end="0xECBFFF" start="0xEC8000" />
+            <memoryRange end="0xEDBFFF" start="0xED8000" />
+            <memoryRange end="0xEEBFFF" start="0xEE8000" />
+            <memoryRange end="0xEFBFFF" start="0xEF8000" />
+            <memoryRange end="0xF0BFFF" start="0xF08000" />
+            <memoryRange end="0xF1BFFF" start="0xF18000" />
+            <memoryRange end="0xF2BFFF" start="0xF28000" />
+            <memoryRange end="0xF3BFFF" start="0xF38000" />
+            <memoryRange end="0xF4BFFF" start="0xF48000" />
+            <memoryRange end="0xF5BFFF" start="0xF58000" />
+            <memoryRange end="0xF6BFFF" start="0xF68000" />
+            <memoryRange end="0xF7BFFF" start="0xF78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XB128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC100" />
+         <sdid value="0xC101" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XB256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC000" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XD64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC100" />
+         <sdid value="0xC101" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XD128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC100" />
+         <sdid value="0xC101" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12XD256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0BFF" start=  "0x0800" pageNo="0xFE"/>
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFC0BFF" start="0xFC0800" />
+            <memoryRange end="0xFD0BFF" start="0xFD0800" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0xFE"/>
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC000" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XDG128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC100" />
+         <sdid value="0xC101" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XDP512">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFC0BFF" start="0xFC0800" />
+            <memoryRange end="0xFD0BFF" start="0xFD0800" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xE8BFFF" start="0xE88000" />
+            <memoryRange end="0xE9BFFF" start="0xE98000" />
+            <memoryRange end="0xEABFFF" start="0xEA8000" />
+            <memoryRange end="0xEBBFFF" start="0xEB8000" />
+            <memoryRange end="0xECBFFF" start="0xEC8000" />
+            <memoryRange end="0xEDBFFF" start="0xED8000" />
+            <memoryRange end="0xEEBFFF" start="0xEE8000" />
+            <memoryRange end="0xEFBFFF" start="0xEF8000" />
+            <memoryRange end="0xF0BFFF" start="0xF08000" />
+            <memoryRange end="0xF1BFFF" start="0xF18000" />
+            <memoryRange end="0xF2BFFF" start="0xF28000" />
+            <memoryRange end="0xF3BFFF" start="0xF38000" />
+            <memoryRange end="0xF4BFFF" start="0xF48000" />
+            <memoryRange end="0xF5BFFF" start="0xF58000" />
+            <memoryRange end="0xF6BFFF" start="0xF68000" />
+            <memoryRange end="0xF7BFFF" start="0xF78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XDQ256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFC0BFF" start="0xFC0800" />
+            <memoryRange end="0xFD0BFF" start="0xFD0800" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC000" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XDT256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFC0BFF" start="0xFC0800" />
+            <memoryRange end="0xFD0BFF" start="0xFD0800" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <sdid value="0xC000" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XDT384">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFC0BFF" start="0xFC0800" />
+            <memoryRange end="0xFD0BFF" start="0xFD0800" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xF0BFFF" start="0xF08000" />
+            <memoryRange end="0xF1BFFF" start="0xF18000" />
+            <memoryRange end="0xF2BFFF" start="0xF28000" />
+            <memoryRange end="0xF3BFFF" start="0xF38000" />
+            <memoryRange end="0xF4BFFF" start="0xF48000" />
+            <memoryRange end="0xF5BFFF" start="0xF58000" />
+            <memoryRange end="0xF6BFFF" start="0xF68000" />
+            <memoryRange end="0xF7BFFF" start="0xF78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+         <note>Untested</note>
+      </device>
+      <device family="HCS12" name="MC9S12XDT512">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0110" type="eeprom">
+            <memoryRange end=  "0x0FFF" start=  "0x0C00" />
+            <memoryRange end="0xFC0BFF" start="0xFC0800" />
+            <memoryRange end="0xFD0BFF" start="0xFD0800" />
+            <memoryRange end="0xFE0BFF" start="0xFE0800" />
+            <memoryRange end="0xFF0BFF" start="0xFF0800" />
+         </memory>
+         <memory pageAddress="0x0030" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xE8BFFF" start="0xE88000" />
+            <memoryRange end="0xE9BFFF" start="0xE98000" />
+            <memoryRange end="0xEABFFF" start="0xEA8000" />
+            <memoryRange end="0xEBBFFF" start="0xEB8000" />
+            <memoryRange end="0xECBFFF" start="0xEC8000" />
+            <memoryRange end="0xEDBFFF" start="0xED8000" />
+            <memoryRange end="0xEEBFFF" start="0xEE8000" />
+            <memoryRange end="0xEFBFFF" start="0xEF8000" />
+            <memoryRange end="0xF0BFFF" start="0xF08000" />
+            <memoryRange end="0xF1BFFF" start="0xF18000" />
+            <memoryRange end="0xF2BFFF" start="0xF28000" />
+            <memoryRange end="0xF3BFFF" start="0xF38000" />
+            <memoryRange end="0xF4BFFF" start="0xF48000" />
+            <memoryRange end="0xF5BFFF" start="0xF58000" />
+            <memoryRange end="0xF6BFFF" start="0xF68000" />
+            <memoryRange end="0xF7BFFF" start="0xF78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />
+         </memory>
+         <sdid value="0xC410" />
+         <sdid value="0xC411" />
+         <flashProgramRef ref="HCS12-XMMC-XFTXK-flash-program" />
+      </device>
+<!-- 
+===================================================================================
+ -->      
+      <device family="HCS12" name="MC9S12XS64">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x000BFF" start="0x000800" />
+            <memoryRange end="0x010BFF" start="0x010800" />
+            <memoryRange end="0x020BFF" start="0x020800" />
+            <memoryRange end="0x030BFF" start="0x030800" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />               <!--  Fixed 0xFD -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0xFE" /> <!--  Reset default 0xFE -->
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />               <!--  Fixed 0xFF -->
+         </memory>
+         <sdid value="0xC1C0" />
+         <sdid value="0xC1C1" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-XFTMRK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-XMMC-XFTMRK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12XS64-Linear">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256" addressMode="linear">
+            <memoryRange end="0x100FFF" start="0x100000" />
+         </memory>
+         <memory registerAddress="0x0100" type="flash" securityAddress="0x7FFF00" sectorSize="1024" addressMode="linear">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x7FFFFF" start="0x7F0000" />
+         </memory>
+         <sdid value="0xC1C0" />
+         <sdid value="0xC1C1" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-XFTMRK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-XMMC-XFTMRK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12XS128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x000BFF" start="0x000800" />
+            <memoryRange end="0x010BFF" start="0x010800" />
+            <memoryRange end="0x020BFF" start="0x020800" />
+            <memoryRange end="0x030BFF" start="0x030800" />
+            <memoryRange end="0x040BFF" start="0x040800" />
+            <memoryRange end="0x050BFF" start="0x050800" />
+            <memoryRange end="0x060BFF" start="0x060800" />
+            <memoryRange end="0x070BFF" start="0x070800" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />               <!--  Fixed 0xFD -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0xFE" /> <!--  Reset default 0xFE -->
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />               <!--  Fixed 0xFF -->
+         </memory>
+         <sdid value="0xC1C0" />
+         <sdid value="0xC1C1" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-XFTMRK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-XMMC-XFTMRK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12XS128-Linear">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256" addressMode="linear">
+            <memoryRange end="0x101FFF" start="0x100000" />
+         </memory>
+         <memory registerAddress="0x0100" type="flash" securityAddress="0x7FFF00" sectorSize="1024" addressMode="linear">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x7FFFFF" start="0x7E0000" />
+         </memory>
+         <sdid value="0xC1C0" />
+         <sdid value="0xC1C1" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-XFTMRK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-XMMC-XFTMRK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12XS256">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x000BFF" start="0x000800" />
+            <memoryRange end="0x010BFF" start="0x010800" />
+            <memoryRange end="0x020BFF" start="0x020800" />
+            <memoryRange end="0x030BFF" start="0x030800" />
+            <memoryRange end="0x040BFF" start="0x040800" />
+            <memoryRange end="0x050BFF" start="0x050800" />
+            <memoryRange end="0x060BFF" start="0x060800" />
+            <memoryRange end="0x070BFF" start="0x070800" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />               <!--  Fixed 0xFD -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0xFE" /> <!--  Reset default 0xFE -->
+            <memoryRange end="0xF0BFFF" start="0xF08000" />
+            <memoryRange end="0xF1BFFF" start="0xF18000" />
+            <memoryRange end="0xF2BFFF" start="0xF28000" />
+            <memoryRange end="0xF3BFFF" start="0xF38000" />
+            <memoryRange end="0xF4BFFF" start="0xF48000" />
+            <memoryRange end="0xF5BFFF" start="0xF58000" />
+            <memoryRange end="0xF6BFFF" start="0xF68000" />
+            <memoryRange end="0xF7BFFF" start="0xF78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />               <!--  Fixed 0xFF -->
+         </memory>
+         <sdid value="0xC1C0" />
+         <sdid value="0xC1C1" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-XFTMRK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-XMMC-XFTMRK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12XS256-Linear">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256" addressMode="linear">
+            <memoryRange end="0x101FFF" start="0x100000" />
+         </memory>
+         <memory registerAddress="0x0100" type="flash" securityAddress="0x7FFF00" sectorSize="1024" addressMode="linear">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x7FFFFF" start="0x7C0000" />
+         </memory>
+         <sdid value="0xC1C0" />
+         <sdid value="0xC1C1" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-XFTMRK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-XMMC-XFTMRK-flash-program" />
+      </device>
+<!-- 
+===================================================================================
+-->      
+      <device family="HCS12" name="MC9S12XEP100">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory pageAddress="0x0017" registerAddress="0x0100" type="eeprom" sectorSize="256">
+            <memoryRange end="0x000BFF" start="0x000800" />
+            <memoryRange end="0x010BFF" start="0x010800" />
+            <memoryRange end="0x020BFF" start="0x020800" />
+            <memoryRange end="0x030BFF" start="0x030800" />
+            <memoryRange end="0x040BFF" start="0x040800" />
+            <memoryRange end="0x050BFF" start="0x050800" />
+            <memoryRange end="0x060BFF" start="0x060800" />
+            <memoryRange end="0x070BFF" start="0x070800" />
+            <memoryRange end="0x080BFF" start="0x080800" />
+            <memoryRange end="0x090BFF" start="0x090800" />
+            <memoryRange end="0x0A0BFF" start="0x0A0800" />
+            <memoryRange end="0x0B0BFF" start="0x0B0800" />
+            <memoryRange end="0x0C0BFF" start="0x0C0800" />
+            <memoryRange end="0x0D0BFF" start="0x0D0800" />
+            <memoryRange end="0x0E0BFF" start="0x0E0800" />
+            <memoryRange end="0x0F0BFF" start="0x0F0800" />
+            <memoryRange end="0x100BFF" start="0x100800" />
+            <memoryRange end="0x110BFF" start="0x110800" />
+            <memoryRange end="0x120BFF" start="0x120800" />
+            <memoryRange end="0x130BFF" start="0x130800" />
+            <memoryRange end="0x140BFF" start="0x140800" />
+            <memoryRange end="0x150BFF" start="0x150800" />
+            <memoryRange end="0x160BFF" start="0x160800" />
+            <memoryRange end="0x170BFF" start="0x170800" />
+            <memoryRange end="0x180BFF" start="0x180800" />
+            <memoryRange end="0x190BFF" start="0x190800" />
+            <memoryRange end="0x1A0BFF" start="0x1A0800" />
+            <memoryRange end="0x1B0BFF" start="0x1B0800" />
+            <memoryRange end="0x1C0BFF" start="0x1C0800" />
+            <memoryRange end="0x1D0BFF" start="0x1D0800" />
+            <memoryRange end="0x1E0BFF" start="0x1E0800" />
+            <memoryRange end="0x1F0BFF" start="0x1F0800" />
+            <memoryRange end="0x000FFF" start="0x000C00" /> <!-- Fixed -->
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="1024">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end=  "0x7FFF" start=  "0x4000" />               <!--  Fixed 0xFD -->
+            <memoryRange end=  "0xBFFF" start=  "0x8000" pageNo="0xFE" /> <!--  Reset default 0xFE -->
+            <memoryRange end="0xC0BFFF" start="0xC08000" />
+            <memoryRange end="0xC1BFFF" start="0xC18000" />
+            <memoryRange end="0xC2BFFF" start="0xC28000" />
+            <memoryRange end="0xC3BFFF" start="0xC38000" />
+            <memoryRange end="0xC4BFFF" start="0xC48000" />
+            <memoryRange end="0xC5BFFF" start="0xC58000" />
+            <memoryRange end="0xC6BFFF" start="0xC68000" />
+            <memoryRange end="0xC7BFFF" start="0xC78000" />
+            <memoryRange end="0xC8BFFF" start="0xC88000" />
+            <memoryRange end="0xC9BFFF" start="0xC98000" />
+            <memoryRange end="0xCABFFF" start="0xCA8000" />
+            <memoryRange end="0xCBBFFF" start="0xCB8000" />
+            <memoryRange end="0xCCBFFF" start="0xCC8000" />
+            <memoryRange end="0xCDBFFF" start="0xCD8000" />
+            <memoryRange end="0xCEBFFF" start="0xCE8000" />
+            <memoryRange end="0xCFBFFF" start="0xCF8000" />
+            <memoryRange end="0xD0BFFF" start="0xD08000" />
+            <memoryRange end="0xD1BFFF" start="0xD18000" />
+            <memoryRange end="0xD2BFFF" start="0xD28000" />
+            <memoryRange end="0xD3BFFF" start="0xD38000" />
+            <memoryRange end="0xD4BFFF" start="0xD48000" />
+            <memoryRange end="0xD5BFFF" start="0xD58000" />
+            <memoryRange end="0xD6BFFF" start="0xD68000" />
+            <memoryRange end="0xD7BFFF" start="0xD78000" />
+            <memoryRange end="0xD8BFFF" start="0xD88000" />
+            <memoryRange end="0xD9BFFF" start="0xD98000" />
+            <memoryRange end="0xDABFFF" start="0xDA8000" />
+            <memoryRange end="0xDBBFFF" start="0xDB8000" />
+            <memoryRange end="0xDCBFFF" start="0xDC8000" />
+            <memoryRange end="0xDDBFFF" start="0xDD8000" />
+            <memoryRange end="0xDEBFFF" start="0xDE8000" />
+            <memoryRange end="0xDFBFFF" start="0xDF8000" />
+            <memoryRange end="0xE0BFFF" start="0xE08000" />
+            <memoryRange end="0xE1BFFF" start="0xE18000" />
+            <memoryRange end="0xE2BFFF" start="0xE28000" />
+            <memoryRange end="0xE3BFFF" start="0xE38000" />
+            <memoryRange end="0xE4BFFF" start="0xE48000" />
+            <memoryRange end="0xE5BFFF" start="0xE58000" />
+            <memoryRange end="0xE6BFFF" start="0xE68000" />
+            <memoryRange end="0xE7BFFF" start="0xE78000" />
+            <memoryRange end="0xE8BFFF" start="0xE88000" />
+            <memoryRange end="0xE9BFFF" start="0xE98000" />
+            <memoryRange end="0xEABFFF" start="0xEA8000" />
+            <memoryRange end="0xEBBFFF" start="0xEB8000" />
+            <memoryRange end="0xECBFFF" start="0xEC8000" />
+            <memoryRange end="0xEDBFFF" start="0xED8000" />
+            <memoryRange end="0xEEBFFF" start="0xEE8000" />
+            <memoryRange end="0xEFBFFF" start="0xEF8000" />
+            <memoryRange end="0xF0BFFF" start="0xF08000" />
+            <memoryRange end="0xF1BFFF" start="0xF18000" />
+            <memoryRange end="0xF2BFFF" start="0xF28000" />
+            <memoryRange end="0xF3BFFF" start="0xF38000" />
+            <memoryRange end="0xF4BFFF" start="0xF48000" />
+            <memoryRange end="0xF5BFFF" start="0xF58000" />
+            <memoryRange end="0xF6BFFF" start="0xF68000" />
+            <memoryRange end="0xF7BFFF" start="0xF78000" />
+            <memoryRange end="0xF8BFFF" start="0xF88000" />
+            <memoryRange end="0xF9BFFF" start="0xF98000" />
+            <memoryRange end="0xFABFFF" start="0xFA8000" />
+            <memoryRange end="0xFBBFFF" start="0xFB8000" />
+            <memoryRange end="0xFCBFFF" start="0xFC8000" />
+            <memoryRange end="0xFDBFFF" start="0xFD8000" />
+            <memoryRange end="0xFEBFFF" start="0xFE8000" />
+            <memoryRange end="0xFFBFFF" start="0xFF8000" />
+            <memoryRange end=  "0xFFFF" start=  "0xC000" />               <!--  Fixed 0xFF -->
+         </memory>
+         <sdidMask value="0xFFF0" />
+         <sdid value="0xCC80" />
+         <sdid value="0xCC90" />
+         <sdid value="0xC480" />
+         <sdid value="0xC080" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-XFTMRK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-XMMC-XFTMRK-flash-program" />
+      </device>
+      <device family="HCS12" name="MC9S12XEP-Linear">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange end="0x3FFF" start="0x2000" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="256" addressMode="linear">
+            <memoryRange end="0x107FFF" start="0x100000" />
+         </memory>
+         <memory registerAddress="0x0100" type="flash" securityAddress="0x7FFF00" sectorSize="1024" addressMode="linear">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange end="0x7FFFFF" start="0x700000" />
+         </memory>
+         <sdidMask value="0xFFF0" />
+         <sdid value="0xCC80" />
+         <sdid value="0xCC90" />
+         <sdid value="0xC480" />
+         <sdid value="0xC080" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-XFTMRK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-XMMC-XFTMRK-flash-program" />
+      </device>
+<!-- 
+===================================================================================
+-->      
+   </deviceList>
+</root>

@@ -1,0 +1,38 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-Localization: plugin
+Bundle-Name: 
+  %Bundle-Name
+Require-Bundle: 
+ org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.debug.core,
+ org.eclipse.ui.forms,
+ com.freescale.core.debugger.ui.cdt,
+ com.freescale.mcu.debugger.cdt,
+ com.freescale.mcu.debug.connections
+Bundle-Vendor: 
+  %Bundle-Vendor
+Bundle-Version: 
+ 4.7.0.vqualifier
+Bundle-Activator: net.sourceforge.usbdm.connections.usbdm.Activator
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: 
+  net.sourceforge.usbdm.connections.usbdm;singleton:=true
+Bundle-RequiredExecutionEnvironment: 
+  JavaSE-1.6, 
+  J2SE-1.5
+Export-Package: 
+ .,
+ net.sourceforge.usbdm.connections.usbdm;
+  uses:="org.eclipse.debug.core,
+   org.eclipse.jface.resource,
+   org.eclipse.swt.events,
+   org.eclipse.ui.plugin,
+   org.eclipse.ui.forms.widgets,
+   org.eclipse.osgi.util,
+   org.osgi.framework,
+   org.eclipse.swt.widgets,
+   com.freescale.cdt.debug.cw.mcu.common.publicintf,
+   com.freescale.cdt.debug.cw.core.ui.publicintf"

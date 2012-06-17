@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Export-Package: .,
+ com.swtdesigner;uses:="org.eclipse.swt.graphics",
+ net.sourceforge.usbdm.connections.usbdm;
+  uses:="org.eclipse.debug.core,
+   org.eclipse.jface.resource,
+   org.eclipse.swt.events,
+   org.eclipse.ui.plugin,
+   org.osgi.framework,
+   org.eclipse.swt.widgets,
+   com.freescale.cdt.debug.cw.mcu.common.publicintf,
+   com.freescale.cdt.debug.cw.core.ui.publicintf,
+   org.eclipse.ui.forms.widgets"
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-Localization: plugin
+Bundle-Name: %Bundle-Name
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6,  J2SE-1.5
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.de
+ bug.core,org.eclipse.ui.forms,com.freescale.core.debugger.ui.cdt,com.
+ freescale.mcu.debugger.cdt,com.freescale.mcu.debug.connections
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Version: 4.9.5.vqualifier
+Bundle-Activator: net.sourceforge.usbdm.connections.usbdm.Activator
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: net.sourceforge.usbdm.connections.usbdm;singleton:=true
+
