@@ -9,7 +9,7 @@
 <!ENTITY STM-Devices                       SYSTEM "ARM/STM-Devices.xml">
 <!ENTITY Custom-Devices                    SYSTEM "Custom/custom-arm.xml">
 ]>
-<root version="4.7.0">
+<root version="4.9.5">
    <description>ARM device characteristics v4.6.0 1/5/2011</description>
    <sharedInformation>
       <flashProgram id="default-STM32F100xx-FlashProgram">

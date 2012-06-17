@@ -6,7 +6,7 @@
 <!ENTITY Custom-Devices                   SYSTEM "Custom/custom-hcs08.xml">
 <!ENTITY HCS08-PTxx-flash-program       SYSTEM "HCS08/HCS08-PTxx-flash-program.s19">
 ]>
-<root version="4.8.0">
+<root version="4.9.5">
    <description>HCS08 Device characteristics v4.8.0 25/12/2011</description>
    <sharedInformation>
 <!-- TCL Scripts -->

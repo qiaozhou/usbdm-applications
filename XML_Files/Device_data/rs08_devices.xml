@@ -3,7 +3,7 @@
 [
 <!ENTITY RS08-default-flashScripts      SYSTEM "RS08/RS08-default-flash-scripts.tcl">
 ]>
-<root version="4.8.0">
+<root version="4.9.5">
    <description>RS08 Device characteristics v4.8.0 5/12/2011</description>
    <sharedInformation>
       <tclScript id="RS08-default-Scripts">

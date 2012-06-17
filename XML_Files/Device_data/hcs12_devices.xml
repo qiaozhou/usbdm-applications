@@ -13,7 +13,7 @@
 
 <!ENTITY Custom-Devices                   SYSTEM "Custom/custom-hcs12.xml">
 ]>
-<root version="4.8.0">
+<root version="4.9.5">
    <description>HCS12 Device characteristics v4.9.0 9/2/2012</description>
    <sharedInformation>
 <!-- TCL Scripts -->

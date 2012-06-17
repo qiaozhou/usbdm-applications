@@ -8,7 +8,7 @@
 <!ENTITY New-ColdfileV1-Devices         SYSTEM "cfv1_newDevices.xml">
 <!ENTITY Custom-Devices                 SYSTEM "Custom/custom-cfv1.xml">
 ]>
-<root version="4.8.0">
+<root version="4.9.5">
    <description>Coldfire V1 Device characteristics v4.8.0 25/12/2011</description>
    <sharedInformation>
       <flashProgram id="CFV1-default-FlashProgram">

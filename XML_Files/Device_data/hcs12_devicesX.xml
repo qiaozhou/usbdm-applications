@@ -7,7 +7,7 @@
 <!ENTITY HCS12-9S12XS-flash-scripts       SYSTEM "HCS12/HCS12-9S12XS-flash-scripts.tcl">
 <!ENTITY Custom-Devices                   SYSTEM "Custom/custom-hcs12.xml">
 ]>
-<root version="4.8.0">
+<root version="4.9.5">
    <description>HCS12 Device characteristics v4.8.0 25/12/2011</description>
    <sharedInformation>
       <flashProgram id="HCS12-default-FlashProgram">

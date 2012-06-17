@@ -5,7 +5,7 @@
 <!ENTITY CFV2-default-flashScripts      SYSTEM "CFVx/ColdfireV2-default-flash-scripts.tcl">
 <!ENTITY Custom-Devices                 SYSTEM "Custom/custom-cfvx.xml">
 ]>
-<root version="4.7.0">
+<root version="4.9.5">
    <description>Coldfire V2,3,4 device characteristics v4.7.0 10/8/2011</description>
    <sharedInformation>
       <flashProgram id="default-CFV2-FlashProgram">
