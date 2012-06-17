@@ -66,6 +66,14 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.473129658.124811675" name="Version.rc" rcbsApplicability="override" resourcePath="src/Version.rc" toolsToInvoke="org.eclipse.cdt.managedbuilder.ui.rcbs.884928705">
+						<tool command="windres ..\src\Version.rc -o src\Version.o" customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.884928705" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1683774603" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.225828468" name="Resource Custom Build Step Output Type" outputNames="Version.o"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
@@ -136,6 +144,14 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.mingw.exe.release.2000245616.677233721" name="Version.rc" rcbsApplicability="override" resourcePath="src/Version.rc" toolsToInvoke="org.eclipse.cdt.managedbuilder.ui.rcbs.1745767756">
+						<tool command="windres ..\src\Version.rc -o src\Version.o" customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1745767756" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.2073530673" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.475606191" name="Resource Custom Build Step Output Type" outputNames="Version.o"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
@@ -162,4 +178,5 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="refreshScope"/>
 </cproject>

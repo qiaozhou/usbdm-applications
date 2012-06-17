@@ -1,4 +1,4 @@
-#include "Version.h"
+#include "../../Shared_V4/Shared/Version.h"
 
 #include <windows.h>
 
