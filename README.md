@@ -14,4 +14,3 @@ It is suggested that you use EGit to do this.
 
 Requires MinGW, WxWidgets, Xerces, ActiveTcl to build
 
-Documentation - Requires Doxygen to build

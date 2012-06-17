@@ -71,7 +71,7 @@
 		<link>
 			<name>Shared</name>
 			<type>2</type>
-			<locationURI>GIT_LOC/usbdm/Applications/Shared_V4/Shared</locationURI>
+			<locationURI>GIT_LOC/usbdm-applications/Shared_V4/Shared</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
