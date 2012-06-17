@@ -34,6 +34,7 @@
 									<listOptionValue builtIn="false" value="&quot;C:\Program Files\Java\jdk1.6.0_23\include\win32&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Program Files\Java\jdk1.6.0_23\include&quot;"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.other.other.935431242" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1800178491" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.exe.debug.2081567347" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.exe.debug">
@@ -56,6 +57,7 @@
 								<option id="gnu.cpp.link.option.libs.480038349" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="usbdm-debug.4"/>
 								</option>
+								<option id="gnu.cpp.link.option.flags.867583727" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-Wl,--kill-at" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1664795700" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -127,6 +129,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Shared_V4/lib}&quot;"/>
 								</option>
 								<option defaultValue="true" id="gnu.cpp.link.option.shared.488820375" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
+								<option id="gnu.cpp.link.option.flags.1566186082" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-Wl,--kill-at" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.891150765" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

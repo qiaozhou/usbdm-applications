@@ -3,7 +3,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Program Files/Freescale/CW MCU v10.1/eclipse/plugins/com.freescale.core.debugger.ui.cdt_7.15.0.FSL_b8726/cdtcwcoreui.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/Freescale/CW MCU v10.1/eclipse/plugins/com.freescale.mcu.debug.connections_10.1.1.FSL_b5491/mcuconn.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Freescale/CW MCU v10.1/eclipse/plugins/com.freescale.core.debugger.ui.cdt_7.15.0.FSL_b8720/cdtcwcoreui.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Freescale/CW MCU v10.1/eclipse/plugins/com.freescale.mcu.debug.connections_10.1.0.FSL_b5490/mcuconn.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
