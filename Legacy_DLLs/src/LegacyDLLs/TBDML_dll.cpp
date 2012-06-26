@@ -38,7 +38,7 @@
 #include "wx/wx.h"
 #include "wx/numdlg.h"
 #include "../Log.h"
-#include "../Version.h"
+//#include "../Version.h"
 #include "../Common.h"
 #include "../USBDM_API.h"
 #include "../gui/USBDM_AUX.h"

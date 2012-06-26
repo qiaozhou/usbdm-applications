@@ -37,7 +37,6 @@ class FlashPanel: public wxPanel {
 private:
    const static
    string       settingsKey;               //!< Key to use for saving settings
-   bool         deviceSet;                 //!< Device has been explicitly set
    int          currentDeviceIndex;        //!< Device type (index into device database)
    bool         doFilterByChipId;          //!< For dialogue handling - Filter by SDID
    map<uint32_t,uint32_t> filterChipIds;   //!< The SDIDs being filtered by
@@ -54,7 +53,7 @@ private:
    FlashImage   flashImageData;
 
    //! Used to save/restore the custom settings when changing from/to a custom device
-   DeviceData   customDevice;
+//   DeviceData   customDevice;
 
    //! Description of current device
    DeviceData   currentDevice;
@@ -81,8 +80,6 @@ private:
       ID_DEVICE_TYPE_CHOICE,
       ID_FILTER_BY_CHIP_ID_CHECKBOX,
       ID_DETECT_CHIP_ID_BUTTON,
-//      ID_RAM_BEGIN_ADDRESS_TEXT,
-//      ID_RAM_END_ADDRESS_TEXT,
       ID_CLOCK_MODULE_TYPE_CHOICE,
       ID_CLOCK_MODULE_ADDRESS_TEXT,
       ID_TRIM_FREQUENCY_CHECKBOX,
@@ -114,8 +111,7 @@ private:
 
    NumberTextEditCtrl*     busFrequencyTextControl;
    wxChoice*               deviceTypeChoiceControl;
-//   NumberTextEditCtrl*     ramStartAddressTextControl;
-//   NumberTextEditCtrl*     ramEndAddressTextControl;
+//   wxComboBox*             deviceTypeChoiceControl;
    wxChoice*               clockModuleTypeChoiceControl;
    wxStaticText*           clockModuleAddressStaticControl;
    NumberTextEditCtrl*     clockModuleAddressTextControl;

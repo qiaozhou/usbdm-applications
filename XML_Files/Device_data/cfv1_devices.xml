@@ -342,6 +342,9 @@
             <securityInfoRef ref="CFV1Plus-default-security-on"  />
             <memoryRange size="128K" start="0x000000" />
          </memory>
+         <memory registerAddress="0xFF84E0" type="flash">
+            <memoryRange size="32K" start="0x200000" />
+         </memory>
          <soptAddress value="0xFF80C0" />
          <sdidAddress value="0xFF80D0" />
          <sdid value="0x0000" />

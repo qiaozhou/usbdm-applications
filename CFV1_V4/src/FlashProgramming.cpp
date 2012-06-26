@@ -758,7 +758,7 @@ USBDM_ErrorCode FlashProgrammer::loadTargetProgram(FlashProgramPtr flashProgram)
          }
          loadAddress           += loadOffset;
          headerPtr->loadAddress = nativeToTarget16(loadAddress);
-         headerPtr->entry       = nativeToTarget16(targetToNative16(headerPtr->entry)+loadOffset);
+         headerPtr->entry       = nativeToTarget16(targetToNative32(headerPtr->entry)+loadOffset);
          print("FlashProgrammer::loadTargetProgram() - Loading at non-default address 0x%04X (offset=%04X)\n", loadAddress, loadOffset);
       }
    }
@@ -779,15 +779,15 @@ USBDM_ErrorCode FlashProgrammer::loadTargetProgram(FlashProgramPtr flashProgram)
 #else
    if ((capabilities&CAP_DATA_FIXED)==0) {
       // Relocate Data Entry to immediately after code
-      headerPtr->flashData   = nativeToTarget16(loadAddress + size);
-      print("FlashProgrammer::loadTargetProgram() - Relocating flashData @ 0x%06X\n", targetToNative16(headerPtr->flashData));
+      headerPtr->flashData   = nativeToTarget32(loadAddress + size);
+      print("FlashProgrammer::loadTargetProgram() - Relocating flashData @ 0x%06X\n", targetToNative32(headerPtr->flashData));
    }
 #endif
 
    headerPtr->soptAddress = nativeToTarget32(parameters.getSOPTAddress());
 
    // Save the programming data structure
-   flashProgramHeader.flashData     = targetToNative16(headerPtr->flashData);
+   flashProgramHeader.flashData     = targetToNative32(headerPtr->flashData);
    flashProgramHeader.loadAddress   = targetToNative32(headerPtr->loadAddress);
    flashProgramHeader.entry         = targetToNative32(headerPtr->entry);
    flashProgramHeader.capabilities  = targetToNative32(headerPtr->capabilities);

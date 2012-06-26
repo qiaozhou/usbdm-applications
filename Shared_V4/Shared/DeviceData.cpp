@@ -385,6 +385,8 @@ uint16_t DeviceData::getPageNo(uint32_t address) {
 //!
 const DeviceData *DeviceDataBase::findDeviceFromName(const string &targetName) {
 
+   print("findDeviceFromName(%s)\n", (const char *)targetName.c_str());
+
    // Note - Assumes ASCII string
    char buff[50];
    strncpy(buff, targetName.c_str(), sizeof(buff));
@@ -393,11 +395,12 @@ const DeviceData *DeviceDataBase::findDeviceFromName(const string &targetName) {
 
    vector<DeviceData *>::iterator it;
    for (it = deviceData.begin(); it != deviceData.end(); it++) {
-      if (strcmp((*it)->getTargetName().c_str(), buff)) {
+      if (strcmp((*it)->getTargetName().c_str(), buff) == 0) {
+         print("findDeviceFromName(%s) found %s\n", buff, (const char *)((*it)->getTargetName().c_str()));
          return *it;
       }
    }
-   print("findDeviceFromName(%s) => Device not found\n", targetName.c_str());
+   print("findDeviceFromName(%s) => Device not found\n", (const char *)targetName.c_str());
    return NULL;
 }
 
@@ -443,19 +446,20 @@ bool DeviceDataBase::loadDeviceData(void) {
    print("DeviceDataBase::loadDeviceData()\n");
    try {
       string appFilePath = getApplicationFilePath("Device_data/" configFilename);
-      if (appFilePath.empty())
+      if (appFilePath.empty()) {
          throw MyException("DeviceDataBase::loadDeviceData() - failed to find device file");
-      DeviceXmlParser::loadDeviceData(appFilePath, this);
-      // Find default device
-      const DeviceData *defaultDevice = findDeviceFromName("_Default");
-      if (defaultDevice == NULL) {
-         throw MyException("DeviceDataBase::loadDeviceData() - failed to find default device");
       }
-      this->defaultDevice = defaultDevice;
+      DeviceXmlParser::loadDeviceData(appFilePath, this);
+//      // Find default device
+//      const DeviceData *defaultDevice = findDeviceFromName("_Default");
+//      if (defaultDevice == NULL) {
+//         throw MyException("DeviceDataBase::loadDeviceData() - failed to find default device");
+//      }
+//      this->defaultDevice = defaultDevice;
    }
    catch (MyException &exception) {
-      // Create dummy default device and add to database
-      defaultDevice = *deviceData.insert(deviceData.end(), new DeviceData()).base();
+      // Create dummy default device
+//      defaultDevice = *deviceData.insert(deviceData.end(), new DeviceData()).base();
       print("DeviceXmlParser::loadDeviceData() - Exception %s\n", exception.what());
       return false;
    }
@@ -464,7 +468,7 @@ bool DeviceDataBase::loadDeviceData(void) {
       return false;
    }
 #ifdef LOG
-//   listDevices();
+   listDevices();
 #endif
    print("DeviceDataBase::loadDeviceData() - %d devices loaded\n", deviceData.size());
    return true;
@@ -497,12 +501,13 @@ void DeviceDataBase::listDevices() {
 #else
          if (lineCount == 0) {
             print("\n"
-                  "#                  Clock    Clock   NVTRIM    Trim                                    \n"
-                  "#    Target        Name     Addr     Addr     Freq.    SDIDA    SDID Scripts? FlashP? \n"
-                  "#=====================================================================================\n");
+                  "#                      RAM       Clock    Clock   NVTRIM    Trim                                    \n"
+                  "#    Target        Start   End    Name     Addr     Addr     Freq.    SDIDA    SDID Scripts? FlashP? \n"
+                  "#==================================================================================================\n");
          }
-         print("%-14s %10s 0x%06X 0x%06X %6f %08X %08X %4s %4s\n",
+         print("%-14s 0x%06X 0x%06X %10s 0x%06X 0x%06X %6f %08X %08X %4s %4s\n",
                (*it)->getTargetName().c_str(),
+               (*it)->getRamStart(), (*it)->getRamEnd(),
                ClockTypes::getClockName((*it)->getClockType()).c_str(),
                (*it)->getClockAddress(),
                (*it)->getClockTrimNVAddress(),
@@ -513,6 +518,7 @@ void DeviceDataBase::listDevices() {
                (*it)->getFlashProgram()?"Y":"N"
          );
 #endif
+#if 0
          for (int regionNum=0; (*it)->getMemoryRegion(regionNum) != NULL; regionNum++) {
             MemoryRegionPtr reg=(*it)->getMemoryRegion(regionNum);
             print("      %10s: ", reg->getMemoryTypeName());
@@ -530,6 +536,7 @@ void DeviceDataBase::listDevices() {
             print("\n");
          }
          print("\n");
+#endif
 //         const TclScript *tclScript;
 //         tclScript = (*it)->getPreSequence();
 //         if (tclScript != NULL) {

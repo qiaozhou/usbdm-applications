@@ -69,7 +69,7 @@ typedef enum  {
  PROGRAMMING_RC_OK                             = 0,     //!<  0 Success
  PROGRAMMING_RC_ERROR_FIRST_MESSAGE            = 101,
  PROGRAMMING_RC_ERROR_ILLEGAL_PARAMS           = 101,   //!<  1 Programming parameters incorrect
- PROGRAMMING_RC_ERROR_WRONG_SDID               = 102,   //!<  2 Wrong SDID
+ PROGRAMMING_RC_ERROR_WRONG_SDID               = 102,   //!<  2 Incorrect target device
  PROGRAMMING_RC_ERROR_FAILED_VERIFY            = 103,   //!<  3 Verification of Flash failed
  PROGRAMMING_RC_ERROR_BDM                      = 104,   //!<  4 General BDM error
  PROGRAMMING_RC_ERROR_NOT_BLANK                = 105,   //!<  5 Device is not blank/failed erase

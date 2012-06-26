@@ -42,7 +42,7 @@
 #include <wx/msgdlg.h>
 
 #include "Common.h"
-#include "Version.h"
+#include "../../Shared_V4/Shared/Version.h"
 #include "USBDMPanel.h"
 #include "USBDMDialogue.h"
 #include "USBDM_API.h"

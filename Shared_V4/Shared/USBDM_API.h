@@ -38,7 +38,7 @@
     extern "C" {
 #else
 #ifndef bool
-#define bool int //! Define bool for C
+#define bool int //!< Define bool for C
 #endif
 #endif
 

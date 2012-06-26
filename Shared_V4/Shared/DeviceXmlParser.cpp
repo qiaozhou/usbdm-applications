@@ -56,6 +56,97 @@ XERCES_CPP_NAMESPACE_USE
 
 #include "Log.h"
 
+#if 0
+//! Convert a single digit to an integer
+//!
+//! @param s    - character to convert
+//! @param base - base to use - either 8, 10 or 16
+//!
+//! @return <0  => invalid digit
+//!         >=0 => converted digit
+//!
+uint8_t getDigit(char s, int base) {
+   int digit = s-'0';
+   if ((s>=0) && (s<=base)) {
+      return digit;
+   }
+   if (base <= 10) {
+      return -1;
+   }
+   digit -= 10;
+   if ((s>=0) && (s<=base)) {
+      return digit;
+   }
+   return -1;
+}
+
+//! Convert string to long integer
+//!
+//! @param start = ptr to string to convert
+//! @param end   = updated to point to char following valid string (may be NULL)
+//! @param value = value read
+//!
+//! @return true  => OK \n
+//!         false => failed
+//!
+//! @note Accepts decimal, octal with '0' prefix or hex with '0x' prefix \n
+//!                        '_' may be used to space number e.g. 0x1000_0000
+//!
+bool strToULong(const char *s, char **end, long *returnValue) {
+   uint32_t value = 0;
+   int base = 10;
+   *returnValue = 0;
+   while (isspace(*s)) {
+      s++;
+   }
+   if (*s == '_') {
+      // Don't allow '_' as first character of number
+      return false;
+   }
+   if (*s == '0') {
+      s++;
+      base = 8;
+      if ((s=='x')||(s=='X')) {
+         s++;
+         base = 16;
+      }
+   }
+   char *startOfNum = s;
+   do {
+      if (*s == '_') {
+         // Ignore '_'
+         continue;
+      }
+      int digit = getDigit(*s);
+      if (digit < 0) {
+         break;
+      }
+      s++;
+      value = base*value + digit;
+   } while (1);
+   if (startOfNum == s) {
+      // No digits
+      return false;
+   }
+   if (end != NULL) {
+      // Record end of number (immediately following character)
+      end = s;
+   }
+   else {
+      // If end is not used then check if at end of string
+      // Skip trailing spaces
+      while (isspace(*end_t)) {
+         end_t++;
+      }
+      if (*end_t != '\0') {
+         print("strToULong() - Unexpected chars following number (%s)\n", start);
+         return false;
+      }
+   }
+   // if accepted chars its a valid number
+   return true;
+}
+#else
 //! Convert string to long integer
 //!
 //! @param start = ptr to string to convert
@@ -97,6 +188,7 @@ bool strToULong(const char *start, char **end, long *value) {
    *value = value_t;
    return true;
 }
+#endif
 
 //! Convert string to long integer.
 //!
@@ -108,18 +200,18 @@ bool strToULong(const char *start, char **end, long *value) {
 //!         false => failed
 //!
 //! @note Accepts decimal, octal with '0' prefix or hex with '0x' prefix
-//! @note Value may have K or M suffix to indicate kilobytes or megabytes \n
+//! @note Value may have K or M suffix to indicate kilobytes(2^10) or megabytes(2^20) \n
 //!       e.g. '1M' '0x1000 K' etc
 //!
 bool strSizeToULong(const char *start, char **end, long *value) {
    char *end_t;
    bool success = strToULong(start, &end_t, value);
-   if (!success)
+   if (!success) {
       return false;
-
-   if (end != NULL)
+   }
+   if (end != NULL) {
       *end = end_t;
-
+   }
    // Skip trailing spaces
    while (isspace(*end_t)) {
       end_t++;
@@ -762,9 +854,9 @@ void DeviceXmlParser::parseDeviceXML(void) {
 //      cerr << ", family=" << familyValue;
 //      cerr << ">\n";
 
-      DeviceData *itDev;
       // Create new device
-      itDev = deviceDataBase->addDevice(new DeviceData());
+      DeviceData *itDev = new DeviceData();
+
       // Note - Assumes ASCII string
       char buff[50];
       strncpy(buff, targetName.asCString(), sizeof(buff));
@@ -938,6 +1030,14 @@ void DeviceXmlParser::parseDeviceXML(void) {
          else {
             print("Ignoring Unknown tag \'%s\'\n", propertyTag.asCString());
          }
+      }
+      if (itDev->getTargetName().compare("_DEFAULT") == 0) {
+         // Add device as default
+         deviceDataBase->setDefaultDevice(itDev);
+      }
+      else {
+         // Add general device
+         deviceDataBase->addDevice(itDev);
       }
    }
 }

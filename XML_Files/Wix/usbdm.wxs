@@ -55,6 +55,8 @@
       =======================================================-->
       <Directory Id='TARGETDIR' Name='SourceDir'>
          <Directory Id='ProgramFilesFolder' Name='PFiles'>
+            <Directory Id="D.CODESOURCERY" Name="CodeSourcery"/>
+
             <Directory Id='MANUFACTURER_FOLDER' Name="$(var.Manufacturer)">
                <Directory Id='INSTALLDIR' Name="$(var.ProductName) $(var.ProductVersion)">
                   <Directory Id="D.Device_data"      Name='Device_data' />
@@ -82,6 +84,15 @@
 
       </Directory>
 
+      <!--======================================================
+            Directory searches
+      =======================================================-->
+      <Property Id="D.CODESOURCERY">
+         <DirectorySearch Id="Ds.ProgramFilesFolder" Path="[ProgramFilesFolder]">
+            <DirectorySearch Id="Ds.CODESOURCERY" AssignToProperty="yes" Path="CodeSourcery"/>
+         </DirectorySearch>
+      </Property>
+      
       <!--=================================================================================
            Actions
       ==================================================================================-->
@@ -284,16 +295,16 @@
          <Component Id='C.DSCProgrammer' Guid='*'>
             <File Id='DSC_FlashProgrammerEXE' DiskId='1'
                Source='bin\DSC_FlashProgrammer.exe' KeyPath='yes'>
-               <Shortcut Id="startmenuUSBDM_5a" Directory="D.UsbdmProgramMenuDir" Name="M56F80xx Programmer"
+               <Shortcut Id="startmenuUSBDM_5a" Directory="D.UsbdmProgramMenuDir" Name="MC56F80xx Programmer"
                   WorkingDirectory='INSTALLDIR' Icon="ChipIcon.ico" IconIndex="0" Advertise="yes" />
             </File>
             <!--
-            <ProgId Id="USBDM.DSCProgrammer" Description="USBDM M56F80xx Programmer" Icon="ChipIcon.ico" Advertise="yes">
+            <ProgId Id="USBDM.DSCProgrammer" Description="USBDM MC56F80xx Programmer" Icon="ChipIcon.ico" Advertise="yes">
                <Extension Id="sx">
-                  <Verb Id="open.dsc" Command="Open M56F80xx Programmer" Argument="&quot;%1&quot;" />
+                  <Verb Id="open.dsc" Command="Open MC56F80xx Programmer" Argument="&quot;%1&quot;" />
                </Extension>
                <Extension Id="s19">
-                  <Verb Id="open.dsc" Command="Open M56F80xx Programmer" Argument="&quot;%1&quot;" />
+                  <Verb Id="open.dsc" Command="Open MC56F80xx Programmer" Argument="&quot;%1&quot;" />
                </Extension>
             </ProgId>         
             -->
@@ -332,8 +343,15 @@
          </Component>
          <Component Id='C.CFUnlocker' Guid='*'>
             <File Id='CFUnlockerEXE' DiskId='1'
-               Source='bin\CFUnlocker.exe' KeyPath='yes'>
+               Source='bin\CFVx_Unlocker.exe' KeyPath='yes'>
                <Shortcut Id="startmenuUSBDM_9" Directory="D.UsbdmProgramMenuDir" Name="Coldfire V2,3,4 JTAG Unlocker"
+                  WorkingDirectory='INSTALLDIR' Icon="ChipIcon.ico" IconIndex="0" Advertise="yes" />
+            </File>
+         </Component>
+         <Component Id='C.DSCUnlocker' Guid='*'>
+            <File Id='DSCUnlockerEXE' DiskId='1'
+               Source='bin\DSC_Unlocker.exe' KeyPath='yes'>
+               <Shortcut Id="startmenuUSBDM_9a" Directory="D.UsbdmProgramMenuDir" Name="MC56F80xx Unlocker"
                   WorkingDirectory='INSTALLDIR' Icon="ChipIcon.ico" IconIndex="0" Advertise="yes" />
             </File>
          </Component>
@@ -380,6 +398,8 @@
                                          
             <File Id='ComonFiles15'      DiskId='1' Source='bin\libgcc_s_dw2-1.dll' />
             <File Id='ComonFiles16'      DiskId='1' Source='bin\libstdc++-6.dll' />
+            <File Id='ComonFiles17'      DiskId='1' Source='bin\pthreadGC2.dll' />
+            
          </Component>
       </DirectoryRef>
 
@@ -468,6 +488,14 @@
             <FeatureRef Id='F.CW_FOR_MICROCONTROLLERS_V6_3' />
             <FeatureRef Id='F.CWS12_X_V5_1' />
          </Feature>
+         <Feature Id='F.CodeSourcerySupport'
+               Title='CodeSourcery Interfaces '
+               Description='Add USBDM support to various versions of CodeSourcery software.'
+               AllowAdvertise="no"
+               Level='1'>
+            <FeatureRef Id='F.CODESOURCERY_CF' />
+            <FeatureRef Id='F.CODESOURCERY_ARM' />
+         </Feature>
          <FeatureRef Id='F.FREEMASTER_V1_3' />
          <FeatureRef Id='F.CFFLASHER_V3_1' />
          <Feature Id='F.Programmers'
@@ -505,7 +533,7 @@
                <ComponentGroupRef Id='Cg.DeviceDataInstall'/>
             </Feature>
             <Feature Id='F.DSCProgrammer'
-                  Title='M56F80xx Programmer'
+                  Title='MC56F80xx Programmer'
                   Description='Stand-alone MC56F800xx flash programmer.'
                   AllowAdvertise="no"
                   Level='1'>
@@ -578,6 +606,15 @@
             <ComponentRef Id='C.CommonFiles' />
             <ComponentGroupRef Id='Cg.DeviceDataInstall' />
          </Feature>
+         <Feature Id='F.DSCUnlocker'
+               Title='MC56F80xx Unlocker'
+               Description='MC56F80xx JTAG Unlocker.'
+               AllowAdvertise="no"
+               Level='1'>
+            <ComponentRef Id='C.DSCUnlocker' />
+            <ComponentRef Id='C.CommonFiles' />
+            <ComponentGroupRef Id='Cg.DeviceDataInstall' />
+         </Feature>
          <Feature Id='F.SetBoot'
                Title='JB16 Setboot utility'
                Description='Sets JB16 BDMs into ICP mode for upgrade by Freescale ICP tool.'
@@ -588,7 +625,7 @@
          </Feature>
          <Feature Id='F.USBDM_Drivers'
                Title='Device Drivers'
-               Description='Creates a folder containing the USBDM drivers, with Menu shortcut.'
+               Description='Creates a folder containing the USBDM drivers with Menu shortcut.'
                AllowAdvertise="no"
                Level='1'>
             <ComponentGroupRef Id="Cg.USBDM_Drivers" />

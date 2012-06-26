@@ -385,7 +385,6 @@ static USBDM_ErrorCode initialiseBDMInterface(void) {
    // Load description of device
    bdmRC = getDeviceData(deviceOptions);
    if (bdmRC != BDM_RC_OK) {
-      deviceOptions.setTargetName("Unknown");
       return bdmRC;
    }
 #if ((TARGET == RS08)||(TARGET == HCS08)||(TARGET == HC12))
@@ -900,16 +899,18 @@ void DiErrorGetMessage ( DiConstStringT *pszErrorMsg ) {
 
    *pszErrorMsg = getGDIErrorMessage();
 
-   if (pszErrorMsg == NULL)
+   if (pszErrorMsg == NULL) {
       print("DiErrorGetMessage() => not set\n");
-   else
+   }
+   else {
       print("DiErrorGetMessage() => %s\n", *pszErrorMsg);
-
+   }
    mtwksDisplayLine("DiErrorGetMessage() => %s\n", getGDIErrorMessage());
 
    // Clear all errors apart from fatal
-   if (currentError != DI_ERR_FATAL)
+   if (currentError != DI_ERR_FATAL) {
       setErrorState(DI_OK);
+   }
 }
 
 //! 2.2.4.1 Configure Target Memory

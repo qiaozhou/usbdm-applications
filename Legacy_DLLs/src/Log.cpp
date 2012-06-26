@@ -40,7 +40,7 @@
 #include <wchar.h>
 #include "USBDM_API.h"
 #include "Log.h"
-#include "Version.h"
+#include "../../Shared_V4/Shared/Version.h"
 
 #ifdef UNICODE
 #undef UNICODE

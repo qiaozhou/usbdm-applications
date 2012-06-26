@@ -98,7 +98,7 @@ static const char *const errorMessages[] = {
 //! Error code returned by the various routines
 static const char *programmingErrorMessages[] = {
    /* 101 */ "Illegal programming parameters",
-   /* 102 */ "SDID incorrect (incorrect target type)",
+   /* 102 */ "Target device does not agree with selected",
    /* 103 */ "Verification of Flash failed",
    /* 104 */ "General BDM error",
    /* 105 */ "Device or region is not blank or failed erase",

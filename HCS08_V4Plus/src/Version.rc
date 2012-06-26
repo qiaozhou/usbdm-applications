@@ -28,7 +28,7 @@ BEGIN
         BLOCK "040904E4"
         BEGIN
             VALUE "CompanyName",      "pgo"
-            VALUE "FileDescription",  "USBDM CFV 1 Programmer"
+            VALUE "FileDescription",  "USBDM HCS08 Programmer"
             VALUE "FileVersion",      PROGRAM_VERSION_STRING
             VALUE "InternalName",     ""
             VALUE "ProductName",      "USBDM"

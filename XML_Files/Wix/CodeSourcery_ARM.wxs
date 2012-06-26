@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+   <?define CW_Ver="1" ?> 
+
+   <?define Manufacturer="pgo" ?>
+   <?define ProductName="USBDM" ?>
+   <!--?define ProductVersion="4.9.0" ?-->                        <!-- Defined on command line -->
+   <?define ProductCode="17b2306b-6310-4c23-8e96-fdac4c922b3d" ?> <!-- Don't change        -->
+   <?define UpgradeCode="9bd8ce56-449a-4787-9c20-feb701416411" ?> <!-- Don't change        -->
+   <?define InfoURL="http://usbdm.sourceforge.net" ?>
+
+   <?define ApplicationFolderName="Sourcery_CodeBench_Lite_for_ARM_EABI" ?>
+
+   <Fragment>
+      <!--======================================================
+            Directory structure
+      =======================================================-->
+      <DirectoryRef Id="D.CODESOURCERY">
+         <!-- Directory structure for Application -->
+         <Directory Id="D.CODESOURCERY_ARM"  Name="$(var.ApplicationFolderName)">
+            <Directory Id="D.CODESOURCERY_ARM_bin" Name="bin" />
+         </Directory>
+      </DirectoryRef>
+
+      <!--======================================================
+            Registry searches
+      =======================================================-->
+      
+      <!-- None -->
+      
+      <!--======================================================
+            Directory searches
+      =======================================================-->
+
+      <!-- Check for presence of CodeSourcery -->
+      <Property Id="P.CODESOURCERY_ARM">
+         <DirectorySearchRef Id="Ds.CODESOURCERY" Parent="Ds.ProgramFilesFolder" Path="CodeSourcery">
+            <DirectorySearch Id="Ds.CODESOURCERY_ARM"
+                     AssignToProperty="yes"
+                     Depth="2"
+                     Path="$(var.ApplicationFolderName)" />
+         </DirectorySearchRef>
+      </Property>
+
+      <!-- Modify default install path for CodeWarrior Development Studio for MCU V10.x -->
+      <Property Id="D.CODESOURCERY_ARM">
+         <DirectorySearchRef Id="Ds.CODESOURCERY_ARM" Parent="Ds.CODESOURCERY" Path="$(var.ApplicationFolderName)"/>
+      </Property>
+      
+      <!--======================================================
+            Actions
+      =======================================================-->
+
+      <!-- None -->
+      
+      <!--======================================================
+            Components
+      =======================================================-->
+     <!-- USBDM Installed Marker -->
+      <DirectoryRef Id="D.CODESOURCERY_ARM">
+         <Component Id='C.CODESOURCERY_ARM.Marker' Guid='ac8447a6-d3c6-41ea-9da0-cbc1089dad5b' >
+            <File Id='CODESOURCERY_ARM_Marker'  DiskId='1' Source='USBDM_Installed.txt' KeyPath='yes' />
+         </Component>
+      </DirectoryRef>
+      
+      <!-- Sourcery CodeBench Lite for ColdFire ELF support -->
+      <DirectoryRef Id="D.CODESOURCERY_ARM_bin">
+         <Component Id='C.CODESOURCERY_ARM.Files' Guid='95a036d9-1299-4bd2-91f9-02b221ef3e51' >
+            <File Id='CODESOURCERY_ARM_Files1'   DiskId='1' Source='bin\usbdm-arm-gdbServer-debug.exe' KeyPath='yes'/>
+            <File Id='CODESOURCERY_ARM_Files2'   DiskId='1' Source='bin\usbdm-arm-gdbServer.exe'/>
+
+            <!-- Common Shared -->
+            <File Id='CODESOURCERY_ARM_Files11'  DiskId='1' Source='bin\libgcc_s_dw2-1.dll' />
+            <File Id='CODESOURCERY_ARM_Files12'  DiskId='1' Source='bin\libstdc++-6.dll' />
+            <File Id='CODESOURCERY_ARM_Files13'  DiskId='1' Source='bin\pthreadGC2.dll' />
+
+            <File Id='CODESOURCERY_ARM_Files14'  DiskId='1' Source='bin\libusb-1.0.dll' />
+            <File Id='CODESOURCERY_ARM_Files15'  DiskId='1' Source='bin\libxerces-c-3-1.dll' />
+            <File Id='CODESOURCERY_ARM_Files16'  DiskId='1' Source='bin\tcl85.dll' />
+            <File Id='CODESOURCERY_ARM_Files17'  DiskId='1' Source='bin\wxPlugin.dll' />
+     
+            <File Id='CODESOURCERY_ARM_Files21'  DiskId='1' Source='bin\usbdm.4.dll'/>
+            <File Id='CODESOURCERY_ARM_Files22'  DiskId='1' Source='bin\usbdmTCL.4.dll' />
+            <File Id='CODESOURCERY_ARM_Files23'  DiskId='1' Source='bin\usbdm-arm.4.dll' />
+            <File Id='CODESOURCERY_ARM_Files24'  DiskId='1' Source='bin\usbdm-dsc.4.dll' />
+
+            <File Id='CODESOURCERY_ARM_Files31'  DiskId='1' Source='bin\usbdm-debug.4.dll' />
+            <File Id='CODESOURCERY_ARM_Files32'  DiskId='1' Source='bin\usbdmTCL-debug.4.dll' />
+            <File Id='CODESOURCERY_ARM_Files33'  DiskId='1' Source='bin\usbdm-arm-debug.4.dll' />
+            <File Id='CODESOURCERY_ARM_Files34'  DiskId='1' Source='bin\usbdm-dsc-debug.4.dll' />
+
+         </Component>
+      </DirectoryRef>
+
+      <!--======================================================
+            Features
+      =======================================================-->
+      <Feature Id='F.CODESOURCERY_ARM'
+            Title='Sourcery Codebench Lite for ARM EABI'
+            Description="USBDM plugin for Sourcery Codebench Lite for ARM EABI."
+            ConfigurableDirectory="D.CODESOURCERY_ARM"
+            AllowAdvertise="no"
+            Level='100'>
+         <Condition Level='1'>
+            <![CDATA[Installed OR P.CODESOURCERY_ARM]]>
+         </Condition>
+         <ComponentRef Id='C.CODESOURCERY_ARM.Marker' />
+         <ComponentRef Id='C.CODESOURCERY_ARM.Files' />
+         <ComponentGroupRef Id='Cg.DeviceDataInstall'/>
+      </Feature>
+   </Fragment>
+</Wix>

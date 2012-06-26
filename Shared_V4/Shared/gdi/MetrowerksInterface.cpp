@@ -378,20 +378,25 @@ USBDM_ErrorCode getDeviceData(DeviceData &deviceData) {
       return BDM_RC_DEVICE_DATABASE_ERROR;
    }
    const DeviceData *dev = deviceDataBase.findDeviceFromName(deviceName);
+   print("getDeviceData() - Found device \'%s\' in database\n", (const char *)dev->getTargetName().c_str());
    if (dev == NULL) {
       print("getDeviceData() - Unknown device\n");
-      return BDM_RC_UNKNOWN_DEVICE;
+      mtwksDisplayLine("Unrecognised device - using default settings");
+      dev = deviceDataBase.getDefaultDevice();
+//      return BDM_RC_UNKNOWN_DEVICE;
    }
    deviceData = *dev;
    getAttribute(KeyTrimTargetClock, value, 0);
    if (value != 0) {
       getAttribute(KeyClockTrimFrequency, value, deviceData.getClockTrimFreq());
-      if (value == 0)
+      if (value == 0) {
          value = deviceData.getClockTrimFreq();
+      }
       deviceData.setClockTrimFreq(value);
       getAttribute(KeyClockTrimNVAddress, value, deviceData.getClockTrimNVAddress());
-      if (value == 0)
+      if (value == 0) {
          value = deviceData.getClockTrimNVAddress();
+      }
       deviceData.setClockTrimNVAddress(value);
    }
    else {

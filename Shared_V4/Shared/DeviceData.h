@@ -500,7 +500,6 @@ public:
 
    FlashProgramPtr   getFlashProgram()            const { return flashProgram; }
    TclScriptPtr      getFlashScripts()            const { return flashScripts; }
-
    MemoryRegionPtr getMemoryRegion(unsigned index) const {
       if (index >= memoryRegionCount)
          return MemoryRegionPtr();
@@ -673,6 +672,12 @@ public:
    }
    void   listDevices();
    static const DeviceData *getDefaultDevice() { return defaultDevice; }
+   static const DeviceData *setDefaultDevice(const DeviceData *defaultDevice) {
+      DeviceDataBase::defaultDevice = defaultDevice;
+      return defaultDevice;
+   }
+   unsigned getNumDevice() const { return this->deviceData.size(); }
+
    DeviceData *addDevice(DeviceData *device) {
       std::vector<DeviceData*>::iterator itDev = deviceData.insert(deviceData.end(),device);
       return *itDev;

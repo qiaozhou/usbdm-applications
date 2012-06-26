@@ -144,68 +144,47 @@ void FlashPanel::populateClockDropDown(void) {
 //! @note: the list may be filtered by filterChipIds
 //!
 void FlashPanel::populateDeviceDropDown() {
-int deviceIndex;
-int controlIndex;
-vector<DeviceData *>::iterator it;
-int firstAddedDevice = 0;
-
 //   print("FlashPanel()::populateDeviceDropDown()\n");
 
-   // Empty list
+   // Clear device list
    deviceTypeChoiceControl->Clear();
-
-   // Add custom entry (now 1st entry in database)
-   deviceTypeChoiceControl->Append(wxString(customDevice.getTargetName().c_str(), wxConvUTF8));
-
-   if (deviceSet) {
-      // Only populate a single additional fixed device.
-//      print("FlashPanel()::populateDeviceDropDown() - deviceSet!\n");
-//      print("FlashPanel()::populateDeviceDropDown() - \'%s\'\n",
-//            (const char *)currentDeviceName.ToAscii());
-      controlIndex = deviceTypeChoiceControl->Append(currentDeviceName);
-      if (controlIndex>=0) {
-         // Associate index value with item
-         deviceTypeChoiceControl->SetClientData(controlIndex, (void*)currentDeviceIndex);
-      }
-      return;
-   }
-
-   // Populate the rest of list with filtered items
+   // Populate the list with filtered items
+   int firstAddedDevice = -1;
+   vector<DeviceData *>::iterator it;
+   int deviceIndex;
    for ( it=deviceDatabase->begin(), deviceIndex=0;
          it < deviceDatabase->end(); it++, deviceIndex++ ) {
-      if (deviceIndex == 0) {
-         // Discard default device
-         continue;
-      }
       if (((*it)->getTargetName().length() != 0) && (!doFilterByChipId || (*it)->isThisDevice(filterChipIds))) {
 //         print("Adding device %s\n", (*it)->getTargetName().c_str());
-         controlIndex = deviceTypeChoiceControl->Append(makeDeviceName(wxString((*it)->getTargetName().c_str(), wxConvUTF8)));
+         int controlIndex = deviceTypeChoiceControl->Append(makeDeviceName(wxString((*it)->getTargetName().c_str(), wxConvUTF8)));
          if (controlIndex>=0) {
             // Associate index value with item
             deviceTypeChoiceControl->SetClientData(controlIndex, (void *) deviceIndex);
 //            print("FlashPanel::populateDeviceDropDown() - Add device %s @%d, devIndex=%d\n", (*it)->getTargetName().c_str(), controlIndex, deviceIndex);
-            if (firstAddedDevice == 0)
+            if (firstAddedDevice == -1) {
                firstAddedDevice = deviceIndex;
+            }
          }
          else {
             print("FlashPanel::populateDeviceDropDown() - Add device failed, rc = %d\n", controlIndex);
          }
       }
    }
-   // Select device in list control
-   setDeviceindex(firstAddedDevice);
+   if (firstAddedDevice<0) {
+      // No device added
+      print("FlashPanel::populateDeviceDropDown() - No devices\n");
+      setDeviceindex(-1);
+      deviceTypeChoiceControl->Append(_("[No matching device]"));
+      deviceTypeChoiceControl->SetClientData(0, (void *) -1);
+      deviceTypeChoiceControl->SetSelection(0);
+      deviceTypeChoiceControl->Enable(false);
+   }
+   else {
+      // Select device in list control
+      setDeviceindex(firstAddedDevice);
+      deviceTypeChoiceControl->Enable(true);
+   }
 }
-
-////============================================================================
-////! Handles changes in the clock selection dialogue.
-////! Updates internal state & affected part of dialogue
-////!
-//void FlashPanel::clockChangeHandler(ClockTypes_t clockType) {
-////   print("updateClockParameters(): index = %d\n", index); fflush(stderr);
-//
-//   setClockType(clockType);
-//   TransferDataToWindow();
-//}
 
 //============================================================================
 //! Sets clock type
@@ -219,33 +198,7 @@ void FlashPanel::setClockType(ClockTypes_t clockType) {
 
 //   print("FlashPanel::setClockType(%d)\n", clockType);
    currentDevice.setClockType(clockType);
-
-   if (currentDeviceIndex == 0) {
-//      print("FlashPanel::setClockType(%d) - updating values\n", clockType);
-
-      // Custom device -
-      // Update the clock parameters to default values according to selected clock
-      currentDevice.setClockAddress(currentDevice.getDefaultClockAddress());
-      if (doTrim) {
-         currentDevice.setClockTrimFreq(currentDevice.getDefaultClockTrimFreq());
-         currentDevice.setClockTrimNVAddress(currentDevice.getDefaultClockTrimNVAddress());
-      }
-   }
 }
-
-////! Updates internal state and dialogue on device selection change
-////!
-//void FlashPanel::deviceChangeHandler() {
-//   int  deviceIndex;
-//
-//   // Get currently selected device type
-//   deviceIndex = (int) deviceTypeChoiceControl->GetClientData();
-//   print("FlashPanel::deviceChangeHandler(): devIndex=%d\n", deviceIndex);
-//   if (deviceIndex < 0)
-//      deviceIndex = 0;
-//   setDeviceindex(deviceIndex);
-//   TransferDataToWindow();
-//}
 
 //! Sets the currently selected device
 //!
@@ -256,26 +209,16 @@ void FlashPanel::setDeviceindex(int newDeviceIndex) {
 
 //   print("FlashPanel::setDeviceindex() newDeviceIndex = %d\n", newDeviceIndex);
 
-   // Save settings if moving away from the custom settings
-   if ((currentDeviceIndex == 0) && (newDeviceIndex != 0)) {
-      customDevice = currentDevice;
-      if (!doTrim) {
-         customDevice.setClockTrimFreq(0);
-      }
-   }
-
    // Save non-device-specific settings.
    savedDevice = currentDevice;
 
-   if (newDeviceIndex == 0) {
-      // Moving to custom device
-      currentDevice = customDevice;
-      doTrim = currentDevice.getClockTrimFreq() != 0;
+   if (newDeviceIndex<0) {
+      currentDevice = *deviceDatabase->getDefaultDevice();
    }
-   else
+   else {
       currentDevice = (*deviceDatabase)[newDeviceIndex];
-
-   currentDeviceName = wxString(currentDevice.getTargetName().c_str(), wxConvUTF8);
+   }
+   currentDeviceName  = wxString(currentDevice.getTargetName().c_str(), wxConvUTF8);
    currentDeviceIndex = newDeviceIndex;
 
 //   print("FlashPanel::setDeviceindex() currentDeviceIndex = %d, currentDevice.getTargetName() = %s\n",
@@ -288,7 +231,6 @@ void FlashPanel::setDeviceindex(int newDeviceIndex) {
    if (!doTrim) {
       currentDevice.setClockTrimFreq(0);
    }
-
    setClockType(currentDevice.getClockType());
 }
 
@@ -558,7 +500,6 @@ USBDM_ErrorCode lastRc = PROGRAMMING_RC_OK;
 // FlashPanel
 
 FlashPanel::FlashPanel( wxWindow* parent, TargetType_t targetType, HardwareCapabilities_t bdmCapabilities) :
-      deviceSet(false),
       deviceDatabase(NULL),
       targetType(targetType),
       bdmCapabilities(bdmCapabilities),
@@ -570,7 +511,6 @@ FlashPanel::FlashPanel( wxWindow* parent, TargetType_t targetType, HardwareCapab
 }
 
 FlashPanel::FlashPanel(TargetType_t targetType, HardwareCapabilities_t bdmCapabilities) :
-      deviceSet(false),
       deviceDatabase(NULL),
       targetType(targetType),
       bdmCapabilities(bdmCapabilities),
@@ -591,9 +531,7 @@ bool FlashPanel::Create(wxWindow* parent) {
    if (okSoundPath != wxEmptyString) {
       beep = new wxSound(okSoundPath);
    }
-
 #ifdef FLASH_PROGRAMMER
-   //   setText( hWnd, IDC_PROGRAM_VERSION_STATIC, "Version " VERSION_STRING);
    securityRadioBoxControl->SetSelection(0);
    incrementalFileLoadCheckBoxControl->Set3StateValue(wxCHK_UNCHECKED);
 #endif
@@ -620,24 +558,16 @@ void FlashPanel::Init() {
                       this);
       }
    }
-   customDevice  = *deviceDatabase->getDefaultDevice();
-   customDevice.setSecurity(SEC_DEFAULT);
-   customDevice.setEraseOption(DeviceData::eraseNone);
-   if (!deviceSet) {
-      currentDeviceIndex = 0;
-      currentDevice      = customDevice;
-   }
    currentDevice.setSecurity(SEC_DEFAULT);
-
-   doFilterByChipId = FALSE;
    filterChipIds.clear();
+   doFilterByChipId       = false;
    needManualFrequencySet = false;
-   incrementalLoad = false;
-   fileLoaded = false;
-   doTrim = false;
-   sound = false;
-   bdmOptions.size = sizeof(USBDM_ExtendedOptions_t);
-   bdmOptions.targetType = targetType;
+   incrementalLoad        = false;
+   fileLoaded             = false;
+   doTrim                 = false;
+   sound                  = false;
+   bdmOptions.size        = sizeof(USBDM_ExtendedOptions_t);
+   bdmOptions.targetType  = targetType;
 //   print("FlashPanel::Init() - currentdeviceIndex = %d\n", currentDeviceIndex);
 }
 
@@ -699,6 +629,7 @@ bool FlashPanel::CreateControls() {
    itemStaticBoxSizer->Add(flexGridSizer, 1, wxALIGN_CENTER_VERTICAL|wxALL, 0);
 
    deviceTypeChoiceControl = new wxChoice(panel, ID_DEVICE_TYPE_CHOICE, wxDefaultPosition, wxSize(180,-1), 0, NULL, 0); //wxDefaultSize);
+//   deviceTypeChoiceControl = new wxComboBox(panel, ID_DEVICE_TYPE_CHOICE, _("Select Device"), wxDefaultPosition, wxSize(180,-1), 0, NULL, wxCB_READONLY); //wxDefaultSize);
    flexGridSizer->Add(deviceTypeChoiceControl, 0, wxALIGN_CENTER_HORIZONTAL|wxEXPAND|wxALL, 5);
 
 #ifdef FLASH_PROGRAMMER
@@ -731,45 +662,6 @@ bool FlashPanel::CreateControls() {
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("kHz"), wxDefaultPosition, wxDefaultSize, 0 );
    itemStaticBoxSizer->Add(itemStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 #endif
-#if 0
-   //======================================================================
-
-   itemStaticBox = new wxStaticBox(panel, wxID_ANY, _("RAM Buffer"));
-   itemStaticBoxSizer = new wxStaticBoxSizer(itemStaticBox, wxHORIZONTAL);
-   panelBoxSizerV->Add(itemStaticBoxSizer, 0, wxEXPAND|wxLEFT|wxRIGHT|wxTOP, 5);
-
-   //------------------------------------------------------------------------
-   wxBoxSizer* panelSizer18 = new wxBoxSizer(wxVERTICAL);
-   itemStaticBoxSizer->Add(panelSizer18, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-
-   itemStaticText = new wxStaticText( panel, wxID_STATIC, _("&Begin Address"), wxDefaultPosition, wxDefaultSize, 0 );
-   panelSizer18->Add(itemStaticText, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT, 5);
-
-   wxBoxSizer* panelSizer20 = new wxBoxSizer(wxHORIZONTAL);
-   panelSizer18->Add(panelSizer20, 0, wxALIGN_CENTER_HORIZONTAL|wxRIGHT, 5);
-
-   ramStartAddressTextControl = new NumberTextEditCtrl( panel, ID_RAM_BEGIN_ADDRESS_TEXT, wxEmptyString, wxDefaultPosition, wxSize(80, -1), 0 );
-   panelSizer20->Add(ramStartAddressTextControl, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxRIGHT, 5);
-
-   itemStaticText = new wxStaticText( panel, wxID_STATIC, _("(hex)"), wxDefaultPosition, wxDefaultSize, 0 );
-   panelSizer20->Add(itemStaticText, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 5);
-
-   //------------------------------------------------------------------------
-   wxBoxSizer* panelSizer23 = new wxBoxSizer(wxVERTICAL);
-   itemStaticBoxSizer->Add(panelSizer23, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-
-   itemStaticText = new wxStaticText( panel, wxID_STATIC, _("&End Address"), wxDefaultPosition, wxDefaultSize, 0 );
-   panelSizer23->Add(itemStaticText, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT, 5);
-
-   wxBoxSizer* panelSizer25 = new wxBoxSizer(wxHORIZONTAL);
-   panelSizer23->Add(panelSizer25, 0, wxALIGN_CENTER_HORIZONTAL|wxRIGHT, 5);
-
-   ramEndAddressTextControl = new NumberTextEditCtrl( panel, ID_RAM_END_ADDRESS_TEXT, wxEmptyString, wxDefaultPosition, wxSize(80, -1), 0 );
-   panelSizer25->Add(ramEndAddressTextControl, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxTOP, 5);
-
-   itemStaticText = new wxStaticText( panel, wxID_STATIC, _("(hex)"), wxDefaultPosition, wxDefaultSize, 0 );
-   panelSizer25->Add(itemStaticText, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 5);
-#endif
 
    //====================================================================
 
@@ -787,12 +679,14 @@ bool FlashPanel::CreateControls() {
 
    clockModuleTypeChoiceControl = new wxChoice( panel, ID_CLOCK_MODULE_TYPE_CHOICE, wxDefaultPosition, wxSize(150, -1));
    gridBagSizer->Add(clockModuleTypeChoiceControl, wxGBPosition(1,0), wxGBSpan(1,2), wxLEFT|wxTOP, 5);
+   clockModuleTypeChoiceControl->Enable(false);
 
    clockModuleAddressStaticControl = new wxStaticText( panel, wxID_STATIC, _("&Clock Module Address"), wxDefaultPosition, wxDefaultSize, 0 );
    gridBagSizer->Add(clockModuleAddressStaticControl, wxGBPosition(2,0), wxGBSpan(1,3),  wxLEFT|wxRIGHT|wxTOP, 5);
 
    clockModuleAddressTextControl = new NumberTextEditCtrl( panel, ID_CLOCK_MODULE_ADDRESS_TEXT, wxEmptyString, wxDefaultPosition, wxSize(80, -1), 0 );
    gridBagSizer->Add(clockModuleAddressTextControl, wxGBPosition(3,0), wxGBSpan(1,1), wxLEFT|wxTOP, 5);
+   clockModuleAddressTextControl->Enable(false);
 
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("(hex)"), wxDefaultPosition, wxDefaultSize, 0 );
    gridBagSizer->Add(itemStaticText, wxGBPosition(3,1), wxGBSpan(1,1), wxLEFT|wxTOP|wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL, 5);
@@ -856,8 +750,8 @@ bool FlashPanel::CreateControls() {
                                     "Selective - Erase only sectors being programmed\n"
                                     "All       - Erase entire chip\n"
                                     "Mass      - Use device specific mass erase method"));
-#undef MASS_ERASE
-#define MASS_ERASE MASS_ERASE_OPTIONAL // Todo Fix this
+//#undef MASS_ERASE
+//#define MASS_ERASE MASS_ERASE_OPTIONAL // Todo Fix this
 #if MASS_ERASE == MASS_ERASE_NEVER
    eraseChoiceControl->Append(wxString(DeviceData::getEraseOptionName(DeviceData::eraseNone),wxConvUTF7),      (void*)DeviceData::eraseNone);
    eraseChoiceControl->Append(wxString(DeviceData::getEraseOptionName(DeviceData::eraseSelective),wxConvUTF7), (void*)DeviceData::eraseSelective);
@@ -915,27 +809,13 @@ bool FlashPanel::TransferDataToWindow() {
    // Set currently selected device
    deviceTypeChoiceControl->SetStringSelection(makeDeviceName(currentDeviceName));
 
-   // Enable active controls
-   deviceTypeChoiceControl->Enable(!deviceSet);
-
-   bool customChip = (currentDeviceIndex == 0);
-#if 0
-   ramStartAddressTextControl->Enable(customChip);
-   ramEndAddressTextControl->Enable(customChip);
-#endif
-   clockModuleTypeChoiceControl->Enable(customChip);
-
-   clockModuleAddressTextControl->Enable(customChip);
-
    bool usingClock = (currentDevice.getClockType() != CLKEXT) &&
                      (currentDevice.getClockType() != CLKINVALID);
-
 //   print("FlashPanel::TransferDataToWindow() - usingClock=%s, getClockType()=%d\n",
 //            usingClock?"true":"false",
 //                  currentDevice.getClockType()
 //            );
    clockModuleAddressStaticControl->Enable(usingClock);
-   clockModuleAddressTextControl->Enable(usingClock && customChip);
    trimFrequencyCheckBoxControl->Enable(usingClock);
 
    bool trimEnabled = usingClock && doTrim;
@@ -944,11 +824,7 @@ bool FlashPanel::TransferDataToWindow() {
    trimFrequencyTextControl->Enable(trimEnabled);
    trimAddressStaticControl->Enable(trimEnabled);
    trimAddressTextControl->Enable(trimEnabled);
-#if 0
-   // Update dialogue values
-   ramStartAddressTextControl->SetHexValue(currentDevice.getRamStart());
-   ramEndAddressTextControl->SetHexValue(currentDevice.getRamEnd());
-#endif
+
    clockModuleTypeChoiceControl->SetStringSelection(wxString(ClockTypes::getClockName(currentDevice.getClockType()).c_str(), wxConvUTF8));
 
    clockModuleAddressTextControl->SetHexValue(currentDevice.getClockAddress());
@@ -986,18 +862,17 @@ bool FlashPanel::TransferDataToWindow() {
    busFrequencyTextControl->SetDecimalValue(round(currentDevice.getConnectionFreq()/1000));
    busFrequencyTextControl->Enable(needManualFrequencySet);
 #endif
+   updateProgrammingState();
    return true;
 }
 
 bool FlashPanel::TransferDataFromWindow() {
-
 //   print("FlashPanel::TransferDataFromWindow()\n");
 
 #ifdef FLASH_PROGRAMMER
    sound = enableSoundsCheckBoxControl->IsChecked();
    autoFileLoad = autoFileReloadCheckBoxControl->IsChecked();
 #endif
-
    return true;
 }
 
@@ -1011,12 +886,6 @@ IMPLEMENT_CLASS( FlashPanel, wxPanel )
  */
 BEGIN_EVENT_TABLE( FlashPanel, wxPanel )
    EVT_CHOICE( ID_DEVICE_TYPE_CHOICE,               FlashPanel::OnDeviceTypeChoiceSelected )
-#if 0
-   EVT_TEXT( ID_RAM_BEGIN_ADDRESS_TEXT,             FlashPanel::OnRamBeginAddressTextTextUpdated )
-   EVT_TEXT( ID_RAM_END_ADDRESS_TEXT,               FlashPanel::OnRamEndAddressTextTextUpdated )
-#endif
-   EVT_CHOICE( ID_CLOCK_MODULE_TYPE_CHOICE,         FlashPanel::OnClockModuleTypeChoiceSelected )
-   EVT_TEXT( ID_CLOCK_MODULE_ADDRESS_TEXT,          FlashPanel::OnClockModuleAddressTextTextUpdated )
    EVT_CHECKBOX( ID_TRIM_FREQUENCY_CHECKBOX,        FlashPanel::OnTrimFrequencyCheckboxClick )
    EVT_TEXT( ID_TRIM_FREQUENCY_TEXT,                FlashPanel::OnTrimFrequencyTextTextUpdated )
    EVT_TEXT( ID_NONVOLATILE_ADDRESS_TEXT,           FlashPanel::OnNonvolatileAddressTextTextUpdated )
@@ -1046,9 +915,7 @@ USBDM_ErrorCode FlashPanel::loadHexFile( wxString hexFilename, bool clearBuffer 
 
    print("FlashPanel::loadHexFile(%s)\n", (const char *)hexFilename.ToAscii());
    loadedFilenameStaticControl->SetLabel(_("Loading File"));
-
    rc = flashImageData.loadFile((const char*)hexFilename.mb_str(wxConvUTF8), clearBuffer);
-
    if (rc != BDM_RC_OK) {
       wxMessageBox(_("Failed to read S-File.\n") +
                      hexFilename +
@@ -1061,9 +928,7 @@ USBDM_ErrorCode FlashPanel::loadHexFile( wxString hexFilename, bool clearBuffer 
       fileLoaded = FALSE;
       flashImageData.initData();
       loadedFilenameStaticControl->SetLabel(_("No file loaded"));
-      programFlashButtonControl->Enable(false);
-      verifyFlashButtonControl->Enable(false);
-      loadAndGoButtonControl->Enable(false);
+      updateProgrammingState();
       return PROGRAMMING_RC_ERROR_FILE_OPEN_FAIL;
    }
    else {
@@ -1071,9 +936,7 @@ USBDM_ErrorCode FlashPanel::loadHexFile( wxString hexFilename, bool clearBuffer 
       lastFileLoaded = hexFilename;
       fileLoadTime = wxFileModificationTime(hexFilename);
       loadedFilenameStaticControl->SetLabel(wxFileNameFromPath(hexFilename));
-      programFlashButtonControl->Enable(true);
-      verifyFlashButtonControl->Enable(true);
-      loadAndGoButtonControl->Enable(true);
+      updateProgrammingState();
    }
    flashImageData.printMemoryMap();
    return PROGRAMMING_RC_OK;
@@ -1107,19 +970,15 @@ USBDM_ErrorCode FlashPanel::checkFileChange(void) {
 //! @param event The event to handle
 //!
 void FlashPanel::OnLoadFileButtonClick( wxCommandEvent& event ) {
-   int getCancelOK;
-
 //   print("FlashPanel::OnLoadFileButtonClick()\n");
 
-   wxString caption = _("Select Binary File to Load");
+   wxString caption  = _("Select Binary File to Load");
    wxString wildcard = _("Binary Files(*.s*;*.afx;*.elf)|*.s*;*.afx;*.elf|SREC Hex "
                          "files (*.s*)|*.s*|Elf files (*.afx)|*.afx,*.elf|All Files|*");
    wxString defaultDir = wxEmptyString;
    wxString defaultFilename = wxEmptyString;
    wxFileDialog dialog(this, caption, defaultDir, defaultFilename, wildcard, wxFD_OPEN);
-
-   getCancelOK = dialog.ShowModal();
-
+   int getCancelOK = dialog.ShowModal();
    if (getCancelOK != wxID_OK) {
       return;
    }
@@ -1149,12 +1008,7 @@ void FlashPanel::OnAutoFileReloadCheckboxClick( wxCommandEvent& event ) {
 void FlashPanel::OnDeviceTypeChoiceSelected( wxCommandEvent& event ) {
    // Get currently selected device type
    int deviceIndex = (int) event.GetClientData();
-//   int choiceIndex = (int) event.GetSelection();
-
-//   print("FlashPanel::OnDeviceTypeChoiceSelected(): devIndex=%d, choiceIndex=%d\n", deviceIndex, choiceIndex);
-   if (deviceIndex < 0) {
-      deviceIndex = 0;
-   }
+   print("FlashPanel::OnDeviceTypeChoiceSelected(): devIndex=%d\n", deviceIndex);
    setDeviceindex(deviceIndex);
    TransferDataToWindow();
 }
@@ -1203,45 +1057,10 @@ void FlashPanel::OnDetectChipButtonClick( wxCommandEvent& event ) {
    TransferDataToWindow();
 }
 #endif
-/*
- * wxEVT_COMMAND_TEXT_UPDATED event handler for ID_RAM_BEGIN_ADDRESS_TEXT
- */
-void FlashPanel::OnRamBeginAddressTextTextUpdated( wxCommandEvent& event ) {
-   long int value;
-   event.GetString().ToLong(&value, 16);
-   currentDevice.setRamStart(value);
-}
-
-/*
- * wxEVT_COMMAND_TEXT_UPDATED event handler for ID_RAM_END_ADDRESS_TEXT
- */
-void FlashPanel::OnRamEndAddressTextTextUpdated( wxCommandEvent& event ) {
-   long int value;
-   event.GetString().ToLong(&value, 16);
-   currentDevice.setRamEnd(value);
-}
-
-/*
- * wxEVT_COMMAND_CHOICE_SELECTED event handler for ID_CLOCK_MODULE_TYPE_CHOICE
- */
-void FlashPanel::OnClockModuleTypeChoiceSelected( wxCommandEvent& event ) {
-   setClockType((ClockTypes_t)(int)event.GetClientData());
-   TransferDataToWindow();
-}
-
-/*
- * wxEVT_COMMAND_TEXT_UPDATED event handler for ID_CLOCK_MODULE_ADDRESS_TEXT
- */
-void FlashPanel::OnClockModuleAddressTextTextUpdated( wxCommandEvent& event ) {
-   long int value;
-   event.GetString().ToLong(&value, 16);
-   currentDevice.setClockAddress(value);
-}
 
 /*
  * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_TRIM_FREQUENCY_CHECKBOX
  */
-
 void FlashPanel::OnTrimFrequencyCheckboxClick( wxCommandEvent& event ) {
    doTrim = event.IsChecked() &&
             (currentDevice.getClockType() != CLKEXT) &&
@@ -1257,9 +1076,6 @@ void FlashPanel::OnTrimFrequencyCheckboxClick( wxCommandEvent& event ) {
       currentDevice.setClockTrimFreq(0);
       currentDevice.setClockTrimNVAddress(currentDevice.getDefaultClockTrimNVAddress());
    }
-#ifdef FLASH_PROGRAMMER
-   updateProgrammingState();
-#endif
    TransferDataToWindow();
 }
 
@@ -1313,75 +1129,30 @@ bool FlashPanel::chooseDevice(const wxString &deviceName) {
    populateDeviceDropDown();
 
    int deviceIndex = deviceDatabase->findDeviceIndexFromName(string(deviceName.ToAscii()));
-
    if (deviceIndex < 0) {
 //      print("FlashPanel::chooseDevice(): no suitable device in comboBox\n");
-      // Select custom device
       setDeviceindex(0);
       return false;
    }
    currentDeviceIndex = deviceIndex;
-   currentDevice = (*deviceDatabase)[deviceIndex];
+   currentDevice      = (*deviceDatabase)[deviceIndex];
 //   print("FlashPanel::chooseDevice() - device Name = \'%s\'\n", currentDevice.getTargetName().c_str());
 //   print("FlashPanel::chooseDevice() - currentDeviceIndex = %d\n", currentDeviceIndex);
    setDeviceindex(currentDeviceIndex);
-
    return true;
 }
-
-#ifdef GDI
-////! Set internal state to selected device
-////!
-////! @param deviceName - name of device e.g. 51AC128A, MC9S12DP256B
-////!
-////! @note setState is set true to disable device changes in the dialogue
-////!
-//bool FlashPanel::setDevice(const wxString &deviceName) {
-//vector<DeviceData>::iterator it;
-//
-//   print("FlashPanel::setDevice(%s)\n", (const char *)deviceName.ToAscii());
-//
-//   it = deviceDataBase->findDeviceFromName(deviceName);
-//   if (it == deviceDataBase->end()) {
-//      print("FlashPanel::setDevice() - device not found\n");
-//      return false;
-//   }
-//   currentDevice = *it;
-//   currentDeviceIndex = it - deviceDataBase->begin();
-////   print("FlashPanel::setDevice() - deviceIndex = %d\n", currentDeviceIndex);
-//
-//   deviceSet = true;
-//   print("FlashPanel::setDevice() - currentDeviceIndex = %d\n", currentDeviceIndex);
-//   setDeviceindex(currentDeviceIndex);
-//
-//   return true;
-//}
-#endif
 
 //!
 //! @param settings      - Object to load settings from
 //!
 void FlashPanel::loadSettings(const AppSettings &settings) {
-
-   string deviceName;
 //   print("FlashPanel::loadSettings()\n");
 
-   // Only load this information if device not already (automatically) set
-   if (!deviceSet) {
-      // Check for saved device name setting
-      wxString deviceName(settings.getValue(settingsKey+".deviceName", "").c_str(), wxConvUTF7);
-      print("FlashPanel::loadSettings() - deviceName = %s\n", (const char *)deviceName.ToAscii());
-
-      if (deviceName.IsEmpty())
-         setDeviceindex(0);
-
-      if (deviceName.IsEmpty() || !chooseDevice(deviceName)) {
-         // Fully custom device - load all settings
-         currentDevice.setRamStart(                settings.getValue(settingsKey+".RAMStart",     DeviceDataBase::getDefaultDevice()->getRamStart()));
-         currentDevice.setRamEnd(                  settings.getValue(settingsKey+".RAMEnd",       DeviceDataBase::getDefaultDevice()->getRamEnd()));
-                       setClockType((ClockTypes_t) settings.getValue(settingsKey+".clockType",    DeviceDataBase::getDefaultDevice()->getClockType()));
-         currentDevice.setClockAddress(            settings.getValue(settingsKey+".clockAddress", currentDevice.getClockAddress()));
-      }
+   // Check for saved device name setting
+   wxString deviceName(settings.getValue(settingsKey+".deviceName", "").c_str(), wxConvUTF7);
+   print("FlashPanel::loadSettings() - deviceName = \"%s\"\n", (const char *)deviceName.ToAscii());
+   if (deviceName.IsEmpty()) {
+      setDeviceindex(0);
    }
    // Load the trim information
    unsigned long clockTrimFrequency = settings.getValue(settingsKey+".clockTrimFrequency", 0);
@@ -1395,10 +1166,8 @@ void FlashPanel::loadSettings(const AppSettings &settings) {
 #ifdef FLASH_PROGRAMMER
    unsigned long playSounds = settings.getValue(settingsKey+".playSounds", 0);
    sound = playSounds;
-
    currentDevice.setSecurity((SecurityOptions_t)settings.getValue(settingsKey+".security", currentDevice.getSecurity()));
    currentDevice.setEraseOption((DeviceData::EraseOptions)settings.getValue(settingsKey+".eraseOption", (int)currentDevice.getEraseOption()));
-
    autoFileLoad = settings.getValue(settingsKey+".autoFileLoad", 0) != 0;
 #endif
 }
@@ -1414,24 +1183,9 @@ void FlashPanel::saveSettings(AppSettings &settings) {
    DeviceData deviceData;
    getDialogueValues(&deviceData);
 
-   if (!deviceSet) {
-      // Save device-specific settings that may have been set manually
-      // These are discarded if a device is set or selected
+   // Save device name
+   settings.addValue(settingsKey+".deviceName",   deviceData.getTargetName().c_str());
 
-      if (deviceDatabase->findDeviceFromName(deviceData.getTargetName()) != NULL) {
-         // Standard device - just save device name
-         settings.addValue(settingsKey+".deviceName",   deviceData.getTargetName().c_str());
-      }
-      else {
-         // Custom device - save all settings
-         settings.addValue(settingsKey+".RAMStart",     deviceData.getRamStart());
-         settings.addValue(settingsKey+".RAMEnd",       deviceData.getRamEnd());
-         if (deviceData.getClockType() != CLKEXT) {
-            settings.addValue(settingsKey+".clockType",    deviceData.getClockType());
-            settings.addValue(settingsKey+".clockAddress", deviceData.getClockAddress());
-         }
-      }
-   }
    // Save non-device fixed settings
    if (deviceData.getClockTrimFreq() != 0) {
       settings.addValue(settingsKey+".clockTrimFrequency", deviceData.getClockTrimFreq());
@@ -1776,9 +1530,12 @@ void FlashPanel::OnSecurityRadioboxSelected( wxCommandEvent& event ) {
 }
 
 void FlashPanel::updateProgrammingState(void) {
-   bool enableProgramming = (fileLoaded ||
-                            (doTrim && (currentDevice.getEraseOption() != DeviceData::eraseMass)));
+   bool enableProgramming = ((currentDeviceIndex>=0)&&
+                             (fileLoaded ||
+                             (doTrim && (currentDevice.getEraseOption() != DeviceData::eraseMass))));
    programFlashButtonControl->Enable(enableProgramming);
+   verifyFlashButtonControl->Enable(enableProgramming);
+   loadAndGoButtonControl->Enable(enableProgramming);
 }
 
 //! wxEVT_COMMAND_CHOICE_SELECTED event handler for ID_ERASE_CHOICE
@@ -1789,6 +1546,7 @@ void FlashPanel::OnEraseChoiceSelect( wxCommandEvent& event ) {
    int selIndex = event.GetSelection();
    DeviceData::EraseOptions eraseOption = (DeviceData::EraseOptions)(int)eraseChoiceControl->GetClientData(selIndex);
    currentDevice.setEraseOption(eraseOption);
+   updateProgrammingState();
 //   print("FlashPanel::OnEraseChoiceSelect(%s)\n", DeviceData::getEraseOptionName(eraseOption));
 }
 
