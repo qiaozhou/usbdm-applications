@@ -42,6 +42,10 @@ private:
    DualString   tag_flashProgramRef;
    DualString   tag_securityInfo;
    DualString   tag_securityInfoRef;
+   DualString   tag_flexNvmInfo;
+   DualString   tag_flexNvmInfoRef;
+   DualString   tag_eeepromEntry;
+   DualString   tag_partitionEntry;
 
    DualString   attr_name;
    DualString   attr_family;
@@ -60,6 +64,10 @@ private:
    DualString   attr_id;
    DualString   attr_ref;
    DualString   attr_addressMode;
+   DualString   attr_description;
+   DualString   attr_eeeSize;
+   DualString   attr_eeSize;
+
    bool         isDefault; // Indicates that the current device is the default device
 
    DeviceDataBase *deviceDataBase;
@@ -80,6 +88,9 @@ private:
    MemoryRegion *parseFlashMemoryDetails(xercesc::DOMElement *currentProperty, MemType_t memoryType, long &defaultSectorSize);
    SecurityInfo *parseSecurity(xercesc::DOMElement *currentProperty);
    //   void  parseActionSequence(xercesc::DOMElement *sharedRoot, std::map<const string, SharedInformationItem> &shareInformation);
+   FlexNVMInfo *parseFlexNVMInfo(xercesc::DOMElement *currentProperty);
+   FlexNVMInfo::EeepromSizeValue      parseEeepromEntry(xercesc::DOMElement *eeepromElement);
+   FlexNVMInfo::FlexNvmPartitionValue parsePartitionEntry(xercesc::DOMElement *partitionElement);
 
    void          loadFile(const std::string &xmlFile);
 

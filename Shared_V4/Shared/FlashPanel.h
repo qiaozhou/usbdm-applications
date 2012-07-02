@@ -35,39 +35,29 @@ class FlashPanel: public wxPanel {
     DECLARE_EVENT_TABLE()
 
 private:
-   const static
-   string       settingsKey;               //!< Key to use for saving settings
-   int          currentDeviceIndex;        //!< Device type (index into device database)
-   bool         doFilterByChipId;          //!< For dialogue handling - Filter by SDID
-   map<uint32_t,uint32_t> filterChipIds;   //!< The SDIDs being filtered by
-   bool         incrementalLoad;           //!< Don't clear buffer when loading a file
-   bool         autoFileLoad;              //!< Auto load changed files before programing
-   bool         fileLoaded;                //!< Flag indicating Hex file loaded
-   bool         doTrim;                    //!< Trim target clock (if possible)
-   bool         needManualFrequencySet;    //!< Connection speed has been manually set
-   bool         sound;
-   time_t       fileLoadTime;              //!< Time last file was loaded
-   wxString     lastFileLoaded;            //!< Path to last file loaded
-
-   // Memory Image loaded from S1S9 files.
-   FlashImage   flashImageData;
-
-   //! Used to save/restore the custom settings when changing from/to a custom device
-//   DeviceData   customDevice;
-
-   //! Description of current device
-   DeviceData   currentDevice;
-   wxString     currentDeviceName;
-
-   DeviceDataBase          *deviceDatabase;
-   wxString                caption;
-   int                     targetProperties;
-   TargetType_t            targetType;
-   HardwareCapabilities_t  bdmCapabilities;
-
-   FlashProgrammer         *flashprogrammer;
+   static wxProgressDialog *progressDialogue;
+   const static string      settingsKey;            //!< Key to use for saving settings
+   int                      currentDeviceIndex;     //!< Device type (index into device database)
+   bool                     doFilterByChipId;       //!< For dialogue handling - Filter by SDID
+   map<uint32_t,uint32_t>   filterChipIds;          //!< The SDIDs being filtered by
+   bool                     incrementalLoad;        //!< Don't clear buffer when loading a file
+   bool                     autoFileLoad;           //!< Auto load changed files before programing
+   bool                     fileLoaded;             //!< Flag indicating Hex file loaded
+   bool                     doTrim;                 //!< Trim target clock (if possible)
+   bool                     needManualFrequencySet; //!< Connection speed has been manually set
+   bool                     sound;                  //!< Sound on/off
+   time_t                   fileLoadTime;           //!< Time last file was loaded
+   wxString                 lastFileLoaded;         //!< Path to last file loaded
+   FlashImage               flashImageData;         //!< Memory Image loaded from S1S9 files.
+   DeviceData               currentDevice;          //!< Description of current device
+   DeviceDataBase          *deviceDatabase;         //!< Database of available devices
+   TargetType_t             targetType;             //!< Device target type
+   HardwareCapabilities_t   bdmCapabilities;        //!< Capabilities of the connected BDM
+   FlashProgrammer         *flashprogrammer;        //!< Flash programmer
    wxSound                 *beep;
-   USBDM_ExtendedOptions_t bdmOptions;
+   USBDM_ExtendedOptions_t  bdmOptions;
+//   wxString                 caption;
+//   int                      targetProperties;
 
    // Control Identifiers
    enum {
@@ -111,7 +101,6 @@ private:
 
    NumberTextEditCtrl*     busFrequencyTextControl;
    wxChoice*               deviceTypeChoiceControl;
-//   wxComboBox*             deviceTypeChoiceControl;
    wxChoice*               clockModuleTypeChoiceControl;
    wxStaticText*           clockModuleAddressStaticControl;
    NumberTextEditCtrl*     clockModuleAddressTextControl;
@@ -121,7 +110,6 @@ private:
    wxStaticText*           trimAddressStaticControl;
    NumberTextEditCtrl*     trimAddressTextControl;
 
-   void setClockType(ClockTypes_t clockType);
    void setDeviceindex(int deviceIndex);
    USBDM_ErrorCode autoDetectTargetDevice();
    USBDM_ErrorCode hcs12Check(void);
@@ -132,7 +120,7 @@ private:
    // Creates the controls and sizers
    bool CreateControls();
 
-   // Handlers
+   // Event Handlers
    void OnLoadFileButtonClick( wxCommandEvent& event );
    void OnIncrementalFileLoadCheckboxClick( wxCommandEvent& event );
    void OnAutoFileReloadCheckboxClick( wxCommandEvent& event );
@@ -153,10 +141,10 @@ private:
    void OnLoadAndGoButtonClick( wxCommandEvent& event );
    void OnSoundCheckboxClick( wxCommandEvent& event );
    void OnEraseChoiceSelect( wxCommandEvent& event );
-   USBDM_ErrorCode programFlash(bool loadAndGo = false);
+
    void updateProgrammingState(void);
+   USBDM_ErrorCode programFlash(bool loadAndGo = false);
    USBDM_ErrorCode verifyFlash(void);
-   static wxProgressDialog *progressDialogue;
    USBDM_ErrorCode checkFileChange(void);
 
 public:
@@ -207,6 +195,14 @@ public:
       print("FlashPanel::setBdmOptions()\n");
       printBdmOptions(_bdmOptions);
    }
+   void setDeviceOptions(DeviceDataPtr deviceData) {
+      currentDevice.setFlexNVMParameters(deviceData->getFlexNVMParameters());
+   }
+   DeviceData *getCurrentDevice() {
+      print("FlashPanel::getCurrentDevice()\n");
+      return &currentDevice;
+   }
+
 #ifdef GDI
    bool setDevice(const wxString &deviceName);
 #endif   

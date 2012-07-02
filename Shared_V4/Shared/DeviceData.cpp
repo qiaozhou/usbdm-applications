@@ -408,7 +408,7 @@ const DeviceData *DeviceDataBase::findDeviceFromName(const string &targetName) {
 //!
 //! @param targetName - Name of device
 //!
-//! @returns index or -1 if nor found
+//! @returns index or -1 if not found
 //!
 int DeviceDataBase::findDeviceIndexFromName(const string &targetName) {
 
@@ -720,3 +720,52 @@ bool MemoryRegion::isCompatibleType(MemType_t memoryType, MemorySpace_t memorySp
       case MS_Data    : return ((memoryType == MemXRAM) || (memoryType == MemXROM));
    }
 }
+
+
+//=============================================================================================
+
+//! Return minimum required ration between backing store in EEPROM and EEEPROM
+//!
+//! @return ratio e.g. 16 => EEPROM size >= 16* EEEPROM size
+//!
+unsigned FlexNVMInfo::getBackingRatio() const {
+    return backingRatio;
+}
+
+//! Returns list of permitted EEEPROM values for use in partition command
+//!
+//! @return vector of permitted values
+//!
+std::vector<FlexNVMInfo::EeepromSizeValue> &FlexNVMInfo::getEeepromSizeValues() {
+    return eeepromSizeValues;
+}
+
+//! Returns list of permitted Partition values for use in partition command
+//!
+//! @return vector of permitted values
+//!
+std::vector<FlexNVMInfo::FlexNvmPartitionValue> &FlexNVMInfo::getFlexNvmPartitionValues() {
+    return flexNvmPartitionValues;
+}
+
+//! Adds a permitted EEEPROM values for use in partition command
+//!
+//! @param eeepromSizeValue - Description of value
+//!
+void FlexNVMInfo::addEeepromSizeValues(const EeepromSizeValue &eeepromSizeValue) {
+   this->eeepromSizeValues.push_back(eeepromSizeValue);
+}
+
+//! Adds a permitted Partition values for use in partition command
+//!
+//! @param flexNvmPartitionValue  - Description of value
+//!
+void FlexNVMInfo::addFlexNvmPartitionValues(const FlexNvmPartitionValue &flexNvmPartitionValue) {
+   this->flexNvmPartitionValues.push_back(flexNvmPartitionValue);
+}
+
+void FlexNVMInfo::setBackingRatio(unsigned  backingRatio) {
+    this->backingRatio = backingRatio;
+}
+
+

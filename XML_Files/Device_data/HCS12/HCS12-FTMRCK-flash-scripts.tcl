@@ -107,11 +107,12 @@ proc calculateFlashDivider { busFrequency } {
 ;#   According to data sheets the Flash uses the BUS clock for timing
 ;#
    ;# puts "calculateFlashDivider {}"
-   if { [expr $busFrequency < 1000] } {
+   set clockFreq $busFrequency
+   if { [expr $clockFreq < 1000] } {
       error "Clock too low for flash programming"
    }
-   set cfmclkd  [expr round(($busFrequency-1101.0)/1000)]
-   set flashClk [expr round($busFrequency/($cfmclkd+1))]
+   set cfmclkd  [expr round(($clockFreq-1101.0)/1000)]
+   set flashClk [expr round($clockFreq/($cfmclkd+1))]
    ;# puts "cfmclkd = $cfmclkd, flashClk = $flashClk"
    
    return $cfmclkd

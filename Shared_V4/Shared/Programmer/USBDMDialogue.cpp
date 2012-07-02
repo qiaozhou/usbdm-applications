@@ -181,6 +181,7 @@ USBDM_ErrorCode USBDMDialogue::execute(string const     &deviceName,
 USBDM_ErrorCode USBDMDialogue::execute(wxString const &settingsFilename, wxString const &hexFilename) {
 
    loadSettingsFileFromAppDir((const char *)settingsFilename.ToAscii());
+   TransferDataToWindow();
    if (!hexFilename.IsEmpty() && (flashParametersPanel->loadHexFile(hexFilename, true) != PROGRAMMING_RC_OK)) {
       print("USBDMDialogue::execute() - Failed to load Hex file\n");
    }
@@ -198,20 +199,21 @@ USBDM_ErrorCode USBDMDialogue::execute(wxString const &settingsFilename, wxStrin
 #endif
 //! Load settings from a settings object
 //!
-//! @param appSettings - Object containg settings
+//! @param appSettings - Object containing settings
 //!
 bool USBDMDialogue::loadSettings(const AppSettings &appSettings) {
    print("USBDMDialogue::loadSettings(AppSettings)\n");
 
+   advancedPanel->Init();
+   communicationPanel->Init();
+
 #if defined(FLASH_PROGRAMMER)
    flashParametersPanel->Init();
    flashParametersPanel->loadSettings(appSettings);
+   advancedPanel->setCurrentDevice(flashParametersPanel->getCurrentDevice());
 #endif
 
-   communicationPanel->Init();
    communicationPanel->loadSettings(appSettings);
-
-   advancedPanel->Init();
    advancedPanel->loadSettings(appSettings);
 
 #ifdef GDI
@@ -366,7 +368,7 @@ USBDMDialogue::USBDMDialogue( wxWindow* parent, TargetType_t targetType, const w
    print("USBDMDialogue::USBDMDialogue() #2\n");
 }
 
-//! USBDMDialogue creator
+//! Set the dialogue internal state to the default (not including pages)
 //!
 bool USBDMDialogue::Init() {
 
@@ -504,13 +506,13 @@ bool USBDMDialogue::TransferDataToWindow() {
 #endif
 
    int rc = true;
-#if defined(FLASH_PROGRAMMER)
-   rc = flashParametersPanel->TransferDataToWindow();
-#endif
-   rc = rc &&
-        communicationPanel->TransferDataToWindow() &&
-        advancedPanel->TransferDataToWindow();
-//   print("USBDMDialogue::TransferDataToWindow() - #2, rc = %d\n", rc);
+//#if defined(FLASH_PROGRAMMER)
+//   rc = flashParametersPanel->TransferDataToWindow();
+//#endif
+//   rc = rc &&
+//        communicationPanel->TransferDataToWindow() &&
+//        advancedPanel->TransferDataToWindow();
+////   print("USBDMDialogue::TransferDataToWindow() - #2, rc = %d\n", rc);
    return rc;
 }
 
@@ -526,12 +528,12 @@ bool USBDMDialogue::TransferDataFromWindow() {
 #endif
 
    int rc = true;
-#if defined(FLASH_PROGRAMMER)
-   rc = flashParametersPanel->TransferDataFromWindow();
-#endif
-   rc = rc &&
-          communicationPanel->TransferDataFromWindow() &&
-          advancedPanel->TransferDataFromWindow();
+//#if defined(FLASH_PROGRAMMER)
+//   rc = flashParametersPanel->TransferDataFromWindow();
+//#endif
+//   rc = rc &&
+//          communicationPanel->TransferDataFromWindow() &&
+//          advancedPanel->TransferDataFromWindow();
    return rc;
 }
 
@@ -543,12 +545,6 @@ bool USBDMDialogue::setDialogueValuesToDefault() {
    print("USBDMDialogue::setDialogueValuesToDefault()\n");
 
    Init();
-#if defined(FLASH_PROGRAMMER)
-   flashParametersPanel->Init();
-#endif
-   communicationPanel->Init();
-   advancedPanel->Init();
-
    TransferDataToWindow();
 
    return true;
@@ -625,9 +621,33 @@ void USBDMDialogue::OnOkClick( wxCommandEvent& event ) {
    }
 }
 
+//! Returns the Device options from the internal state
+//!
+//! @param bdmOptions - where to return options
+//!
+void USBDMDialogue::getDeviceOptions( DeviceDataPtr deviceData ) {
+   // Poll each page for changes
+   advancedPanel->getDeviceOptions(deviceData);
+};
+
+//! Returns the BDM options from the internal state
+//!
+//! @param bdmOptions - where to return options
+//!
+void USBDMDialogue::getBdmOptions( USBDM_ExtendedOptions_t &bdmOptions ) {
+   // Set options to default
+   bdmOptions.size       = sizeof(USBDM_ExtendedOptions_t);
+   bdmOptions.targetType = targetType;
+   USBDM_GetDefaultExtendedOptions(&bdmOptions);
+
+   // Poll each page for changes
+   communicationPanel->getDialogueValues(&bdmOptions);
+   advancedPanel->getBdmOptions(&bdmOptions);
+};
+
 //! wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING event handler for ID_NOTEBOOK
 //!
-//! @param event The event to handle
+//! @param event The event to handle.
 //!
 void USBDMDialogue::OnSelChanging( wxNotebookEvent& event ) {
    print("USBDMDialogue::OnSelChanging(%d => %d)\n", event.GetOldSelection(), event.GetSelection());
@@ -661,9 +681,10 @@ void USBDMDialogue::OnSelChanging( wxNotebookEvent& event ) {
    }
 #endif
 }
+
 //! wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED event handler for ID_NOTEBOOK
 //!
-//! @param event The event to handle
+//! @param event The event to handle.
 //!
 void USBDMDialogue::OnSelChanged( wxNotebookEvent& event ) {
    print("USBDMDialogue::OnSelChanged(%d => %d)\n", event.GetOldSelection(), event.GetSelection());
@@ -672,15 +693,22 @@ void USBDMDialogue::OnSelChanged( wxNotebookEvent& event ) {
    if (enteringPage < 0) {
       return;
    }
-   wxPanel *panel = static_cast<wxPanel *>(noteBook->GetPage(event.GetSelection()));
+   wxPanel *panel = static_cast<wxPanel *>(noteBook->GetPage(enteringPage));
    if (panel == communicationPanel) {
       // Entering Communication page - Try to close BDM
       USBDM_Close();
       }
    if (panel == flashParametersPanel) {
       USBDM_ExtendedOptions_t bdmOptions;
-      this->getBdmOptions(bdmOptions);
-      this->flashParametersPanel->setBdmOptions(&bdmOptions);
+      getBdmOptions(bdmOptions);
+      flashParametersPanel->setBdmOptions(&bdmOptions);
+
+      DeviceDataPtr deviceDataPtr(new DeviceData);
+      getDeviceOptions(deviceDataPtr);
+      flashParametersPanel->setDeviceOptions(deviceDataPtr);
+   }
+   if (panel == advancedPanel) {
+      advancedPanel->setCurrentDevice(flashParametersPanel->getCurrentDevice());
    }
 #endif
 }

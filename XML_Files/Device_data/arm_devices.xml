@@ -32,6 +32,24 @@
       <securityInfo size="16" type="on" id="Kinetis-default-security-on">
          FFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFF
       </securityInfo>
+      <flexNVMInfo id="defaultKinetisFlexPartition" backingRatio="16">
+         <eeepromEntry description="None"    eeeSize="0"    value="0xFF" />
+         <eeepromEntry description="A=16, B=16"   eeeSize="32"   value="0x39" />
+         <eeepromEntry description="A=32, B=32"   eeeSize="64"   value="0x38" />
+         <eeepromEntry description="A=64, B=64"   eeeSize="128"  value="0x37" />
+         <eeepromEntry description="A=128, B=128" eeeSize="256"  value="0x36" />
+         <eeepromEntry description="A=256, B=256" eeeSize="512"  value="0x35" />
+         <eeepromEntry description="A=512, B=512" eeeSize="1K"   value="0x34" />
+         <eeepromEntry description="A=1K, B=1K"   eeeSize="2K"   value="0x33" />
+         <eeepromEntry description="A=2K, B=2K"   eeeSize="4K"   value="0x32" />
+         <partitionEntry description="DFlash=256, No EEPROM"  eeSize="0"    value="0xFF" />
+         <partitionEntry description="DFlash=224, EEPROM=32"  eeSize="32K"  value="0x03" />
+         <partitionEntry description="DFlash=192, EEPROM=64"  eeSize="64K"  value="0x04" />
+         <partitionEntry description="DFlash=128, EEPROM=128" eeSize="128K" value="0x05" />
+         <partitionEntry description="DFlash=64, EEPROM=192"  eeSize="192K" value="0x0C" />
+         <partitionEntry description="DFlash=32, EEPROM=224"  eeSize="224K" value="0x0B" />
+         <partitionEntry description="DFlash=0,  EEPROM=256"  eeSize="256K" value="0x08" />
+      </flexNVMInfo>
    </sharedInformation>
    <deviceList>
       <device name="_Default" family="ARM" isDefault="true">
@@ -511,6 +529,7 @@
             <tclScriptRef ref="default-Kinetis-Scripts" />
          </flashScripts>
          <flashProgramRef ref="default-Kinetis-FlashProgram" />
+         <flexNVMInfoRef ref="defaultKinetisFlexPartition" />
       </device>
       <device name="K40DX256Z" family="ARM">
          <clock type="External" />

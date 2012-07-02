@@ -127,16 +127,18 @@ void FlashPanel::populateClockDropDown(void) {
 
    int sub;
    int index;
-//      print("FlashPanel::populateClockDropDown()\n");
-      // Populate the list
-      for (sub=0; ClockTypes::getClockName((ClockTypes_t)sub) != ""; sub++) {
-         index = clockModuleTypeChoiceControl->Append(wxString(ClockTypes::getClockName((ClockTypes_t)sub).c_str(), wxConvUTF8));
-         if (index>=0) {
-            clockModuleTypeChoiceControl->SetClientData(index, (void *)sub); // A  bit naughty!
-         }
+
+   // print("FlashPanel::populateClockDropDown()\n");
+
+   // Populate the list
+   for (sub=0; ClockTypes::getClockName((ClockTypes_t)sub) != ""; sub++) {
+      index = clockModuleTypeChoiceControl->Append(wxString(ClockTypes::getClockName((ClockTypes_t)sub).c_str(), wxConvUTF8));
+      if (index>=0) {
+         clockModuleTypeChoiceControl->SetClientData(index, (void *)sub);
       }
-      // Select 1st item
-      clockModuleTypeChoiceControl->SetSelection(0);
+   }
+   // Select 1st item
+   clockModuleTypeChoiceControl->SetSelection(0);
 }
 
 //! Populates the device drop-down box with known devices
@@ -148,8 +150,10 @@ void FlashPanel::populateDeviceDropDown() {
 
    // Clear device list
    deviceTypeChoiceControl->Clear();
+
    // Populate the list with filtered items
-   int firstAddedDevice = -1;
+   int firstAddedDeviceIndex       = -1;
+   int previousDeviceControlIndex  = -1;
    vector<DeviceData *>::iterator it;
    int deviceIndex;
    for ( it=deviceDatabase->begin(), deviceIndex=0;
@@ -161,8 +165,11 @@ void FlashPanel::populateDeviceDropDown() {
             // Associate index value with item
             deviceTypeChoiceControl->SetClientData(controlIndex, (void *) deviceIndex);
 //            print("FlashPanel::populateDeviceDropDown() - Add device %s @%d, devIndex=%d\n", (*it)->getTargetName().c_str(), controlIndex, deviceIndex);
-            if (firstAddedDevice == -1) {
-               firstAddedDevice = deviceIndex;
+            if (firstAddedDeviceIndex == -1) {
+               firstAddedDeviceIndex = deviceIndex;
+            }
+            if (deviceIndex == currentDeviceIndex) {
+               previousDeviceControlIndex = controlIndex;
             }
          }
          else {
@@ -170,8 +177,8 @@ void FlashPanel::populateDeviceDropDown() {
          }
       }
    }
-   if (firstAddedDevice<0) {
-      // No device added
+   if (firstAddedDeviceIndex<0) {
+      // No devices added
       print("FlashPanel::populateDeviceDropDown() - No devices\n");
       setDeviceindex(-1);
       deviceTypeChoiceControl->Append(_("[No matching device]"));
@@ -179,50 +186,37 @@ void FlashPanel::populateDeviceDropDown() {
       deviceTypeChoiceControl->SetSelection(0);
       deviceTypeChoiceControl->Enable(false);
    }
+   else if (previousDeviceControlIndex>=0) {
+      // Select originally selected device in list control
+      print("FlashPanel::populateDeviceDropDown() - Selecting previous device #%d\n", previousDeviceControlIndex);
+      setDeviceindex(currentDeviceIndex);
+      deviceTypeChoiceControl->Enable(true);
+   }
    else {
-      // Select device in list control
-      setDeviceindex(firstAddedDevice);
+      // Select 1st added device in list control
+      print("FlashPanel::populateDeviceDropDown() - Selecting 1st added device\n");
+      setDeviceindex(firstAddedDeviceIndex);
       deviceTypeChoiceControl->Enable(true);
    }
 }
 
-//============================================================================
-//! Sets clock type
+//! Updates internal state to selected device
 //!
-//! @param clockType - type of clock to set
-//!
-//! @note: clock dependent information is set to default values
-//! if a custom device is currently selected
-//!
-void FlashPanel::setClockType(ClockTypes_t clockType) {
-
-//   print("FlashPanel::setClockType(%d)\n", clockType);
-   currentDevice.setClockType(clockType);
-}
-
-//! Sets the currently selected device
-//!
-//! @param newDeviceIndex - index of device to select
+//! @param newDeviceIndex - index of device in deviceDatabase to select (or -1 for default)
 //!
 void FlashPanel::setDeviceindex(int newDeviceIndex) {
-   DeviceData savedDevice;
-
-//   print("FlashPanel::setDeviceindex() newDeviceIndex = %d\n", newDeviceIndex);
+   print("FlashPanel::setDeviceindex() newDeviceIndex = %d\n", newDeviceIndex);
 
    // Save non-device-specific settings.
-   savedDevice = currentDevice;
+   DeviceData savedDevice = currentDevice;
 
    if (newDeviceIndex<0) {
-      currentDevice = *deviceDatabase->getDefaultDevice();
+      currentDevice     = *deviceDatabase->getDefaultDevice();
    }
    else {
-      currentDevice = (*deviceDatabase)[newDeviceIndex];
+      currentDevice     = (*deviceDatabase)[newDeviceIndex];
    }
-   currentDeviceName  = wxString(currentDevice.getTargetName().c_str(), wxConvUTF8);
    currentDeviceIndex = newDeviceIndex;
-
-//   print("FlashPanel::setDeviceindex() currentDeviceIndex = %d, currentDevice.getTargetName() = %s\n",
-//         currentDeviceIndex, (const char *)currentDevice.getTargetName().c_str());
 
    // Restore non-device-specific settings.
    currentDevice.setSecurity(savedDevice.getSecurity());
@@ -231,7 +225,6 @@ void FlashPanel::setDeviceindex(int newDeviceIndex) {
    if (!doTrim) {
       currentDevice.setClockTrimFreq(0);
    }
-   setClockType(currentDevice.getClockType());
 }
 
 #if TARGET == HCS12
@@ -522,7 +515,7 @@ FlashPanel::FlashPanel(TargetType_t targetType, HardwareCapabilities_t bdmCapabi
 
 bool FlashPanel::Create(wxWindow* parent) {
 
-//   print("FlashPanel::Create()\n");
+   print("FlashPanel::Create()\n");
 
    if (!wxPanel::Create(parent) || !CreateControls()) {
       return false;
@@ -541,10 +534,10 @@ bool FlashPanel::Create(wxWindow* parent) {
 }
 
 //===================================================================
-//! Set the dialogue internal state to the default
+//! Set the panel internal state to the default
 //!
 void FlashPanel::Init() {
-//   print("FlashPanel::Init()\n");
+   print("FlashPanel::Init()\n");
 
    if (deviceDatabase == NULL) {
       deviceDatabase = new DeviceDataBase;
@@ -805,10 +798,17 @@ bool FlashPanel::TransferDataToWindow() {
 //   print("FlashPanel::TransferDataToWindow() - target = %s, currentDeviceIndex = %d\n",
 //         (const char *)makeDeviceName(currentDeviceName).ToAscii(),
 //         currentDeviceIndex);
+   print("FlashPanel::TransferDataToWindow() - currentDeviceIndex = %d\n", currentDeviceIndex);
 
    // Set currently selected device
-   deviceTypeChoiceControl->SetStringSelection(makeDeviceName(currentDeviceName));
-
+   wxString deviceName = makeDeviceName(wxString((*deviceDatabase)[currentDeviceIndex].getTargetName().c_str(), wxConvUTF8));
+   int deviceIndex = currentDeviceIndex;
+   if (!deviceTypeChoiceControl->SetStringSelection(deviceName)) {
+      // Device not found - change to 1st device
+      print("FlashPanel::TransferDataToWindow() - Device not found (%s), changing to dev #0\n", (const char *)deviceName.c_str());
+      deviceIndex = 0;
+   }
+   setDeviceindex(deviceIndex);
    bool usingClock = (currentDevice.getClockType() != CLKEXT) &&
                      (currentDevice.getClockType() != CLKINVALID);
 //   print("FlashPanel::TransferDataToWindow() - usingClock=%s, getClockType()=%d\n",
@@ -870,7 +870,7 @@ bool FlashPanel::TransferDataFromWindow() {
 //   print("FlashPanel::TransferDataFromWindow()\n");
 
 #ifdef FLASH_PROGRAMMER
-   sound = enableSoundsCheckBoxControl->IsChecked();
+   sound        = enableSoundsCheckBoxControl->IsChecked();
    autoFileLoad = autoFileReloadCheckBoxControl->IsChecked();
 #endif
    return true;
@@ -893,7 +893,7 @@ BEGIN_EVENT_TABLE( FlashPanel, wxPanel )
 #ifdef FLASH_PROGRAMMER
    EVT_BUTTON( ID_LOAD_FILE_BUTTON,                 FlashPanel::OnLoadFileButtonClick )
    EVT_CHECKBOX( ID_INCREMENTAL_FILE_LOAD_CHECKBOX, FlashPanel::OnIncrementalFileLoadCheckboxClick )
-   EVT_CHECKBOX( ID_AUTO_FILE_RELOAD_CHECKBOX,        FlashPanel::OnAutoFileReloadCheckboxClick )
+   EVT_CHECKBOX( ID_AUTO_FILE_RELOAD_CHECKBOX,      FlashPanel::OnAutoFileReloadCheckboxClick )
 
    EVT_CHECKBOX( ID_FILTER_BY_CHIP_ID_CHECKBOX,     FlashPanel::OnFilterByChipIdCheckboxClick )
    EVT_BUTTON( ID_DETECT_CHIP_ID_BUTTON,            FlashPanel::OnDetectChipButtonClick )
@@ -1029,6 +1029,10 @@ static int displayDialogue(const char *message, const char *caption, int style, 
 void FlashPanel::OnFilterByChipIdCheckboxClick( wxCommandEvent& event ) {
    doFilterByChipId = event.IsChecked() &&
                     !filterChipIds.empty();
+
+   print("FlashPanel::OnFilterByChipIdCheckboxClick(), currentDeviceIndex=%d\n", currentDeviceIndex);
+
+   // Re-load the device list
    populateDeviceDropDown();
    TransferDataToWindow();
 }
@@ -1052,8 +1056,6 @@ void FlashPanel::OnDetectChipButtonClick( wxCommandEvent& event ) {
 
    // Re-load the device list
    populateDeviceDropDown();
-
-   // Device may have changed - update parameters
    TransferDataToWindow();
 }
 #endif
@@ -1130,15 +1132,14 @@ bool FlashPanel::chooseDevice(const wxString &deviceName) {
 
    int deviceIndex = deviceDatabase->findDeviceIndexFromName(string(deviceName.ToAscii()));
    if (deviceIndex < 0) {
-//      print("FlashPanel::chooseDevice(): no suitable device in comboBox\n");
+      print("FlashPanel::chooseDevice(): no suitable device in comboBox\n");
       setDeviceindex(0);
       return false;
    }
-   currentDeviceIndex = deviceIndex;
-   currentDevice      = (*deviceDatabase)[deviceIndex];
+   setDeviceindex(deviceIndex);
+
 //   print("FlashPanel::chooseDevice() - device Name = \'%s\'\n", currentDevice.getTargetName().c_str());
 //   print("FlashPanel::chooseDevice() - currentDeviceIndex = %d\n", currentDeviceIndex);
-   setDeviceindex(currentDeviceIndex);
    return true;
 }
 
@@ -1146,14 +1147,18 @@ bool FlashPanel::chooseDevice(const wxString &deviceName) {
 //! @param settings      - Object to load settings from
 //!
 void FlashPanel::loadSettings(const AppSettings &settings) {
-//   print("FlashPanel::loadSettings()\n");
+
+   print("FlashPanel::loadSettings()\n");
+
+//   Init();
 
    // Check for saved device name setting
-   wxString deviceName(settings.getValue(settingsKey+".deviceName", "").c_str(), wxConvUTF7);
-   print("FlashPanel::loadSettings() - deviceName = \"%s\"\n", (const char *)deviceName.ToAscii());
-   if (deviceName.IsEmpty()) {
-      setDeviceindex(0);
-   }
+   string deviceName  = settings.getValue(settingsKey+".deviceName", "");
+   int    deviceIndex = deviceDatabase->findDeviceIndexFromName(deviceName);
+   setDeviceindex(deviceIndex);
+
+   print("FlashPanel::loadSettings() - deviceName = \"%s\"\n", (const char *)deviceName.c_str());
+
    // Load the trim information
    unsigned long clockTrimFrequency = settings.getValue(settingsKey+".clockTrimFrequency", 0);
    currentDevice.setClockTrimFreq(clockTrimFrequency);
@@ -1164,12 +1169,13 @@ void FlashPanel::loadSettings(const AppSettings &settings) {
    currentDevice.setConnectionFreq(targetBusFrequency);
 
 #ifdef FLASH_PROGRAMMER
-   unsigned long playSounds = settings.getValue(settingsKey+".playSounds", 0);
-   sound = playSounds;
+   autoFileLoad = settings.getValue(settingsKey+".autoFileLoad", 0) != 0;
    currentDevice.setSecurity((SecurityOptions_t)settings.getValue(settingsKey+".security", currentDevice.getSecurity()));
    currentDevice.setEraseOption((DeviceData::EraseOptions)settings.getValue(settingsKey+".eraseOption", (int)currentDevice.getEraseOption()));
-   autoFileLoad = settings.getValue(settingsKey+".autoFileLoad", 0) != 0;
+   sound = settings.getValue(settingsKey+".playSounds", 0);
 #endif
+
+   TransferDataToWindow();
 }
 
 //! Save setting file

@@ -341,6 +341,10 @@ DeviceXmlParser::DeviceXmlParser(DeviceDataBase *deviceDataBase)
    tag_flashProgramRef("flashProgramRef"),
    tag_securityInfo("securityInfo"),
    tag_securityInfoRef("securityInfoRef"),
+   tag_flexNvmInfo("flexNVMInfo"),
+   tag_flexNvmInfoRef("flexNVMInfoRef"),
+   tag_eeepromEntry("eeepromEntry"),
+   tag_partitionEntry("partitionEntry"),
 
    attr_name("name"),
    attr_family("family"),
@@ -359,6 +363,10 @@ DeviceXmlParser::DeviceXmlParser(DeviceDataBase *deviceDataBase)
    attr_id("id"),
    attr_ref("ref"),
    attr_addressMode("addressMode"),
+   attr_description("description"),
+   attr_eeeSize("eeeSize"),
+   attr_eeSize("eeSize"),
+
    isDefault(false),
    deviceDataBase(deviceDataBase),
 
@@ -515,7 +523,13 @@ void DeviceXmlParser::parseSharedXML(void) {
             SecurityInfo *securityInfo = parseSecurity(sharedInformationElement);
             deviceDataBase->addSharedData(string(sId.asCString()), securityInfo);
 //            print("DeviceXmlParser::parseSharedXML(): Inserted Shared Security Information item ID=%s\n", sId.asCString());
-            }
+         }
+         else if (XMLString::equals(sTag.asXMLString(), tag_flexNvmInfo.asXMLString())) {
+            // Parse <flexNVMInfo>
+            FlexNVMInfo *flexNVMInfo = parseFlexNVMInfo(sharedInformationElement);
+            deviceDataBase->addSharedData(string(sId.asCString()), flexNVMInfo);
+            print("DeviceXmlParser::parseSharedXML(): Inserted Shared flexNVM Information item ID=%s\n", sId.asCString());
+         }
          else {
             print("DeviceXmlParser::parseSharedXML(): Unexpected Tag=<%s>\n", sTag.asCString());
             print("\n");
@@ -560,6 +574,63 @@ TclScriptPtr DeviceXmlParser::parseSequence(DOMElement *sequence) {
          return TclScriptPtr();
       }
    }
+}
+
+FlexNVMInfo::EeepromSizeValue DeviceXmlParser::parseEeepromEntry(DOMElement *eeepromElement) {
+   long eeeSize;
+   long value;
+   DualString sDescription(eeepromElement->getAttribute(attr_description.asXMLString()));
+   DualString sEeeSize(eeepromElement->getAttribute(attr_eeeSize.asXMLString()));
+   DualString sValue(eeepromElement->getAttribute(attr_value.asXMLString()));
+   if ((strlen(sDescription.asCString()) == 0) ||
+       !strSizeToULong(sEeeSize.asCString(), NULL, &eeeSize) ||
+       !strToULong(sValue.asCString(), NULL, &value)) {
+      throw MyException("DeviceXmlParser::parseEeepromEntry() - Illegal description/eeeSize/value attributes\n");
+   }
+   return (FlexNVMInfo::EeepromSizeValue(sDescription.asCString(), value, eeeSize));
+}
+
+FlexNVMInfo::FlexNvmPartitionValue DeviceXmlParser::parsePartitionEntry(DOMElement *partitionElement) {
+   long eeSize;
+   long value;
+   DualString sDescription(partitionElement->getAttribute(attr_description.asXMLString()));
+   DualString sEeSize(partitionElement->getAttribute(attr_eeSize.asXMLString()));
+   DualString sValue(partitionElement->getAttribute(attr_value.asXMLString()));
+   if ((strlen(sDescription.asCString()) == 0) ||
+       !strSizeToULong(sEeSize.asCString(), NULL, &eeSize) ||
+       !strToULong(sValue.asCString(), NULL, &value)) {
+      throw MyException("DeviceXmlParser::parsePartitionEntry() - Illegal description/eeeSize/value attributes\n");
+   }
+   return (FlexNVMInfo::FlexNvmPartitionValue(sDescription.asCString(), value, eeSize));
+}
+
+//! Create flexNVMInfo description from flexNVMInfo node
+//!
+//! @param flexNVMInfoElement - Present position in XML parse
+//!
+//! @return FlexNVMInfo node created
+//!
+FlexNVMInfo *DeviceXmlParser::parseFlexNVMInfo(DOMElement *flexNVMInfoElement) {
+   static unsigned defaultBackingRatio = 16;
+
+   FlexNVMInfo *pFlexNVMInfo = new FlexNVMInfo(defaultBackingRatio);
+   DOMChildIterator eeepromEntryIt(flexNVMInfoElement, tag_eeepromEntry.asCString());
+   for (;
+         eeepromEntryIt.getCurrentElement() != NULL;
+         eeepromEntryIt.advanceElement()) {
+      // <eeepromEntry>
+      FlexNVMInfo::EeepromSizeValue eeepromSizeValue = parseEeepromEntry(eeepromEntryIt.getCurrentElement());
+      pFlexNVMInfo->addEeepromSizeValues(eeepromSizeValue);
+   }
+   DOMChildIterator partitionEntryIt(flexNVMInfoElement, tag_partitionEntry.asCString());
+   for (;
+         partitionEntryIt.getCurrentElement() != NULL;
+         partitionEntryIt.advanceElement()) {
+      // <partitionEntry>
+      FlexNVMInfo::FlexNvmPartitionValue flexNvmPartitionValue = parsePartitionEntry(partitionEntryIt.getCurrentElement());
+      pFlexNVMInfo->addFlexNvmPartitionValues(flexNvmPartitionValue);
+   }
+   return pFlexNVMInfo;
 }
 
 //! Create memory description from node for flash 'type' memory
@@ -636,6 +707,16 @@ MemoryRegion *DeviceXmlParser::parseMemory(DOMElement *currentProperty) {
       // <flash>
       static long defaultFlashSectorSize = 0;
       pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemFLASH, defaultFlashSectorSize);
+   }
+   else if (XMLString::equals(sMemoryType.asXMLString(), DualString("pFlash").asXMLString())) {
+      // <flash>
+      static long defaultFlashSectorSize = 0;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemPFlash, defaultFlashSectorSize);
+   }
+   else if (XMLString::equals(sMemoryType.asXMLString(), DualString("dFlash").asXMLString())) {
+      // <flash>
+      static long defaultFlashSectorSize = 0;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemDFlash, defaultFlashSectorSize);
    }
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("pROM").asXMLString())) {
       // <prom>
@@ -795,6 +876,7 @@ void DeviceXmlParser::parseDeviceXML(void) {
    // These are initialised from the default device (if any) in the XML
    TclScriptPtr defaultTCLScript;
    FlashProgramPtr defFlashProgram;
+   FlexNVMInfoPtr  defaultFlexNVMInfo;
    uint32_t   defSDIDAddress;
    uint32_t   defSDIDMask;
 #if (TARGET == HC12)||(TARGET == MC56F80xx)
@@ -1001,6 +1083,17 @@ void DeviceXmlParser::parseDeviceXML(void) {
                }
             }
          }
+         else if (XMLString::equals(propertyTag.asXMLString(), tag_flashProgram.asXMLString())) {
+            // <flashProgram>
+            FlashProgram *flashProgram = parseFlashProgram(currentProperty);
+            print("Flash program =\n%s", flashProgram->toString().c_str());
+            FlashProgramPtr pFlashProgram(flashProgram);
+            itDev->setFlashProgram(pFlashProgram);
+            if (isDefault) {
+//               print("DeviceXmlParser::parseDeviceXML() - Setting default flash program (non-shared)\n");
+               defFlashProgram = itDev->getFlashProgram();
+            }
+         }
          else if (XMLString::equals(propertyTag.asXMLString(), tag_flashProgramRef.asXMLString())) {
             // <flashProgramRef>
             DualString sRef(currentProperty->getAttribute(attr_ref.asXMLString()));
@@ -1016,15 +1109,31 @@ void DeviceXmlParser::parseDeviceXML(void) {
                }
             }
          }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_flashProgram.asXMLString())) {
-            // <flashProgram>
-            FlashProgram *flashProgram = parseFlashProgram(currentProperty);
-            print("Flash program =\n%s", flashProgram->toString().c_str());
-            FlashProgramPtr pFlashProgram(flashProgram);
-            itDev->setFlashProgram(pFlashProgram);
+         else if (XMLString::equals(propertyTag.asXMLString(), tag_flexNvmInfo.asXMLString())) {
+            // <flexNVMInfo>
+            FlexNVMInfo *flexNVMInfo = parseFlexNVMInfo(currentProperty);
+            print("DeviceXmlParser::parseDeviceXML() - adding flexNVMInfo()\n");
+            FlexNVMInfoPtr pFlexNVMInfo(flexNVMInfo);
+            itDev->setflexNVMInfo(pFlexNVMInfo);
             if (isDefault) {
-//               print("DeviceXmlParser::parseDeviceXML() - Setting default flash program (non-shared)\n");
-               defFlashProgram = itDev->getFlashProgram();
+//               print("DeviceXmlParser::parseDeviceXML() - Setting default flexNVMInfo (non-shared)\n");
+               defaultFlexNVMInfo = pFlexNVMInfo;
+            }
+         }
+         else if (XMLString::equals(propertyTag.asXMLString(), tag_flexNvmInfoRef.asXMLString())) {
+            // <flexNvmInfoRef>
+            DualString sRef(currentProperty->getAttribute(attr_ref.asXMLString()));
+            SharedInformationItemPtr pFlexNvmInfo(deviceDataBase->getSharedData(sRef.asCString()));
+            if (!pFlexNvmInfo) {
+               print("Unable to find reference \'%s\'\n", sRef.asCString());
+            }
+            else {
+               print("DeviceXmlParser::parseDeviceXML() - using shared flexNVMInfo()\n");
+               itDev->setflexNVMInfo(std::tr1::dynamic_pointer_cast<FlexNVMInfo>(pFlexNvmInfo));
+               if (isDefault) {
+//                  print("DeviceXmlParser::parseDeviceXML() - Setting default flash program (shared reference)\"%s\" \n", sRef.asCString());
+                  defFlashProgram = itDev->getFlashProgram();
+               }
             }
          }
          else {

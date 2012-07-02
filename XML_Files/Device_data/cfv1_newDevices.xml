@@ -105,6 +105,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QF32">
          <clock type="External" />
@@ -123,6 +124,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QF64">
          <clock type="External" />
@@ -141,6 +143,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QH128">
          <clock type="External" />
@@ -159,6 +162,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QH32">
          <clock type="External" />
@@ -177,6 +181,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QH64">
          <clock type="External" />
@@ -195,6 +200,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QM128">
          <clock type="External" />
@@ -213,6 +219,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QM32">
          <clock type="External" />
@@ -231,6 +238,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QM64">
          <clock type="External" />
@@ -249,6 +257,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QU128">
          <clock type="External" />
@@ -267,6 +276,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QU32">
          <clock type="External" />
@@ -285,6 +295,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51QU64">
          <clock type="External" />
@@ -303,6 +314,7 @@
             <tclScriptRef ref="CFV1Plus-default-Scripts" />
          </flashScripts>
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1" name="uuuMMA9540">
          <clock type="External" />

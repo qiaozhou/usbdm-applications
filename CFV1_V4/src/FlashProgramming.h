@@ -46,7 +46,6 @@ struct FlashProgramHeader_t {
    uint32_t         soptAddress;       // Address of SOPT register
    uint8_t          reserved3[24];     // Reserved for future programmer use
    uint32_t         flashData;         // Ptr to information about operation
-   uint8_t          reserved4[32];     // Reserved for target specific use, values may be copied from XML
 } ;
 #pragma pack()
 
@@ -166,6 +165,7 @@ private:
    USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImageDescription);
 
 public:
+   USBDM_ErrorCode programPartition(void);
    USBDM_ErrorCode initTCL(void);
    USBDM_ErrorCode releaseTCL(void);
    USBDM_ErrorCode setDeviceData(const DeviceData  &theParameters);

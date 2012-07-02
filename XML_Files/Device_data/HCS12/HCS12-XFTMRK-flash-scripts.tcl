@@ -117,7 +117,7 @@ proc calculateFlashDivider { busFrequency } {
    if { [expr $busFrequency < 1000] } {
       error "Clock too low for flash programming"
    }
-   set fmclkFrequency 2.0*$busFrequency
+   set fmclkFrequency [expr 2.0*$busFrequency]
    set cfmclkd  [expr round(floor(($fmclkFrequency/1050.0)-0.0001))]
    set flashClk [expr $fmclkFrequency/($cfmclkd+1)]
    ;# puts "cfmclkd=$cfmclkd, flashClk=$flashClk"

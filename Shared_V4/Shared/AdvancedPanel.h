@@ -91,22 +91,33 @@ public:
 class AdvancedPanel: public wxPanel {
 
     DECLARE_CLASS( AdvancedPanel )
-//    DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 
 private:
    // Creates the controls and sizers
    bool CreateControls();
+   void populateEepromControl();
+   void populatePartitionControl();
+   int  findEeepromSizeIndex(unsigned eepromSize);
+   int  findPartitionControlIndex(unsigned backingStoreSize);
+   void updateFlashNVM();
+   void OnEeepromSizeChoiceSelected( wxCommandEvent& event );
+   void OnFlexNvmPartionChoiceSelected( wxCommandEvent& event );
 
-   NumberTextEditCtrl*        powerOffDurationTextControl;
-   NumberTextEditCtrl*        powerOnRecoveryIntervalTextControl;
-   NumberTextEditCtrl*        resetDurationTextControl;
-   NumberTextEditCtrl*        resetReleaseIntervalTextControl;
-   NumberTextEditCtrl*        resetRecoveryIntervalTextControl;
-   USBDM_ExtendedOptions_t    bdmOptions;
+   NumberTextEditCtrl*           powerOffDurationTextControl;
+   NumberTextEditCtrl*           powerOnRecoveryIntervalTextControl;
+   NumberTextEditCtrl*           resetDurationTextControl;
+   NumberTextEditCtrl*           resetReleaseIntervalTextControl;
+   NumberTextEditCtrl*           resetRecoveryIntervalTextControl;
+   wxChoice*                     eeepromSizeChoiceControl;
+   wxChoice*                     flexNvmPartitionChoiceControl;
+   wxStaticText*                 flexNvmDescriptionStaticControl;
+   USBDM_ExtendedOptions_t       bdmOptions;
+   static const string           settingsKey;
+   int                           eeepromSizeChoice;      // Choice for eeepromSizeChoice control & index for eeepromSizeValues[]
+   int                           flexNvmPartitionIndex;  // Index for flexNvmPartitionValues[]
+   DeviceData                   *currentDevice;
 
-   static const string        settingsKey;
-
-public:
 public:
    // Constructors
    AdvancedPanel(TargetType_t targetType=T_HCS08, HardwareCapabilities_t bdmCapabilities=BDM_CAP_ALL);
@@ -126,7 +137,8 @@ public:
    void loadSettings(const AppSettings &settings);
    void saveSettings(AppSettings &settings);
 
-   void getDialogueValues(USBDM_ExtendedOptions_t *_bdmOptions);
+   void getBdmOptions(USBDM_ExtendedOptions_t       *_bdmOptions);
+   void getDeviceOptions(DeviceDataPtr deviceData);
 
 //   void OnPowerOffDurationTextUpdated( wxCommandEvent& event );
 //   void OnPowerRecoveryTextUpdated( wxCommandEvent& event );
@@ -135,6 +147,8 @@ public:
 //   void OnResetRecoveryIntervalTextUpdated( wxCommandEvent& event );
    bool TransferDataToWindow();
    bool TransferDataFromWindow();
+
+   void setCurrentDevice(DeviceData *currentDevice);
 };
 
 #endif /* ADVANCEDPANEL_H */

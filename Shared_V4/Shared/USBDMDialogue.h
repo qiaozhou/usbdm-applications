@@ -75,16 +75,12 @@ public:
    //!
    //! @param bdmOptions - where to return options
    //!
-   void getBdmOptions( USBDM_ExtendedOptions_t &bdmOptions ) {
-      // Set options to default
-      bdmOptions.size       = sizeof(USBDM_ExtendedOptions_t);
-      bdmOptions.targetType = targetType;
-      USBDM_GetDefaultExtendedOptions(&bdmOptions);
-
-      // Poll each page for changes
-      communicationPanel->getDialogueValues( &bdmOptions );
-      advancedPanel->getDialogueValues(&bdmOptions);
-   };
+   void getBdmOptions( USBDM_ExtendedOptions_t &bdmOptions );
+   //! Returns the Device options from the internal state
+   //!
+   //! @param deviceData - where to return device data
+   //!
+   void getDeviceOptions( DeviceDataPtr deviceData );
 
 #if defined(FLASH_PROGRAMMER)
    //! Returns the Device options from the internal state

@@ -37,19 +37,19 @@ public:
    USBDM_ErrorCode setTarget(void);
 
    USBDM_ErrorCode Create(wxWindow* parent);
+   void Init();
 
    void loadSettings(const AppSettings &settings);
    void saveSettings(AppSettings &settings);
 
-   void populateBDMChoices(void);
-   void findBDMs(void);
-
+   bool setDialogueValuesToDefault();
    bool TransferDataToWindow();
    bool TransferDataFromWindow();
-   bool setDialogueValuesToDefault();
    void getDialogueValues(USBDM_ExtendedOptions_t *_bdmOptions);
-   void Init();
 
+   void populateBDMChoices(void);
+
+private:
    // Control Identifiers
    enum {
       ID_COMMUNICATION = 11000,
@@ -76,12 +76,12 @@ public:
       ID_MASK_INTERRUPTS_WHEN_STEPPING,
    };
 
-private:
    USBDM_ErrorCode CreateControls();
 
    static const string settingsKey;
 
    void bdmUpdateTargetVersion(void);
+   void findBDMs(void);
 
    // Event handlers
    void OnRefreshBDMClick( wxCommandEvent& event );
@@ -90,7 +90,6 @@ private:
    void OnCycleVddOnResetCheckboxClick( wxCommandEvent& event );
    void OnCycleTargetVddOnConnectionCheckboxClick( wxCommandEvent& event );
    void OnLeaveTargetOnCheckboxClick( wxCommandEvent& event );
-//   void OnManuallyCycleVddCheckboxClick( wxCommandEvent& event );
    void OnReconnectCheckboxClick( wxCommandEvent& event );
    void OnSpeedSelectComboSelected( wxCommandEvent& event );
    void OnGuessSpeedCheckboxClick( wxCommandEvent& event );
@@ -109,18 +108,13 @@ private:
       HAS_MASK_INTERRUPTS = (1<<6), // Has an option to mask interrupts when stepping
    } TargetOptions;
 
-   TargetOptions           targetProperties;
-   TargetType_t            targetType;
-   USBDM_ExtendedOptions_t bdmOptions;
-   int                     bdmDeviceNum;
-
+   // Controls
    wxButton*      bdmRefreshButtonControl;
    wxChoice*      bdmSelectChoiceControl;
    wxRadioBox*    targetVddControl;
    wxCheckBox*    cycleVddOnResetControl;
    wxCheckBox*    cycleVddOnConnectionControl;
    wxCheckBox*    leaveTargetPoweredControl;
-//   wxCheckBox*    promptToManualCycleVddControl;
    wxChoice*      connectionSpeedControl;
    wxCheckBox*    automaticallyReconnectControl;
    wxCheckBox*    useResetSignalControl;
@@ -132,9 +126,14 @@ private:
    wxCheckBox*    maskInterruptWhenSteppingControl;
    wxCheckBox*    dontShowAgainControl;
 
-   // Table of connected BDMs
-   vector<BdmInformation> bdmInformation;
-   wxString               bdmIdentification;
+   vector<BdmInformation>  bdmInformation;     // Table of connected BDMs
+   wxString                bdmIdentification;
+   int                     bdmDeviceNum;
+
+   TargetType_t            targetType;
+   TargetOptions           targetProperties;
+   USBDM_ExtendedOptions_t bdmOptions;
+
 };
 
 #endif /* USBDMPANEL_H_ */

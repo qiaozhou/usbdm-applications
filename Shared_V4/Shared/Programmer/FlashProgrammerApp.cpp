@@ -284,8 +284,8 @@ bool FlashProgrammerApp::OnInit(void) {
    else {
       // Create the main application window
       dialogue = new USBDMDialogue(targetType, title);
-      SetTopWindow(dialogue);
       dialogue->Create(NULL);
+      SetTopWindow(dialogue);
       dialogue->execute(settingsFilename, hexFileName);
       dialogue->Destroy();
    }

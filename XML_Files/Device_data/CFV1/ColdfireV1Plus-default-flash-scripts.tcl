@@ -142,7 +142,7 @@ proc massEraseTarget { } {
 proc isUnsecure { } {
    ;# Check if not read protected   
    set status [ rdreg $::CFV1_DRegXCSRbyte ]
-   if [ expr ( $status & $::CFV1_XCSR_SEC ) != 0 ] {
+   if [ expr ( $status & ($::CFV1_XCSR_SEC|$::CFV1_XCSR_ENBDM) ) != $::CFV1_XCSR_ENBDM ] {
       error "Target is secured"
    }
 }

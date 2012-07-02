@@ -131,16 +131,18 @@ proc calculateFlashDivider { busFrequency } {
 ;# This code assumes that oscillator clock = 2 * bus clock
 ;#
    ;#  puts "calculateFlashDivider {}"
+   set clockFreq [expr 2*$busFrequency]
+   
    if { [expr $busFrequency < 1000] } {
       error "Clock too low for flash programming"
    }
    set cfmclkd 0
-   if { [expr $busFrequency > 6400] } {
+   if { [expr $clockFreq > 12800] } {
       set cfmclkd [expr $::HCS12_PRDIV8 + round(floor(0.249999+1.25*($busFrequency/1000.0)))]
-      set flashClk [expr $busFrequency / (4*(($cfmclkd&0x3F)+1))]
+      set flashClk [expr $clockFreq / (8*(($cfmclkd&0x3F)+1))]
    } else {
       set cfmclkd [expr round(floor(0.99999+($busFrequency/100.0)))+1]
-      set flashClk [expr (2*$busFrequency) / (($cfmclkd&0x3F)+1)]
+      set flashClk [expr ($clockFreq) / (($cfmclkd&0x3F)+1)]
    }
    ;# puts "cfmclkd = $cfmclkd, flashClk = $flashClk"
    if { [expr ($flashClk<150)] } {

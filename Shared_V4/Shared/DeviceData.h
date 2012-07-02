@@ -178,6 +178,61 @@ public:
 };
 typedef std::tr1::shared_ptr<SecurityInfo> SecurityInfoPtr;
 
+class FlexNVMInfo: public SharedInformationItem {
+
+public:
+   class EeepromSizeValue {
+   public:
+      std::string    description;   // Description of this value
+      uint8_t        value;         // EEPROM Data Set Size (as used in Program Partition command)
+      unsigned       size;          // EEEPROM size in bytes (FlexRAM used for EEPROM emulation)
+      EeepromSizeValue(std::string description, uint8_t value, unsigned size)
+      : description(description), value(value), size(size)
+      {}
+   } ;
+   class FlexNvmPartitionValue {
+   public:
+      std::string    description;  // Description of this value
+      uint8_t        value;        // FlexNVM Partition Code (as used in Program Partition command)
+      unsigned       backingStore; // EEPROM backing store size in bytes
+      FlexNvmPartitionValue(std::string description, uint8_t value, unsigned backingStore)
+      : description(description), value(value), backingStore(backingStore)
+      {}
+   };
+
+private:
+    unsigned backingRatio;
+    std::vector<EeepromSizeValue>      eeepromSizeValues;
+    std::vector<FlexNvmPartitionValue> flexNvmPartitionValues;
+
+public:
+    FlexNVMInfo(int backingRatio = 16)
+    :backingRatio(backingRatio)
+    {
+        print("FlexNVMInfo()\n");
+    }
+
+    ~FlexNVMInfo()
+    {
+        print("~FlexNVMInfo()\n");
+    }
+
+    const std::string toString() const
+    {
+        return std::string("FlexNVMInfo - \n");
+    }
+
+    std::vector<EeepromSizeValue>      &getEeepromSizeValues();
+    std::vector<FlexNvmPartitionValue> &getFlexNvmPartitionValues();
+
+    void addEeepromSizeValues(const EeepromSizeValue &eeepromSizeValue);
+    void addFlexNvmPartitionValues(const FlexNvmPartitionValue &flexNvmPartitionValue);
+
+    unsigned getBackingRatio() const;
+    void setBackingRatio(unsigned  backingRatio);
+};
+typedef std::tr1::shared_ptr<FlexNVMInfo> FlexNVMInfoPtr;
+
 // Represents a collection of related memory ranges
 //
 // This may be used to represent a non-contiguous range of memory locations that are related
@@ -443,7 +498,12 @@ public:
       case eraseSelective : return "EraseSelective";
       default :             return "Illegal erase option";
       }
-}
+   }
+   typedef struct {
+      uint8_t eeepromSize;
+      uint8_t partionValue;
+   } FlexNVMParameters;
+
 private:
    std::string          targetName;             //!< Name of target
    uint32_t             ramStart;               //!< Start of internal RAM
@@ -469,6 +529,8 @@ private:
    MemoryRegionPtr      lastMemoryRegionUsed;
    TclScriptPtr         flashScripts;
    FlashProgramPtr      flashProgram;
+   FlexNVMParameters    flexNVMParameters;
+   FlexNVMInfoPtr       flexNVMInfo;
 
 public:
    bool                 valid;
@@ -500,6 +562,8 @@ public:
 
    FlashProgramPtr   getFlashProgram()            const { return flashProgram; }
    TclScriptPtr      getFlashScripts()            const { return flashScripts; }
+   FlexNVMInfoPtr    getflexNVMInfo()             { return flexNVMInfo; }
+
    MemoryRegionPtr getMemoryRegion(unsigned index) const {
       if (index >= memoryRegionCount)
          return MemoryRegionPtr();
@@ -569,6 +633,13 @@ public:
 //   void setSecurityAddress(uint32_t value)            { securityAddress = value; };
    void setFlashScripts(TclScriptPtr script)          { flashScripts = script; }
    void setFlashProgram(FlashProgramPtr program)      { flashProgram = program; }
+   void setflexNVMInfo(FlexNVMInfoPtr info)           { flexNVMInfo = info; }
+   void setFlexNVMParameters(const FlexNVMParameters *parameters) {
+      flexNVMParameters = *parameters;
+   }
+   const FlexNVMParameters *getFlexNVMParameters() {
+      return &flexNVMParameters;
+   }
 
 //#if (TARGET == HC12)
 //   void setFSECAddress(uint32_t value)                     { FSECAddress = value; }

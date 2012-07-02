@@ -130,9 +130,7 @@ void USBDMPanel::loadSettings(const AppSettings &settings) {
 
    print("USBDMPanel::loadSettings()\n");
 
-   bdmOptions.size       = sizeof(USBDM_ExtendedOptions_t);
-   bdmOptions.targetType = targetType;
-   USBDM_GetDefaultExtendedOptions(&bdmOptions);
+//   Init();
 
    bdmOptions.targetVdd          = (TargetVddSelect_t) settings.getValue(settingsKey+".setTargetVdd",             bdmOptions.targetVdd);
    bdmOptions.cycleVddOnReset    =                     settings.getValue(settingsKey+".cycleTargetVddOnReset",    bdmOptions.cycleVddOnReset);
@@ -147,10 +145,9 @@ void USBDMPanel::loadSettings(const AppSettings &settings) {
    bdmOptions.usePSTSignals      =                     settings.getValue(settingsKey+".usePSTSignals",            bdmOptions.usePSTSignals);
 
    bdmIdentification             =            wxString(settings.getValue(settingsKey+".bdmSelection",             "").c_str(), wxConvUTF8);
-
 //   print("USBDMPanel::loadSettings() - bdmIdentification=%s \n", (const char *)bdmIdentification.ToAscii());
 
-   findBDMs();
+   TransferDataToWindow();
 }
 
 //! Save settings
@@ -215,21 +212,20 @@ USBDMPanel::USBDMPanel(TargetType_t targetType) {
 }
 
 //===================================================================
-//! Set the dialogue internal state to the default
+//! Set the panel internal state to the default
 //!
 void USBDMPanel::Init() {
 
-//   print("USBDMPanel::Init()\n");
+   print("USBDMPanel::Init()\n");
 
-   bdmDeviceNum = -1;
+   bdmDeviceNum          = -1;
+   bdmIdentification     = wxEmptyString;
    
    // Set options to default
    // TransferDataToWindow() will validate these for the particular dialog/BDM being used.
    bdmOptions.size       = sizeof(USBDM_ExtendedOptions_t);
    bdmOptions.targetType = targetType;
    USBDM_GetDefaultExtendedOptions(&bdmOptions);
-
-   findBDMs();
 }
 
 //! USBDMParametersDialogue creator
@@ -464,7 +460,8 @@ bool USBDMPanel::TransferDataToWindow() {
       bdmDescriptionStaticControl->SetLabel(wxString::FromUTF8(bdmInformation[bdmDeviceNum].description.c_str()));
    }
    else {
-      bdmCapabilities = BDM_CAP_NONE;
+      bdmCapabilities   = BDM_CAP_NONE;
+      bdmIdentification = wxEmptyString;
       versionStaticControl->SetLabel(wxEmptyString);
       bdmDescriptionStaticControl->SetLabel(wxEmptyString);
    }
@@ -476,8 +473,9 @@ bool USBDMPanel::TransferDataToWindow() {
       bdmOptions.leaveTargetPowered = false;
       bdmOptions.cycleVddOnConnect  = false;
    }
-   else
+   else {
       targetVddControl->Enable(true);
+   }
    targetVddControl->Select(bdmOptions.targetVdd);
 
    bool checkBoxEnable = (bdmOptions.targetVdd != BDM_TARGET_VDD_OFF);
@@ -748,22 +746,26 @@ void USBDMPanel::populateBDMChoices(void) {
 //   print("USBDMPanel::populateBDMChoices(), bdmIdentification = \'%s\'\n", (const char *)bdmIdentification.ToAscii());
    if (deviceCount==0) {
       // No devices found
-      bdmSelectChoiceControl->Append(_("No devices Found"));
+      bdmSelectChoiceControl->Append(_("[No devices Found]"));
       bdmSelectChoiceControl->Enable(false);
       bdmSelectChoiceControl->Select(0);
+      bdmSelectChoiceControl->SetClientData(0, (void*)-1);
       print("USBDMPanel::populateBDMChoices() - no devices\n");
       return;
    }
-
-   // Add device names to choice box
+   // Add device names to choice box, client data is device number
    vector<BdmInformation>::iterator it;
    for ( it=bdmInformation.begin(); it < bdmInformation.end(); it++ ) {
-      bdmSelectChoiceControl->Append(wxString::FromUTF8(it->serialNumber.c_str()));
+      int index = bdmSelectChoiceControl->Append(wxString::FromUTF8(it->serialNumber.c_str()));
+      bdmSelectChoiceControl->SetClientData(index, (void*)it->deviceNumber);
    }
-   // Select 1st device by default
-   bdmSelectChoiceControl->Select(0);
-   bdmDeviceNum = 0;
-
+   // Try to select previous device
+   if (bdmIdentification.empty() || bdmSelectChoiceControl->SetStringSelection(bdmIdentification)) {
+      // Select 1st device by default
+      bdmSelectChoiceControl->Select(0);
+   }
+   bdmDeviceNum      = (int)bdmSelectChoiceControl->GetClientData();
+   bdmIdentification = wxString::FromUTF8(bdmInformation[bdmDeviceNum].serialNumber.c_str());
    bdmSelectChoiceControl->Enable(deviceCount>1);
    print("USBDMPanel::populateBDMChoices() - %d devices\n", deviceCount);
 }
@@ -785,9 +787,8 @@ void USBDMPanel::OnRefreshBDMClick( wxCommandEvent& event ) {
 void USBDMPanel::OnBDMSelectComboSelected( wxCommandEvent& event ) {
 //   print("USBDMPanel::OnBDMSelectComboSelected()\n");
 
-   bdmDeviceNum = event.GetSelection();
+   bdmDeviceNum      = (int)bdmSelectChoiceControl->GetClientData(event.GetSelection());
    bdmIdentification = wxString::FromUTF8(bdmInformation[bdmDeviceNum].serialNumber.c_str());
-
    TransferDataToWindow();
 }
 

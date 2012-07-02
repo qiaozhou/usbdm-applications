@@ -10,7 +10,9 @@
                  (soptAddress|copctlAddress)?,
                  sdidAddress?,sdidMask?,sdid+,
                  flashScripts?,
-                 (flashProgram|flashProgramRef)?,flashProgramData?,note*)>
+                 (flashProgram|flashProgramRef)?,flashProgramData?,
+                 (flexNVMInfo|flexNVMInfoRef)?,
+                 note*)>
      <!ATTLIST device name ID #REQUIRED>
      <!ATTLIST device family (RS08|HCS08|HCS12|CFV1|CFV1Plus|CFVx|ARM|DSC) #REQUIRED>
      <!ATTLIST device isDefault (true|false) #IMPLIED>
@@ -24,7 +26,7 @@
      (securityInfo?,securityInfoRef?),
      description?,
      (memoryRange+))>
-     <!ATTLIST memory type (ram|flash|eeprom|flexNVM|flexRAM|io|pRAM|pROM|xRAM|xROM) #REQUIRED>
+     <!ATTLIST memory type (ram|flash|pFlash|dFlash|eeprom|flexNVM|flexRAM|io|pRAM|pROM|xRAM|xROM) #REQUIRED>
      <!ATTLIST memory subType CDATA "1">
      <!ATTLIST memory pageAddress CDATA "0">
      <!ATTLIST memory registerAddress CDATA "0">
@@ -76,7 +78,7 @@
   <!-- Note on device entry -->
 <!ELEMENT note (#PCDATA)>
   <!-- Information shared between devices -->
-<!ELEMENT sharedInformation (tclScript|flashProgram|securityInfo)*>
+<!ELEMENT sharedInformation (tclScript|flashProgram|securityInfo|flexNVMInfo)*>
   <!--TCL Script-->
 <!ELEMENT tclScript (#PCDATA)>
      <!ATTLIST tclScript id ID #IMPLIED>
@@ -90,6 +92,20 @@
 <!ELEMENT flashProgramRef EMPTY>
      <!ATTLIST flashProgramRef ref IDREF #REQUIRED>
 <!ELEMENT flashProgramData (#PCDATA)>
+  <!--Partitioning of FlexNVM-->
+<!ELEMENT flexNVMInfo (eeepromEntry+, partitionEntry+)>
+     <!ATTLIST flexNVMInfo id ID #IMPLIED>
+     <!ATTLIST flexNVMInfo backingRatio CDATA "16">
+<!ELEMENT eeepromEntry EMPTY>
+     <!ATTLIST eeepromEntry description CDATA "">
+     <!ATTLIST eeepromEntry eeeSize     CDATA "0x00">
+     <!ATTLIST eeepromEntry value       CDATA "0x00">
+<!ELEMENT partitionEntry EMPTY>
+     <!ATTLIST partitionEntry description   CDATA "">
+     <!ATTLIST partitionEntry eeSize        CDATA "0x00">
+     <!ATTLIST partitionEntry value         CDATA "0x00">
+<!ELEMENT flexNVMInfoRef EMPTY>
+     <!ATTLIST flexNVMInfoRef ref IDREF #REQUIRED>
    <!-- Example device entry
       <device family="RS08" name="MC9RS08KA1">
          <clock registerAddress="0x0014" type="RS08ICSV1" />
