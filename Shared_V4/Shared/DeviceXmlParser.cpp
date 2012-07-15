@@ -53,8 +53,11 @@ XERCES_CPP_NAMESPACE_USE
 #include "helper-classes.h"
 #include "DeviceXmlParser.h"
 #include "DeviceData.h"
+#include "Names.h"
 
 #include "Log.h"
+
+char DeviceXmlParser::currentDeviceName[] = "Doing preamble";
 
 #if 0
 //! Convert a single digit to an integer
@@ -160,11 +163,20 @@ bool strToULong(const char *s, char **end, long *returnValue) {
 //!
 bool strToULong(const char *start, char **end, long *value) {
    char *end_t;
+
+//   while (isspace(*start)) {
+//      start++;
+//   }
+//   errno = 0;
    unsigned long value_t = strtoul(start, &end_t, 0);
 
 //   print("strToULong() - s=\'%s\', e='%s', val=%ld(0x%lX)\n", start, end_t, value_t, value_t);
+   if (errno != 0) { // no String found
+//      print("strToLong() - No number found\n");
+      return false;
+   }
    if (end_t == start) { // no String found
-      print("strToLong() - No number found\n");
+//      print("strToLong() - No number found\n");
       return false;
    }
    if ((ULONG_MAX == value_t) && ERANGE == errno) { // too large
@@ -321,6 +333,7 @@ DeviceXmlParser::DeviceXmlParser(DeviceDataBase *deviceDataBase)
    tag_device("device"),
    tag_clock("clock"),
    tag_memory("memory"),
+   tag_memoryRef("memoryRef"),
    tag_memoryRange("memoryRange"),
    tag_sdid("sdid"),
    tag_sdidMask("sdidMask"),
@@ -347,14 +360,23 @@ DeviceXmlParser::DeviceXmlParser(DeviceDataBase *deviceDataBase)
    tag_partitionEntry("partitionEntry"),
 
    attr_name("name"),
-   attr_family("family"),
    attr_isDefault("isDefault"),
+   attr_alias("alias"),
+   attr_hidden("hidden"),
+   attr_family("family"),
+   attr_subFamily("subFamily"),
+   attr_speed("speed"),
    attr_type("type"),
-   attr_subtype("subtype"),
+   attr_subType("subType"),
    attr_start("start"),
+   attr_middle("middle"),
    attr_end("end"),
    attr_size("size"),
    attr_pageNo("pageNo"),
+   attr_pageStart("pageStart"),
+   attr_pageEnd("pageEnd"),
+   attr_pageReset("pageReset"),
+   attr_pages("pages"),
    attr_pageAddress("pageAddress"),
    attr_registerAddress("registerAddress"),
    attr_securityAddress("securityAddress"),
@@ -366,6 +388,7 @@ DeviceXmlParser::DeviceXmlParser(DeviceDataBase *deviceDataBase)
    attr_description("description"),
    attr_eeeSize("eeeSize"),
    attr_eeSize("eeSize"),
+   attr_alignment("alignment"),
 
    isDefault(false),
    deviceDataBase(deviceDataBase),
@@ -407,8 +430,7 @@ void DeviceXmlParser::loadFile(const string &xmlFile) {
    document = parser->getDocument();
 //   print("DeviceXmlParser::loadFile() #5\n");
    if (document == NULL) {
-      print("DeviceXmlParser::loadFile() - document failed to load/parse\n");
-      throw MyException("DeviceXmlParser::loadFile() - Unable to create document");
+      throw MyException("DeviceXmlParser::loadFile() - Unable to create document or load/parse file");
    }
 }
 
@@ -417,8 +439,7 @@ TclScript *DeviceXmlParser::parseTCLScript(DOMElement *xmlTclScript) {
    // Type of node (must be a TCL script)
    DualString sTag (xmlTclScript->getTagName());
    if (!XMLString::equals(sTag.asXMLString(), tag_tclScript.asXMLString())) {
-      print("DeviceXmlParser::parseTCLScript() unexpected node \'%s\'\n", sTag.asCString());
-      throw MyException("DeviceXmlParser::parseTCLScript() self check failed");
+      throw MyException(string("DeviceXmlParser::parseTCLScript() - Unexpected tag = ")+sTag.asCString());
    }
    DualString text(xmlTclScript->getTextContent());
    TclScript *tclScript =  new TclScript(text.asCString());
@@ -432,8 +453,7 @@ FlashProgram *DeviceXmlParser::parseFlashProgram(DOMElement *xmlFlashProgram) {
    // Type of node (must be a flashProgram)
    DualString sTag (xmlFlashProgram->getTagName());
    if (!XMLString::equals(sTag.asXMLString(), tag_flashProgram.asXMLString())) {
-      print("DeviceXmlParser::parseFlashProgram() unexpected node \'%s\'\n", sTag.asCString());
-      throw MyException("DeviceXmlParser::parseFlashProgram() self check failed");
+      throw MyException(string("DeviceXmlParser::parseFlashProgram() - Unexpected tag = ")+sTag.asCString());
    }
    DualString text(xmlFlashProgram->getTextContent());
    FlashProgram *flashProgram =  new FlashProgram(text.asCString());
@@ -449,13 +469,12 @@ SecurityInfo *DeviceXmlParser::parseSecurity(DOMElement *currentProperty) {
    // Type of node (must be a flashProgram)
    DualString sTag (currentProperty->getTagName());
    if (!XMLString::equals(sTag.asXMLString(), tag_securityInfo.asXMLString())) {
-      print("DeviceXmlParser::parseSecurity() unexpected node \'%s\'\n", sTag.asCString());
-      throw MyException("DeviceXmlParser::parseSecurity() self check failed");
+      throw MyException(string("DeviceXmlParser::parseSecurity() - Unexpected tag = ")+sTag.asCString());
    }
    long size = 0;
    DualString sSize(currentProperty->getAttribute(attr_size.asXMLString()));
    if (!strToULong(sSize.asCString(), NULL, &size)) {
-      throw MyException("DeviceXmlParser::parseSecurity() - Illegal size in securityInfo");
+      throw MyException(string("DeviceXmlParser::parseSecurity() - Illegal size in securityInfo = ")+sSize.asCString());
    }
    bool type;
    DualString sType(currentProperty->getAttribute(attr_type.asXMLString()));
@@ -466,8 +485,7 @@ SecurityInfo *DeviceXmlParser::parseSecurity(DOMElement *currentProperty) {
       type = false;
    }
    else {
-      print("Illegal type in securityInfo\n");
-      throw MyException("DeviceXmlParser::parseSecurity() self check failed");
+      throw MyException(string("DeviceXmlParser::parseSecurity() - Illegal type in securityInfo = ")+sType.asCString());
    }
    DualString text(currentProperty->getTextContent());
    SecurityInfo *securityInfo =  new SecurityInfo(size, type, text.asCString());
@@ -480,12 +498,11 @@ SecurityInfo *DeviceXmlParser::parseSecurity(DOMElement *currentProperty) {
 //!
 void DeviceXmlParser::parseSharedXML(void) {
 //   print("DeviceXmlParser::parseSharedXML()\n");
+
+   strncpy(currentDeviceName, "Shared Data", sizeof(currentDeviceName));
+
    // Iterator for all the <sharedInformation> sections
    DOMChildIterator sharedIt(document, tag_sharedInformation.asCString());
-   if (sharedIt.getCurrentElement() == NULL) {
-      // No <sharedInformation> section
-      return;
-   }
    // Process each <sharedInformation> section (usually only one)
    for (;
          sharedIt.getCurrentElement() != NULL;
@@ -510,29 +527,34 @@ void DeviceXmlParser::parseSharedXML(void) {
             // Parse <tclScript>
             TclScript *tclScript = parseTCLScript(sharedInformationElement);
             deviceDataBase->addSharedData(string(sId.asCString()), tclScript);
-//            print("DeviceXmlParser::parseSharedXML(): Inserted Shared TCL Script item ID=%s\n", sId.asCString());
+            print("DeviceXmlParser::parseSharedXML(): Inserted shared TclScript item ID=%s\n", sId.asCString());
          }
          else if (XMLString::equals(sTag.asXMLString(), tag_flashProgram.asXMLString())) {
             // Parse <flashProgram>
             FlashProgram *flashProgram = parseFlashProgram(sharedInformationElement);
             deviceDataBase->addSharedData(string(sId.asCString()), flashProgram);
-//            print("DeviceXmlParser::parseSharedXML(): Inserted Shared Flash program item ID=%s\n", sId.asCString());
+            print("DeviceXmlParser::parseSharedXML(): Inserted shared FlashProgram item ID=%s\n", sId.asCString());
          }
          else if (XMLString::equals(sTag.asXMLString(), tag_securityInfo.asXMLString())) {
             // Parse <securityInfo>
             SecurityInfo *securityInfo = parseSecurity(sharedInformationElement);
             deviceDataBase->addSharedData(string(sId.asCString()), securityInfo);
-//            print("DeviceXmlParser::parseSharedXML(): Inserted Shared Security Information item ID=%s\n", sId.asCString());
+            print("DeviceXmlParser::parseSharedXML(): Inserted shared SecurityInfo item ID=%s\n", sId.asCString());
          }
          else if (XMLString::equals(sTag.asXMLString(), tag_flexNvmInfo.asXMLString())) {
             // Parse <flexNVMInfo>
             FlexNVMInfo *flexNVMInfo = parseFlexNVMInfo(sharedInformationElement);
             deviceDataBase->addSharedData(string(sId.asCString()), flexNVMInfo);
-            print("DeviceXmlParser::parseSharedXML(): Inserted Shared flexNVM Information item ID=%s\n", sId.asCString());
+            print("DeviceXmlParser::parseSharedXML(): Inserted shared FlexNVMInfo item ID=%s\n", sId.asCString());
+         }
+         else if (XMLString::equals(sTag.asXMLString(), tag_memory.asXMLString())) {
+            // Parse <memory>
+            MemoryRegion *memoryRegion = parseMemory(sharedInformationElement);
+            deviceDataBase->addSharedData(string(sId.asCString()), memoryRegion);
+            print("DeviceXmlParser::parseSharedXML(): Inserted shared MemoryRegion item ID=%s\n", sId.asCString());
          }
          else {
-            print("DeviceXmlParser::parseSharedXML(): Unexpected Tag=<%s>\n", sTag.asCString());
-            print("\n");
+            throw MyException(string("DeviceXmlParser::parseSharedXML() - Unexpected Tag = ")+sTag.asCString());
          }
       }
    }
@@ -556,13 +578,10 @@ TclScriptPtr DeviceXmlParser::parseSequence(DOMElement *sequence) {
          SharedInformationItemPtr itemPtr = deviceDataBase->getSharedData(sRef.asCString());
          TclScriptPtr tclScript = std::tr1::dynamic_pointer_cast<TclScript>(itemPtr);
          if (tclScript == NULL) {
-            print("DeviceXmlParser::parseSequence() - Unable to find suitable reference \'%s\'\n", sRef.asCString());
-            return TclScriptPtr();
+            throw MyException(string("DeviceXmlParser::parseSequence() - Unable to find reference - ")+sRef.asCString());
          }
-         else {
-//            print("DeviceXmlParser::parseSequence() -  tclScriptRef \'%s\'\n", sRef.asCString());
-            return tclScript;
-         }
+//         print("DeviceXmlParser::parseSequence() -  tclScriptRef \'%s\'\n", sRef.asCString());
+         return tclScript;
       }
       else if (XMLString::equals(sequenceTag.asXMLString(), tag_tclScript.asXMLString())) {
          // <tclScript>
@@ -570,8 +589,7 @@ TclScriptPtr DeviceXmlParser::parseSequence(DOMElement *sequence) {
          return TclScriptPtr(tclScript);
       }
       else {
-         print("DeviceXmlParser::parseSequence() - Ignoring Unknown sequence type - %s\n", sequenceTag.asCString());
-         return TclScriptPtr();
+         throw MyException(string("DeviceXmlParser::parseSequence() - Unexpected Tag = ")+sequenceTag.asCString());
       }
    }
 }
@@ -585,7 +603,7 @@ FlexNVMInfo::EeepromSizeValue DeviceXmlParser::parseEeepromEntry(DOMElement *eee
    if ((strlen(sDescription.asCString()) == 0) ||
        !strSizeToULong(sEeeSize.asCString(), NULL, &eeeSize) ||
        !strToULong(sValue.asCString(), NULL, &value)) {
-      throw MyException("DeviceXmlParser::parseEeepromEntry() - Illegal description/eeeSize/value attributes\n");
+      throw MyException("DeviceXmlParser::parseEeepromEntry() - Illegal description/eeeSize/value attributes");
    }
    return (FlexNVMInfo::EeepromSizeValue(sDescription.asCString(), value, eeeSize));
 }
@@ -599,7 +617,7 @@ FlexNVMInfo::FlexNvmPartitionValue DeviceXmlParser::parsePartitionEntry(DOMEleme
    if ((strlen(sDescription.asCString()) == 0) ||
        !strSizeToULong(sEeSize.asCString(), NULL, &eeSize) ||
        !strToULong(sValue.asCString(), NULL, &value)) {
-      throw MyException("DeviceXmlParser::parsePartitionEntry() - Illegal description/eeeSize/value attributes\n");
+      throw MyException("DeviceXmlParser::parsePartitionEntry() - Illegal description/eeeSize/value attributes");
    }
    return (FlexNVMInfo::FlexNvmPartitionValue(sDescription.asCString(), value, eeSize));
 }
@@ -640,7 +658,7 @@ FlexNVMInfo *DeviceXmlParser::parseFlexNVMInfo(DOMElement *flexNVMInfoElement) {
 //! @return == 0 - success\n
 //!         != 0 - fail
 //!
-MemoryRegion *DeviceXmlParser::parseFlashMemoryDetails(DOMElement *currentProperty, MemType_t memoryType, long &defaultSectorSize) {
+MemoryRegion *DeviceXmlParser::parseFlashMemoryDetails(DOMElement *currentProperty, MemType_t memoryType, uint32_t &defaultSectorSize, uint8_t &defaultAlignment) {
    long ppageAddress    = 0;
    long registerAddress = 0;
    long securityAddress = 0;
@@ -650,13 +668,18 @@ MemoryRegion *DeviceXmlParser::parseFlashMemoryDetails(DOMElement *currentProper
    if (!strToULong(sPpageAddress.asCString(),    NULL, &ppageAddress) ||
        !strToULong(sRegisterAddress.asCString(), NULL, &registerAddress) ||
        !strToULong(sSecurityAddress.asCString(), NULL, &securityAddress)) {
-      throw MyException("DeviceXmlParser::parseMemory() - Illegal PPAGE/Register/Security field in Flash\n");
+      throw MyException("DeviceXmlParser::parseFlashMemoryDetails() - Illegal PPAGE/Register/Security field in Flash");
    }
    long sectorSize      = defaultSectorSize;
-   DualString sSectorSize(currentProperty->getAttribute(attr_sectorSize.asXMLString()));
-   if (XMLString::stringLen(sSectorSize.asXMLString()) != 0) {
+   if (currentProperty->hasAttribute(attr_sectorSize.asXMLString())) {
+      DualString sSectorSize(currentProperty->getAttribute(attr_sectorSize.asXMLString()));
       if (!strToULong(sSectorSize.asCString(), NULL, &sectorSize)) {
-         throw MyException("DeviceXmlParser::parseMemory() - Illegal sectorSize in Flash");
+         throw MyException(string("DeviceXmlParser::parseFlashMemoryDetails() - Illegal sectorSize in Flash - ")+sSectorSize.asCString());
+      }
+      if (isDefault) {
+         print("DeviceXmlParser::parseFlashMemoryDetails() - Setting %s default sector size 0x%04X\n",
+               MemoryRegion::getMemoryTypeName(memoryType), sectorSize);
+         defaultSectorSize = sectorSize;
       }
    }
    static AddressType defaultAddressMode = AddrPaged;
@@ -670,18 +693,31 @@ MemoryRegion *DeviceXmlParser::parseFlashMemoryDetails(DOMElement *currentProper
          addressMode = AddrPaged;
       }
       else {
-         throw MyException("DeviceXmlParser::parseMemory(): Illegal addressMode\n");
+         throw MyException(string("DeviceXmlParser::parseFlashMemoryDetails() - Illegal addressMode in Flash - ")+sAddressMode.asCString());
       }
       if (isDefault) {
-//            print("DeviceXmlParser::parseMemory() - Setting default Flash address mode = %s\n", addressMode==AddrLinear?"linear":"paged");
+         print("DeviceXmlParser::parseFlashMemoryDetails() - Setting default address mode = %s\n",
+               addressMode==AddrLinear?"linear":"paged");
          defaultAddressMode = addressMode;
       }
    }
-   MemoryRegion *pMemoryRegion = new MemoryRegion(memoryType, registerAddress, ppageAddress, securityAddress, sectorSize);
-   pMemoryRegion->setAddressType(addressMode);
-   if (isDefault) {
-      defaultSectorSize = pMemoryRegion->getSectorSize();
+   uint8_t alignment = defaultAlignment;
+   if (currentProperty->hasAttribute(attr_alignment.asXMLString())) {
+      DualString sAlignment(currentProperty->getAttribute(attr_alignment.asXMLString()));
+      long temp;
+      if (!strToULong(sAlignment.asCString(), NULL, &temp) ||
+          ((temp != 1) && (temp != 2) && (temp != 4) && (temp != 8) && (temp != 16) && (temp != 32))) {
+         throw MyException(string("DeviceXmlParser::parseFlashMemoryDetails() - Illegal alignment ")+sAlignment.asCString());
+      }
+      alignment = (uint8_t) temp;
+      if (isDefault) {
+         print("DeviceXmlParser::parseFlashMemoryDetails() - Setting %s default alignment = %d\n",
+               MemoryRegion::getMemoryTypeName(memoryType), alignment);
+         defaultAlignment = alignment;
+      }
    }
+   MemoryRegion *pMemoryRegion = new MemoryRegion(memoryType, registerAddress, ppageAddress, securityAddress, sectorSize, alignment);
+   pMemoryRegion->setAddressType(addressMode);
    return pMemoryRegion;
 }
 
@@ -700,33 +736,45 @@ MemoryRegion *DeviceXmlParser::parseMemory(DOMElement *currentProperty) {
 
    if (XMLString::equals(sMemoryType.asXMLString(), DualString("eeprom").asXMLString())) {
       // <eeprom>
-      static long defaultFlashSectorSize = 0;
-      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemEEPROM, defaultFlashSectorSize);
+      static uint32_t defaultFlashSectorSize = 0;
+      static uint8_t  defaultAlignment = 1;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemEEPROM, defaultFlashSectorSize, defaultAlignment);
    }
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("flash").asXMLString())) {
       // <flash>
-      static long defaultFlashSectorSize = 0;
-      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemFLASH, defaultFlashSectorSize);
+      static uint32_t defaultFlashSectorSize = 0;
+      static uint8_t  defaultAlignment = 1;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemFLASH, defaultFlashSectorSize, defaultAlignment);
    }
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("pFlash").asXMLString())) {
       // <flash>
-      static long defaultFlashSectorSize = 0;
-      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemPFlash, defaultFlashSectorSize);
+      static uint32_t defaultFlashSectorSize = 0;
+      static uint8_t  defaultAlignment = 1;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemPFlash, defaultFlashSectorSize, defaultAlignment);
    }
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("dFlash").asXMLString())) {
       // <flash>
-      static long defaultFlashSectorSize = 0;
-      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemDFlash, defaultFlashSectorSize);
+      static uint32_t defaultFlashSectorSize = 0;
+      static uint8_t  defaultAlignment = 1;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemDFlash, defaultFlashSectorSize, defaultAlignment);
    }
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("pROM").asXMLString())) {
       // <prom>
-      static long defaultFlashSectorSize = 0;
-      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemPROM, defaultFlashSectorSize);
+      static uint32_t defaultFlashSectorSize = 0;
+      static uint8_t  defaultAlignment = 1;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemPROM, defaultFlashSectorSize, defaultAlignment);
    }
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("xROM").asXMLString())) {
       // <xrom>
-      static long defaultFlashSectorSize = 0;
-      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemXROM, defaultFlashSectorSize);
+      static uint32_t defaultFlashSectorSize = 0;
+      static uint8_t  defaultAlignment = 1;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemXROM, defaultFlashSectorSize, defaultAlignment);
+   }
+   else if (XMLString::equals(sMemoryType.asXMLString(), DualString("flexNVM").asXMLString())) {
+      // <flexNVM>
+      static uint32_t defaultFlashSectorSize = 0;
+      static uint8_t  defaultAlignment = 1;
+      pMemoryRegion = parseFlashMemoryDetails(currentProperty, MemFlexNVM, defaultFlashSectorSize, defaultAlignment);
    }
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("ram").asXMLString())) {
       // <ram>
@@ -735,10 +783,6 @@ MemoryRegion *DeviceXmlParser::parseMemory(DOMElement *currentProperty) {
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("rom").asXMLString())) {
       // <rom>
       pMemoryRegion = new MemoryRegion(MemROM);
-   }
-   else if (XMLString::equals(sMemoryType.asXMLString(), DualString("flexNVM").asXMLString())) {
-      // <ram>
-      pMemoryRegion = new MemoryRegion(MemFlexNVM);
    }
    else if (XMLString::equals(sMemoryType.asXMLString(), DualString("flexRAM").asXMLString())) {
       // <ram>
@@ -774,7 +818,7 @@ MemoryRegion *DeviceXmlParser::parseMemory(DOMElement *currentProperty) {
       DualString sRef(flashProgramRefIt.getCurrentElement()->getAttribute(attr_ref.asXMLString()));
       SharedInformationItemPtr flashProgram(deviceDataBase->getSharedData(sRef.asCString()));
       if (!flashProgram) {
-         print("Unable to find reference \'%s\'\n", sRef.asCString());
+         throw MyException(string("DeviceXmlParser::parseMemory() - Unable to find reference - ")+sRef.asCString());
       }
       else {
          FlashProgramPtr pFlashProgram = std::tr1::dynamic_pointer_cast<FlashProgram>(flashProgram);
@@ -805,7 +849,7 @@ MemoryRegion *DeviceXmlParser::parseMemory(DOMElement *currentProperty) {
       DualString sRef(securityRefIt.getCurrentElement()->getAttribute(attr_ref.asXMLString()));
       SharedInformationItemPtr securityInfo(deviceDataBase->getSharedData(sRef.asCString()));
       if (!securityInfo) {
-         print("Unable to find reference \'%s\'\n", sRef.asCString());
+         throw MyException(string("DeviceXmlParser::parseMemory() - Unable to find reference - ")+sRef.asCString());
       }
       else {
          SecurityInfoPtr pSecurityInfoPtr = std::tr1::dynamic_pointer_cast<SecurityInfo>(securityInfo);
@@ -817,72 +861,218 @@ MemoryRegion *DeviceXmlParser::parseMemory(DOMElement *currentProperty) {
          }
       }
    }
+   DOMChildIterator flexNvmInfoIt(currentProperty, tag_flexNvmInfo.asCString());
+   if (flexNvmInfoIt.getCurrentElement() != NULL) {
+      // <flexNVMInfo>
+      FlexNVMInfo *flexNVMInfo = parseFlexNVMInfo(flexNvmInfoIt.getCurrentElement());
+      FlexNVMInfoPtr pFlexNVMInfo(flexNVMInfo);
+      pMemoryRegion->setflexNVMInfo(pFlexNVMInfo);
+   }
+   DOMChildIterator flexNvmInfoRefIt(currentProperty, tag_flexNvmInfoRef.asCString());
+   if (flexNvmInfoRefIt.getCurrentElement() != NULL) {
+      // <flexNvmInfoRef>
+      DualString sRef(flexNvmInfoRefIt.getCurrentElement()->getAttribute(attr_ref.asXMLString()));
+      SharedInformationItemPtr pFlexNvmInfo(deviceDataBase->getSharedData(sRef.asCString()));
+      if (!pFlexNvmInfo) {
+         throw MyException(string("DeviceXmlParser::parseMemory() - Unable to find reference - ")+sRef.asCString());
+      }
+      else {
+         print("DeviceXmlParser::parseDeviceXML() - using shared flexNVMInfo()\n");
+         pMemoryRegion->setflexNVMInfo(std::tr1::dynamic_pointer_cast<FlexNVMInfo>(pFlexNvmInfo));
+      }
+   }
    DOMChildIterator memoryRangeIt(currentProperty, tag_memoryRange.asCString());
    for (;
          memoryRangeIt.getCurrentElement() != NULL;
          memoryRangeIt.advanceElement()) {
       // <memoryRange>
+
+      //====================================================
+      // Memory addresses
+      //
+      bool startGiven  = memoryRangeIt.getCurrentElement()->hasAttribute(attr_start.asXMLString());
+      bool middleGiven = memoryRangeIt.getCurrentElement()->hasAttribute(attr_middle.asXMLString());
+      bool endGiven    = memoryRangeIt.getCurrentElement()->hasAttribute(attr_end.asXMLString());
+      bool sizeGiven   = memoryRangeIt.getCurrentElement()->hasAttribute(attr_size.asXMLString());
+
       DualString sMemoryStartAddress(memoryRangeIt.getCurrentElement()->getAttribute(attr_start.asXMLString()));
+      DualString sMemoryMiddleAddress(memoryRangeIt.getCurrentElement()->getAttribute(attr_middle.asXMLString()));
       DualString sMemoryEndAddress(memoryRangeIt.getCurrentElement()->getAttribute(attr_end.asXMLString()));
       DualString sMemorySize(memoryRangeIt.getCurrentElement()->getAttribute(attr_size.asXMLString()));
-      DualString sPageNo(memoryRangeIt.getCurrentElement()->getAttribute(attr_pageNo.asXMLString()));
 
       long memoryStartAddress;
-      if (!strToULong(sMemoryStartAddress.asCString(), NULL, &memoryStartAddress)) {
-         print("Current device = %s\n", DualString(currentDeviceName).asCString());
-         throw MyException("memoryRangeIt() - Illegal memory start address in memory region list");
-         return NULL;
-      }
+      long memoryMiddleAddress;
       long memoryEndAddress;
       long memorySize;
-      if (strSizeToULong(sMemorySize.asCString(), NULL, &memorySize) &&
-          (memorySize > 0)) {
+
+      bool addressOK = true;
+      if (startGiven && endGiven) {
+         addressOK = strToULong(sMemoryStartAddress.asCString(), NULL, &memoryStartAddress) &&
+               strToULong(sMemoryEndAddress.asCString(), NULL, &memoryEndAddress) &&
+               !middleGiven && !sizeGiven && (memoryStartAddress <= memoryEndAddress);
+      }
+      else if (startGiven && sizeGiven) {
+         addressOK = strToULong(sMemoryStartAddress.asCString(), NULL, &memoryStartAddress) &&
+               strSizeToULong(sMemorySize.asCString(), NULL, &memorySize) &&
+               !middleGiven && !endGiven && (memorySize > 0);
          memoryEndAddress = memoryStartAddress + memorySize - 1;
       }
-      else if (strToULong(sMemoryEndAddress.asCString(), NULL, &memoryEndAddress) &&
-               (memoryEndAddress > memoryStartAddress)) {
-         // done
+      else if (middleGiven && sizeGiven) {
+         addressOK = strToULong(sMemoryMiddleAddress.asCString(), NULL, &memoryMiddleAddress) &&
+               strSizeToULong(sMemorySize.asCString(), NULL, &memorySize) &&
+               (memorySize >= 2) && ((memorySize & 0x01) == 0);
+         memoryStartAddress = memoryMiddleAddress - (memorySize/2);
+         memoryEndAddress   = memoryMiddleAddress + (memorySize/2)-1;
       }
-      else {
-         print("Current device = %s\n", DualString(currentDeviceName).asCString());
-         print("size=\'%s\'\n", sMemorySize.asCString());
-         print("end =\'%s\'\n", sMemoryEndAddress.asCString());
-         throw MyException("memoryRangeIt() - Illegal memory end/size in memory region list\n");
+      else if (endGiven && sizeGiven) {
+         addressOK = strToULong(sMemoryEndAddress.asCString(), NULL, &memoryEndAddress) &&
+               strSizeToULong(sMemorySize.asCString(), NULL, &memorySize) &&
+               !startGiven && !middleGiven && (memorySize > 0);
+         memoryStartAddress = memoryEndAddress - (memorySize - 1);
       }
-      long pageNo;
-      if (XMLString::stringLen(sPageNo.asXMLString()) == 0) {
-         pageNo = MemoryRegion::DefaultPageNo;
+      if (!addressOK) {
+         print("memoryRangeIt() startGiven=%s, middleGiven=%s, endGiven=%s, sizeGiven=%s, \n",
+               startGiven?"Y":"N", middleGiven?"Y":"N", endGiven?"Y":"N", sizeGiven?"Y":"N");
+         print("memoryRangeIt() memoryStartAddress=0x%X, memoryMiddleAddress=0x%X, memoryEndAddress=0x%X, memorySize=0x%X, \n",
+               memoryStartAddress, memoryMiddleAddress, memoryEndAddress, memorySize);
+         throw MyException("memoryRangeIt() - Illegal memory start/middle/end/size in memory region list");
       }
-      else if (!strToULong(sPageNo.asCString(), NULL, &pageNo) ||(pageNo > 0xFF)) {
-            print("Current device = %s\n", DualString(currentDeviceName).asCString());
-            throw MyException("memoryRangeIt() - Illegal page Number in memory region list");
-            return NULL;
+      //====================================================
+      // Page numbers
+      //
+      bool pageResetGiven =  memoryRangeIt.getCurrentElement()->hasAttribute(attr_pageReset.asXMLString());
+      bool pageNoGiven    =  memoryRangeIt.getCurrentElement()->hasAttribute(attr_pageNo.asXMLString());
+      bool pageStartGiven =  memoryRangeIt.getCurrentElement()->hasAttribute(attr_pageStart.asXMLString());
+      bool pageEndGiven   =  memoryRangeIt.getCurrentElement()->hasAttribute(attr_pageEnd.asXMLString());
+      bool pagesGiven     =  memoryRangeIt.getCurrentElement()->hasAttribute(attr_pages.asXMLString());
+
+      DualString sPageReset(memoryRangeIt.getCurrentElement()->getAttribute(attr_pageReset.asXMLString()));
+      DualString sPageNo(memoryRangeIt.getCurrentElement()->getAttribute(attr_pageNo.asXMLString()));
+      DualString sPageStart(memoryRangeIt.getCurrentElement()->getAttribute(attr_pageStart.asXMLString()));
+      DualString sPageEnd(memoryRangeIt.getCurrentElement()->getAttribute(attr_pageEnd.asXMLString()));
+      DualString sPages(memoryRangeIt.getCurrentElement()->getAttribute(attr_pages.asXMLString()));
+
+      long pageStart;
+      long pageEnd;
+      long pages;
+      bool pageOK = true;
+      // If paged, assume page size is memory range
+      const long pageSize = memoryEndAddress - memoryStartAddress +1;
+
+      if (!pageNoGiven && !pageStartGiven && !pageEndGiven && !pagesGiven && !pageResetGiven) {
+         pMemoryRegion->addRange(memoryStartAddress, memoryEndAddress);
+         continue;
       }
-      pMemoryRegion->addRange(memoryStartAddress, memoryEndAddress, pageNo);
-//      print("DeviceXmlParser::parseMemory((): Current device = %s, 0x%02X:[0x%06X, 0x%06X]\n", DualString(currentDeviceName).asCString(), pageNo, memoryStartAddress, memoryEndAddress);
+      else if (pageNoGiven) {
+         pageOK = pageOK &&
+               strToULong(sPageNo.asCString(), NULL, &pageStart) &&
+               !pageStartGiven && !pageEndGiven && !pagesGiven && !pageResetGiven;
+         if (pageOK) {
+            pMemoryRegion->addRange(memoryStartAddress, memoryEndAddress, pageStart);
+            continue;
+         }
+      }
+      else if (pageStartGiven && pageEndGiven) {
+         pageOK = pageOK &&
+               strToULong(sPageStart.asCString(), NULL, &pageStart) &&
+               strToULong(sPageEnd.asCString(), NULL, &pageEnd) &&
+               !pagesGiven;
+         pages = pageEnd - pageStart + 1;
+//         print("Start/End, pageOK=%s\n", pageOK?"True":"False");
+      }
+      else if (pageStartGiven && pagesGiven) {
+         pageOK = pageOK &&
+               strToULong(sPageStart.asCString(), NULL, &pageStart) &&
+               strSizeToULong(sPages.asCString(), NULL, &pages) &&
+               !pageEndGiven;
+         if (pages >= 1024) {
+            // Assume size of paged area rather than number of pages
+            pageOK = pageOK && ((pages % pageSize) == 0);
+            pages /= pageSize;
+         }
+         pageEnd = pageStart + pages - 1;
+//         print("Start/Pages, pageOK=%s\n", pageOK?"True":"False");
+      }
+      else if (pageEndGiven && pagesGiven) {
+         pageOK = pageOK &&
+               strToULong(sPageEnd.asCString(), NULL, &pageEnd) &&
+               strSizeToULong(sPages.asCString(), NULL, &pages) &&
+               !pageStartGiven;
+         if (pages >= 1024) {
+            // Assume size of paged area rather than number of pages
+            pageOK = pageOK && ((pages % pageSize) == 0);
+            pages /= pageSize;
+         }
+         pageStart = pageEnd - pages + 1;
+//         print("End/Pages, pageOK=%s\n", pageOK?"True":"False");
+      }
+      long pageReset;
+      if (pageResetGiven) {
+         pageOK = pageOK && strToULong(sPageReset.asCString(), NULL, &pageReset) && (pageReset >= pageStart) && (pageReset <= pageEnd);
+         if (pageOK) {
+            // This page is visible on reset (from reset PPAGE value)
+            if (pageReset == 0) {
+               // Ignore reset page zero since it will created as part of set anyway
+               pageResetGiven = false;
+            }
+            else {
+               pMemoryRegion->addRange(memoryStartAddress, memoryEndAddress, pageReset);
+//            print("Adding reset page (0x%06X, 0x%06X, P:0x%02X) pageOK=%s\n",
+//                  memoryStartAddress, memoryEndAddress, pageReset, pageOK?"True":"False");
+            }
+         }
+      }
+      if (!pageOK ||
+          ((pageStart < 0) || (pageStart > 0xFF)) ||
+          ((pageEnd < 0)   || (pageEnd > 0xFF)) ||
+          (pageResetGiven && (pageStart <= 0x00) && ( 0x00 <= pageEnd)) ) {
+         print("memoryRangeIt() pageStartGiven=%s, pagesGiven=%s, pageEndGiven=%s, pageNoGiven=%s, pageResetGiven=%s \n",
+               pageStartGiven?"Y":"N", pagesGiven?"Y":"N", pageEndGiven?"Y":"N", pageNoGiven?"Y":"N", pageResetGiven?"Y":"N");
+         print("memoryRangeIt() pageStart=0x%06X, pages=0x%06X, pageEnd=0x%06X\n",
+               pageStart, pages, pageEnd);
+         throw MyException("memoryRangeIt() - Illegal memory pageStart/pages/pageEnd/pageNo/pageReset in memory region list");
+      }
+      for (int pageNo = pageStart; pageNo <= pageEnd; pageNo++) {
+         // These pages use default page no from 24-bit address
+         uint32_t pageValue = (pageNo<<16) & 0xFF0000;
+         uint32_t start = memoryStartAddress|pageValue;
+         uint32_t end   = memoryEndAddress|pageValue;
+         pMemoryRegion->addRange(start, end);
+//         print("Adding page (0x%06X, 0x%06X)\n", start, end);
+      }
+      //      print("DeviceXmlParser::parseMemory((): Current device = %s, 0x%02X:[0x%06X, 0x%06X]\n", currentDeviceName, pageNo, memoryStartAddress, memoryEndAddress);
    }
    return pMemoryRegion;
 }
 
-//! Create device list from xerces document
+//! Create device description from node
+//!
+//!      <!ELEMENT device ((clock?,(memory|memoryRef)+,
+//!                       (soptAddress|copctlAddress)?,
+//!                       sdidAddress?,sdidMask?,sdid+,
+//!                       flashScripts?,
+//!                       (tclScript|tclScriptRef)?,
+//!                       (flashProgram|flashProgramRef)?,flashProgramData?,
+//!                       (flexNVMInfo|flexNVMInfoRef)?,
+//!                       note*))?>
+//! @param currentProperty - Present position in XML parse
 //!
 //! @return == 0 - success\n
 //!         != 0 - fail
 //!
-void DeviceXmlParser::parseDeviceXML(void) {
-//   print("DeviceXmlParser::parseDeviceXML()\n");
+DeviceData *DeviceXmlParser::parseDevice(DOMElement *deviceEl) {
 
    // Default device characteristics
    // These are initialised from the default device (if any) in the XML
-   TclScriptPtr defaultTCLScript;
-   FlashProgramPtr defFlashProgram;
-   FlexNVMInfoPtr  defaultFlexNVMInfo;
-   uint32_t   defSDIDAddress;
-   uint32_t   defSDIDMask;
+   static TclScriptPtr     defaultTCLScript;
+   static FlashProgramPtr  defFlashProgram;
+   static FlexNVMInfoPtr   defaultFlexNVMInfo;
+   static uint32_t         defSDIDAddress = 0x00000000;
+   static uint32_t         defSDIDMask    = 0x00000000;
 #if (TARGET == HC12)||(TARGET == MC56F80xx)
-   uint32_t   defCOPCTLAddress;
+   static uint32_t         defCOPCTLAddress = 0x00000000;
 #else
-   uint32_t   defSOPTAddress;
+   static uint32_t         defSOPTAddress = 0x00000000;
 #endif
 
 #if TARGET == HCS08
@@ -903,250 +1093,322 @@ void DeviceXmlParser::parseDeviceXML(void) {
 #elif TARGET == ARM
    defSDIDMask          = 0x00000FF0;
 #elif TARGET == MC56F80xx
-   defSDIDAddress       = 0x00; // Not used
-   defSDIDMask          = 0xFFFFFFFF;
+   defSDIDMask          = 0xFFFFFFFF; // SDID Not used
 #endif
+
+   // Create new device
+   DeviceData *itDev = new DeviceData();
+
+   // Set default values
+#if (TARGET == HC12)||(TARGET == MC56F80xx)
+   itDev->setCOPCTLAddress(defCOPCTLAddress);
+#else
+   itDev->setSOPTAddress(defSOPTAddress);
+#endif
+
+   itDev->setFlashScripts(defaultTCLScript);
+   itDev->setFlashProgram(defFlashProgram);
+   itDev->setSDIDAddress(defSDIDAddress);
+   itDev->setSDIDMask(defSDIDMask);
+
+   DOMChildIterator propertyIt(deviceEl);
+   for (;
+         propertyIt.getCurrentElement() != NULL;
+         propertyIt.advanceElement()) {
+
+      DOMElement *currentProperty = propertyIt.getCurrentElement();
+      DualString propertyTag(currentProperty->getTagName());
+      if (XMLString::equals(propertyTag.asXMLString(), tag_note.asXMLString())) {
+         // <note>
+//            DualString sNoteText(currentProperty->getTextContent());
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_clock.asXMLString())) {
+         // <clock>
+         DualString sClockType(currentProperty->getAttribute(attr_type.asXMLString()));
+         DualString sClockRegisterAddress(currentProperty->getAttribute(attr_registerAddress.asXMLString()));
+         long clockRegisterAddress;
+         if (!strToULong(sClockRegisterAddress.asCString(), NULL, &clockRegisterAddress)) {
+            throw MyException("DeviceXmlParser::parseDevice() - Illegal Clock register address");
+         }
+         itDev->setClockType(ClockTypes::getClockType(sClockType.asCString()));
+         itDev->setClockAddress(clockRegisterAddress);
+         itDev->setClockTrimNVAddress(itDev->getDefaultClockTrimNVAddress());
+         itDev->setClockTrimFreq(itDev->getDefaultClockTrimFreq());
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_memory.asXMLString())) {
+         // <memory>
+         MemoryRegion *memoryRegion = parseMemory(currentProperty);
+         if (memoryRegion != NULL) {
+            MemoryRegionPtr pMemoryRegion(memoryRegion);
+            itDev->addMemoryRegion(pMemoryRegion);
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_memoryRef.asXMLString())) {
+         // <memoryRef>
+         DualString sRef(currentProperty->getAttribute(attr_ref.asXMLString()));
+         SharedInformationItemPtr pMemoryRegion(deviceDataBase->getSharedData(sRef.asCString()));
+         if (!pMemoryRegion) {
+            throw MyException(string("DeviceXmlParser::parseDevice() - Unable to find reference - ")+sRef.asCString());
+         }
+         else {
+            itDev->addMemoryRegion(std::tr1::dynamic_pointer_cast<MemoryRegion>(pMemoryRegion));
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_sdid.asXMLString())) {
+         // <sdid>
+         DualString sSdidValue(currentProperty->getAttribute(attr_value.asXMLString()));
+         long sdidValue;
+         if (!strToULong(sSdidValue.asCString(), NULL, &sdidValue)) {
+            throw MyException(string("DeviceXmlParser::parseDevice() - Illegal Clock SDID address ")+sSdidValue.asCString());
+         }
+         itDev->addSDID(sdidValue);
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_sdidAddress.asXMLString())) {
+         // <sdidAddress>
+         DualString sSdidAddress(currentProperty->getAttribute(attr_value.asXMLString()));
+         long sdidAddress;
+         if (!strToULong(sSdidAddress.asCString(), NULL, &sdidAddress)) {
+            throw MyException(string("DeviceXmlParser::parseDevice() - Illegal Clock SDID value ")+sSdidAddress.asCString());
+         }
+         itDev->setSDIDAddress(sdidAddress);
+         if (isDefault) {
+            print("DeviceXmlParser::parseDevice() - Setting default SDID Address 0x%06X \n", sdidAddress);
+            defSDIDAddress = sdidAddress;
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_sdidMask.asXMLString())) {
+         // <sdidMask>
+         DualString sSdidMask(currentProperty->getAttribute(attr_value.asXMLString()));
+         long sdidMask;
+         if (!strToULong(sSdidMask.asCString(), NULL, &sdidMask)) {
+            throw MyException(string("DeviceXmlParser::parseDevice() - Illegal SDID mask ")+sSdidMask.asCString());
+         }
+         itDev->setSDIDMask(sdidMask);
+         if (isDefault) {
+            print("DeviceXmlParser::parseDevice() - Setting default SDID mask 0x%04X \n", sdidMask);
+            defSDIDMask = sdidMask;
+         }
+      }
+#if (TARGET == HC12)||(TARGET == MC56F80xx)
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_copctlAddress.asXMLString())) {
+         // <copctlAddress>
+         DualString sCopctlAddress(currentProperty->getAttribute(attr_value.asXMLString()));
+         long copctlAddress=0;
+         if (!strToULong(sCopctlAddress.asCString(), NULL, &copctlAddress)) {
+            throw MyException("DeviceXmlParser::parseDevice() - Illegal COPCTL address");
+         }
+         itDev->setCOPCTLAddress(copctlAddress);
+         if (isDefault)
+            defCOPCTLAddress = copctlAddress;
+      }
+#else
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_soptAddress.asXMLString())) {
+         // <soptAddress>
+         DualString sSoptAddress(currentProperty->getAttribute(attr_value.asXMLString()));
+         long soptAddress = 0x00;
+         if (!strToULong(sSoptAddress.asCString(), NULL, &soptAddress)) {
+            throw MyException(string("DeviceXmlParser::parseDevice() - Illegal SPOT address ")+sSoptAddress.asCString());
+         }
+         itDev->setSOPTAddress(soptAddress);
+         if (isDefault) {
+            print("DeviceXmlParser::parseDevice() - Setting default SOPT Address 0x%06X \n", soptAddress);
+            defSOPTAddress = soptAddress;
+         }
+      }
+#endif
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_tclScriptRef.asXMLString())) {
+         // <tclScriptRef>
+         DualString sRef(currentProperty->getAttribute(attr_ref.asXMLString()));
+         SharedInformationItemPtr pTclScript = deviceDataBase->getSharedData(sRef.asCString());
+         if (pTclScript == NULL) {
+            throw MyException(string("DeviceXmlParser::parseDevice() - Unable to find reference - ")+sRef.asCString());
+         }
+         else {
+            itDev->setFlashScripts(std::tr1::dynamic_pointer_cast<TclScript>(pTclScript));
+            if (isDefault) {
+               print("DeviceXmlParser::parseDevice() - Setting default flash script \"%s\" \n", sRef.asCString());
+               defaultTCLScript = itDev->getFlashScripts();
+            }
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_tclScript.asXMLString())) {
+         // <tclScript>
+         TclScript *tclScript = parseTCLScript(currentProperty);
+         TclScriptPtr pTclScript(tclScript);
+         itDev->setFlashScripts(pTclScript);
+         if (isDefault) {
+            defaultTCLScript = itDev->getFlashScripts();
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_flashScripts.asXMLString())) {
+         // <flashScripts>
+         TclScriptPtr pTclScript = parseSequence(currentProperty);
+         if (pTclScript) {
+            itDev->setFlashScripts(pTclScript);
+            if (isDefault) {
+               print("DeviceXmlParser::parseDevice() - Setting default flash script (non-shared)\n");
+               defaultTCLScript = pTclScript;
+            }
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_flashProgram.asXMLString())) {
+         // <flashProgram>
+         FlashProgram *flashProgram = parseFlashProgram(currentProperty);
+         print("Flash program =\n%s", flashProgram->toString().c_str());
+         FlashProgramPtr pFlashProgram(flashProgram);
+         itDev->setFlashProgram(pFlashProgram);
+         if (isDefault) {
+            print("DeviceXmlParser::parseDevice() - Setting default flash program (non-shared)\n");
+            defFlashProgram = itDev->getFlashProgram();
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_flashProgramRef.asXMLString())) {
+         // <flashProgramRef>
+         DualString sRef(currentProperty->getAttribute(attr_ref.asXMLString()));
+         SharedInformationItemPtr pFlashProgram(deviceDataBase->getSharedData(sRef.asCString()));
+         if (!pFlashProgram) {
+            throw MyException(string("DeviceXmlParser::parseDevice() - Unable to find reference - ")+sRef.asCString());
+         }
+         else {
+            itDev->setFlashProgram(std::tr1::dynamic_pointer_cast<FlashProgram>(pFlashProgram));
+            if (isDefault) {
+               print("DeviceXmlParser::parseDevice() - Setting default flash program: \"%s\" \n", sRef.asCString());
+               defFlashProgram = itDev->getFlashProgram();
+            }
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_flexNvmInfo.asXMLString())) {
+         // <flexNVMInfo>
+         FlexNVMInfo *flexNVMInfo = parseFlexNVMInfo(currentProperty);
+         print("DeviceXmlParser::parseDevice() - adding flexNVMInfo()\n");
+         FlexNVMInfoPtr pFlexNVMInfo(flexNVMInfo);
+         itDev->setflexNVMInfo(pFlexNVMInfo);
+         if (isDefault) {
+            print("DeviceXmlParser::parseDevice() - Setting default flexNVMInfo (non-shared)\n");
+            defaultFlexNVMInfo = pFlexNVMInfo;
+         }
+      }
+      else if (XMLString::equals(propertyTag.asXMLString(), tag_flexNvmInfoRef.asXMLString())) {
+         // <flexNvmInfoRef>
+         DualString sRef(currentProperty->getAttribute(attr_ref.asXMLString()));
+         SharedInformationItemPtr pFlexNvmInfo(deviceDataBase->getSharedData(sRef.asCString()));
+         if (!pFlexNvmInfo) {
+            throw MyException(string("DeviceXmlParser::parseDevice() - Unable to find reference - ")+sRef.asCString());
+         }
+         else {
+            //               print("DeviceXmlParser::parseDevice() - using shared flexNVMInfo()\n");
+            itDev->setflexNVMInfo(std::tr1::dynamic_pointer_cast<FlexNVMInfo>(pFlexNvmInfo));
+            if (isDefault) {
+               print("DeviceXmlParser::parseDevice() - Setting default flash program: \"%s\" \n", sRef.asCString());
+               defFlashProgram = itDev->getFlashProgram();
+            }
+         }
+      }
+      else {
+         throw MyException(string("DeviceXmlParser::parseDevice() - Unknown tag - ")+propertyTag.asCString());
+      }
+   }
+   return itDev;
+}
+
+//! Create device list from device nodes
+//!
+//!      <!ELEMENT device ((clock?,(memory|memoryRef)+,
+//!                       (soptAddress|copctlAddress)?,
+//!                       sdidAddress?,sdidMask?,sdid+,
+//!                       flashScripts?,
+//!                       (tclScript|tclScriptRef)?,
+//!                       (flashProgram|flashProgramRef)?,flashProgramData?,
+//!                       (flexNVMInfo|flexNVMInfoRef)?,
+//!                       note*))?>
+//!           <!ATTLIST device name ID #REQUIRED>
+//!           <!ATTLIST device isDefault (true|false) #IMPLIED>
+//!           <!ATTLIST device alias IDREF #IMPLIED>
+//!           <!ATTLIST device hidden (true|false) #IMPLIED>
+//!           <!ATTLIST device family (RS08|HCS08|HCS12|CFV1|CFV1Plus|CFVx|ARM|DSC) #IMPLIED>
+//!           <!ATTLIST device subFamily CDATA #IMPLIED>
+//!           <!ATTLIST device frequency CDATA #IMPLIED>
+//!
+//! @return == 0 - success\n
+//!         != 0 - fail
+//!
+void DeviceXmlParser::parseDeviceXML(void) {
+//   print("DeviceXmlParser::parseDeviceXML()\n");
 
    DOMChildIterator deviceIt(document, tag_device.asCString());
    if (deviceIt.getCurrentElement() == NULL) {
       throw MyException("DeviceXmlParser::parseDeviceXML() - Device file has no device tag");
    }
-   // Process each <device> element
+   // Process each <device> node
    for (;
          deviceIt.getCurrentElement() != NULL;
          deviceIt.advanceElement()) {
 
+      isDefault = false; // Assume non-default device
+
       DOMElement *deviceEl = deviceIt.getCurrentElement();
 
-      if (!XMLString::equals(deviceEl->getTagName(), tag_device.asXMLString())) {
-         print("DeviceXmlParser::parseDeviceXML(): Unexpected element %s\n", DualString(deviceEl->getTagName()).asCString());
-         throw MyException("DeviceXmlParser::parseDeviceXML() - <device> tag expected");
-      }
-      currentDeviceName = deviceEl->getAttribute(attr_name.asXMLString());
-      DualString targetName(currentDeviceName);
+      // Process <device> element attributes
+
+#if defined FAMILY
+#define MAKE_STRING(x) #x
+
       DualString familyValue(deviceEl->getAttribute(attr_family.asXMLString()));
-      isDefault = false;
-      if (deviceEl->hasAttribute(attr_isDefault.asXMLString())) {
-         DualString value(deviceEl->getAttribute(attr_isDefault.asXMLString()));
-         isDefault = XMLString::equals(value.asCString(), "true");
+      if (strcmp(FAMILY,familyValue.asCString()) != 0) {
+//         print("Discarding %s not matching %s\n", (const char *)familyValue.asCString(), FAMILY);
+         continue;
       }
-
-//      cerr << "Element: <device";
-//      cerr << " name=" << targetName;
-//      cerr << ", family=" << familyValue;
-//      cerr << ">\n";
-
-      // Create new device
-      DeviceData *itDev = new DeviceData();
-
-      // Note - Assumes ASCII string
-      char buff[50];
-      strncpy(buff, targetName.asCString(), sizeof(buff));
-      buff[sizeof(buff)-1] = '\0';
-      strupr(buff);
-      itDev->setTargetName(buff);
-
-      // Tags to handle
-      //  <!ELEMENT device (clock?,
-      //                    memory+,soptAddress?,
-      //                    sdidAddress?,sdidMask?,sdid+,
-      //                    securityAddress?,
-      //                    (foptAddress?|fsecAddress?),
-      //                    copctlAddress?,
-      //                    flashScripts?,
-      //                    (flashProgram|flashProgramRef)?,flashProgramData?,note*)> clock;
-
-#if TARGET == HCS08
-      itDev->setSOPTAddress(defSOPTAddress);
-      itDev->setSDIDAddress(defSDIDAddress);
-      itDev->setSDIDMask(defSDIDMask);
-#elif TARGET == RS08
-      itDev->setSDIDMask(defSDIDMask);
-#elif TARGET == CFV1
-      itDev->setSDIDMask(defSDIDMask);
-#elif TARGET == CFVx
-      itDev->setSDIDAddress(defSDIDAddress);
-      itDev->setSDIDMask(defSDIDMask);
-#elif TARGET == HC12
-      itDev->setCOPCTLAddress(defCOPCTLAddress);
-      itDev->setSDIDAddress(defSDIDAddress);
-      itDev->setSDIDMask(defSDIDMask);
-#elif TARGET == ARM
-      itDev->setSDIDMask(defSDIDMask);
-#elif TARGET == MC56F80xx
-      itDev->setSDIDAddress(defSDIDAddress);
-      itDev->setSDIDMask(defSDIDMask);
 #endif
 
-      itDev->setFlashScripts(defaultTCLScript);
-      itDev->setFlashProgram(defFlashProgram);
-      DOMChildIterator propertyIt(deviceEl);
-      for (;
-            propertyIt.getCurrentElement() != NULL;
-            propertyIt.advanceElement()) {
-
-         DOMElement *currentProperty = propertyIt.getCurrentElement();
-         DualString propertyTag(currentProperty->getTagName());
-         if (XMLString::equals(propertyTag.asXMLString(), tag_note.asXMLString())) {
-            // <note>
-            //            DualString sNoteText(currentProperty->getTextContent());
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_clock.asXMLString())) {
-            // <clock>
-            DualString sClockType(currentProperty->getAttribute(attr_type.asXMLString()));
-            DualString sClockRegisterAddress(currentProperty->getAttribute(attr_registerAddress.asXMLString()));
-            long clockRegisterAddress;
-            if (!strToULong(sClockRegisterAddress.asCString(), NULL, &clockRegisterAddress)) {
-               throw MyException("DeviceXmlParser::parseDeviceXML() - Illegal Clock register address");
-            }
-            itDev->setClockType(ClockTypes::getClockType(sClockType.asCString()));
-            itDev->setClockAddress(clockRegisterAddress);
-            itDev->setClockTrimNVAddress(itDev->getDefaultClockTrimNVAddress());
-            itDev->setClockTrimFreq(itDev->getDefaultClockTrimFreq());
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_memory.asXMLString())) {
-            // <memory>
-            MemoryRegion *memoryRegion = parseMemory(currentProperty);
-            if (memoryRegion != NULL) {
-               MemoryRegionPtr pMemoryRegion(memoryRegion);
-               itDev->addMemoryRegion(pMemoryRegion);
-//               if (!itDev->getFlashProgram()) {
-//                  // Save as default Flash program if not explicitly set (yet)
-//                  itDev->setFlashProgram(pMemoryRegion->getFlashprogram());
-//               }
-            }
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_sdid.asXMLString())) {
-            // <sdid>
-            DualString sSdidValue(currentProperty->getAttribute(attr_value.asXMLString()));
-            long sdidValue;
-            if (!strToULong(sSdidValue.asCString(), NULL, &sdidValue)) {
-               throw MyException("DeviceXmlParser::parseDeviceXML() - Illegal Clock SDID address \'%s\'\n");
-            }
-            itDev->addSDID(sdidValue);
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_sdidAddress.asXMLString())) {
-            // <sdidAddress>
-            DualString sSdidAddress(currentProperty->getAttribute(attr_value.asXMLString()));
-            uint32_t sdidAddress  = strtoul(sSdidAddress.asCString(), NULL, 16);
-            itDev->setSDIDAddress(sdidAddress);
-            if (isDefault) {
-               defSDIDAddress = sdidAddress;
-            }
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_sdidMask.asXMLString())) {
-            // <sdidMask>
-            DualString sSdidMask(currentProperty->getAttribute(attr_value.asXMLString()));
-            long sdidMask;
-            if (!strToULong(sSdidMask.asCString(), NULL, &sdidMask)) {
-               throw MyException("DeviceXmlParser::parseDeviceXML() - Illegal SDID mask");
-            }
-            itDev->setSDIDMask(sdidMask);
-            if (isDefault) {
-               defSDIDMask = sdidMask;
-            }
-         }
-#if (TARGET == HC12)||(TARGET == MC56F80xx)
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_copctlAddress.asXMLString())) {
-            // <copctlAddress>
-            DualString sCopctlAddress(currentProperty->getAttribute(attr_value.asXMLString()));
-            long copctlAddress=0;
-            if (!strToULong(sCopctlAddress.asCString(), NULL, &copctlAddress)) {
-               throw MyException("DeviceXmlParser::parseDeviceXML() - Illegal COPCTL address");
-            }
-            itDev->setCOPCTLAddress(copctlAddress);
-            if (isDefault)
-               defCOPCTLAddress = copctlAddress;
-         }
-#else
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_soptAddress.asXMLString())) {
-            // <soptAddress>
-            DualString sSoptAddress(currentProperty->getAttribute(attr_value.asXMLString()));
-            long soptAddress = 0x00;
-            if (!strToULong(sSoptAddress.asCString(), NULL, &soptAddress)) {
-               print("Illegal SOPT address \'%s\'\n", sSoptAddress.asCString());
-               continue;
-            }
-            itDev->setSOPTAddress(soptAddress);
-            if (isDefault) {
-               defSOPTAddress = soptAddress;
-            }
-         }
-#endif
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_flashScripts.asXMLString())) {
-            // <flashScripts>
-            TclScriptPtr pTclScript = parseSequence(currentProperty);
-            if (pTclScript) {
-               itDev->setFlashScripts(pTclScript);
-               if (isDefault) {
-                  defaultTCLScript = pTclScript;
-               }
-            }
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_flashProgram.asXMLString())) {
-            // <flashProgram>
-            FlashProgram *flashProgram = parseFlashProgram(currentProperty);
-            print("Flash program =\n%s", flashProgram->toString().c_str());
-            FlashProgramPtr pFlashProgram(flashProgram);
-            itDev->setFlashProgram(pFlashProgram);
-            if (isDefault) {
-//               print("DeviceXmlParser::parseDeviceXML() - Setting default flash program (non-shared)\n");
-               defFlashProgram = itDev->getFlashProgram();
-            }
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_flashProgramRef.asXMLString())) {
-            // <flashProgramRef>
-            DualString sRef(currentProperty->getAttribute(attr_ref.asXMLString()));
-            SharedInformationItemPtr pFlashProgram(deviceDataBase->getSharedData(sRef.asCString()));
-            if (!pFlashProgram) {
-               print("Unable to find reference \'%s\'\n", sRef.asCString());
-            }
-            else {
-               itDev->setFlashProgram(std::tr1::dynamic_pointer_cast<FlashProgram>(pFlashProgram));
-               if (isDefault) {
-//                  print("DeviceXmlParser::parseDeviceXML() - Setting default flash program (shared reference)\"%s\" \n", sRef.asCString());
-                  defFlashProgram = itDev->getFlashProgram();
-               }
-            }
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_flexNvmInfo.asXMLString())) {
-            // <flexNVMInfo>
-            FlexNVMInfo *flexNVMInfo = parseFlexNVMInfo(currentProperty);
-            print("DeviceXmlParser::parseDeviceXML() - adding flexNVMInfo()\n");
-            FlexNVMInfoPtr pFlexNVMInfo(flexNVMInfo);
-            itDev->setflexNVMInfo(pFlexNVMInfo);
-            if (isDefault) {
-//               print("DeviceXmlParser::parseDeviceXML() - Setting default flexNVMInfo (non-shared)\n");
-               defaultFlexNVMInfo = pFlexNVMInfo;
-            }
-         }
-         else if (XMLString::equals(propertyTag.asXMLString(), tag_flexNvmInfoRef.asXMLString())) {
-            // <flexNvmInfoRef>
-            DualString sRef(currentProperty->getAttribute(attr_ref.asXMLString()));
-            SharedInformationItemPtr pFlexNvmInfo(deviceDataBase->getSharedData(sRef.asCString()));
-            if (!pFlexNvmInfo) {
-               print("Unable to find reference \'%s\'\n", sRef.asCString());
-            }
-            else {
-               print("DeviceXmlParser::parseDeviceXML() - using shared flexNVMInfo()\n");
-               itDev->setflexNVMInfo(std::tr1::dynamic_pointer_cast<FlexNVMInfo>(pFlexNvmInfo));
-               if (isDefault) {
-//                  print("DeviceXmlParser::parseDeviceXML() - Setting default flash program (shared reference)\"%s\" \n", sRef.asCString());
-                  defFlashProgram = itDev->getFlashProgram();
-               }
-            }
-         }
-         else {
-            print("Ignoring Unknown tag \'%s\'\n", propertyTag.asCString());
-         }
+      // Get device name. Note - Assumes ASCII string
+      DualString targetName(deviceEl->getAttribute(attr_name.asXMLString()));
+      strncpy(currentDeviceName, targetName.asCString(), sizeof(currentDeviceName));
+      currentDeviceName[sizeof(currentDeviceName)-1] = '\0';
+      strupr(currentDeviceName);
+      if (strlen(currentDeviceName) == 0) {
+         throw MyException(string("DeviceXmlParser::parseDeviceXML() - Device name missing or invalid"));
       }
-      if (itDev->getTargetName().compare("_DEFAULT") == 0) {
-         // Add device as default
-         deviceDataBase->setDefaultDevice(itDev);
+      if (deviceEl->hasAttribute(attr_alias.asXMLString())) {
+         // Alias device
+
+         // Get real device name. Note - Assumes ASCII string
+         DualString aliasValue(deviceEl->getAttribute(attr_alias.asXMLString()));
+         char buff[50];
+         strncpy(buff, aliasValue.asCString(), sizeof(buff));
+         buff[sizeof(buff)-1] = '\0';
+         strupr(buff);
+         if (strlen(buff) == 0) {
+            throw MyException(string("DeviceXmlParser::parseDeviceXML() - Alias name missing or invalid"));
+         }
+         DeviceData *itDev = parseDevice(deviceEl);
+         itDev->setTargetName(currentDeviceName);
+         itDev->setAliasName(buff);
+         if (deviceEl->hasAttribute(attr_hidden.asXMLString())) {
+            itDev->setHidden();
+         }
+         deviceDataBase->addDevice(itDev);
       }
       else {
-         // Add general device
-         deviceDataBase->addDevice(itDev);
+         // Real device
+         if (deviceEl->hasAttribute(attr_isDefault.asXMLString())) {
+            DualString value(deviceEl->getAttribute(attr_isDefault.asXMLString()));
+            isDefault = XMLString::equals(value.asCString(), "true");
+         }
+         DualString subFamilyValue(deviceEl->getAttribute(attr_subFamily.asXMLString()));
+         DualString speedValue(deviceEl->getAttribute(attr_speed.asXMLString()));
+         DeviceData *itDev = parseDevice(deviceEl);
+         itDev->setTargetName(currentDeviceName);
+         if (deviceEl->hasAttribute(attr_hidden.asXMLString())) {
+            itDev->setHidden();
+         }
+         if (isDefault) {
+            // Add device as default
+            deviceDataBase->setDefaultDevice(itDev);
+         }
+         else {
+            // Add general device
+            deviceDataBase->addDevice(itDev);
+         }
       }
    }
 }
@@ -1162,49 +1424,39 @@ void DeviceXmlParser::parseDeviceXML(void) {
 void DeviceXmlParser::loadDeviceData(const std::string &deviceFilePath, DeviceDataBase *deviceDataBase) {
 
 //   print("DeviceXmlParser::loadDeviceData()\n");
-   bool exceptionHandled = false;
    try {
       xercesc::XMLPlatformUtils::Initialize();
    }
-//   catch (const XMLException& toCatch) {
-//      char* message = XMLString::transcode(toCatch.getMessage());
-//      XMLString::release(&message);
-//      throw MyException("Error during XML Initialisation");
-//   }
    catch (...) {
       throw MyException("DeviceXmlParser::loadDeviceData((): Exception in XMLPlatformUtils::Initialise()");
    }
-//   static volatile xercesc_3_1::MemoryManager* xx = xercesc_3_1::XMLPlatformUtils::fgMemoryManager;
-//   const char *cString_   = xercesc::XMLString::replicate( "Hello" );
-//   DualString s("Hello");
    DeviceXmlParser* deviceXmlParser = new DeviceXmlParser(deviceDataBase);
    try {
-      // Load the XML
-      deviceXmlParser->loadFile(deviceFilePath);
-      // Parse shared information
-      deviceXmlParser->parseSharedXML();
-      // Parse device information
-      deviceXmlParser->parseDeviceXML();
+      try {
+         // Load the XML
+         deviceXmlParser->loadFile(deviceFilePath);
+         // Parse shared information
+         deviceXmlParser->parseSharedXML();
+         // Parse device information
+         deviceXmlParser->parseDeviceXML();
+      }
+      catch (const xercesc::XMLException& exception) {
+         DualString message(exception.getMessage());
+         throw MyException(string("DeviceXmlParser::loadDeviceData() - XML Exception")+message.asCString());
+      }
+      catch (const xercesc::DOMException& exception) {
+         DualString message(exception.getMessage());
+         throw MyException(string("DeviceXmlParser::loadDeviceData() - DOM Exception")+message.asCString());
+      }
+      catch (MyException &exception) {
+         throw MyException(string(exception.what())+"\n   Current Device = "+deviceXmlParser->currentDeviceName);
+      }
+      catch (std::runtime_error &exception) {
+         throw MyException(string(exception.what())+"\n   Current Device = "+deviceXmlParser->currentDeviceName);
+      }
    }
-   catch (const xercesc::XMLException& toCatch) {
-#ifdef LOG
-      DualString message(toCatch.getMessage());
-      print("DeviceXmlParser::loadDeviceData() - Exception, reason = %s\n", message.asCString());
-#endif
-      exceptionHandled = true;
-      throw MyException("DeviceXmlParser::loadDeviceData() - XML Exception");
-   }
-   catch (const xercesc::DOMException& toCatch) {
-#ifdef LOG
-      DualString message(toCatch.getMessage());
-      print("DeviceXmlParser::loadDeviceData() - Exception, reason = %s\n", message.asCString());
-#endif
-      exceptionHandled = true;
-      throw MyException("DeviceXmlParser::loadDeviceData() - DOM Exception");
-   }
-   catch (std::runtime_error &exception) {
-      print("DeviceXmlParser::loadDeviceData() - Exception, reason = %s\n", exception.what());
-      exceptionHandled = true;
+   catch (MyException &exception) {
+      XMLPlatformUtils::Terminate();
       throw exception;
    }
    catch (...) {

@@ -13,35 +13,32 @@ class ProgressTimer;
 
 // Describes a block to be programmed & result
 struct FlashData_t {
-   uint32_t         flags;             // Controls actions of routine
-   uint32_t         controller;        // Ptr to flash controller
-   uint32_t         frequency;         // Target frequency (kHz)
+   uint16_t         flags;             // Controls actions of routine
    uint16_t         errorCode;         // Error code from action
-   uint16_t         sectorSize;        // Size of flash sectors (minimum erase size)
-   uint32_t         address;           // Memory address being accessed
-   uint32_t         size;              // Size of memory range being accessed
-   uint32_t         data;              // Ptr to data to program
+   uint16_t         controller;        // Ptr to flash controller
+   uint16_t         frequency;         // Target frequency (kHz)
+   uint16_t         sectorSize;        // Size of Flash memory sectors (smallest erasable block)
+   uint32_t         address;           // Memory address being accessed (reserved/page/address)
+   uint16_t         size;              // Size of memory range being accessed
+   uint16_t         data;              // Ptr to data to program
 } ;
 
 // Timing information
 struct TimingData_t {
-   uint32_t         flags;             // Controls actions of routine
-   uint32_t         controller;        // Ptr to flash controller
-   uint32_t         frequency;         // Target frequency (kHz)
+   uint16_t         flags;             // Controls actions of routine
    uint16_t         errorCode;         // Error code from action
-   uint16_t         res1;
+   uint16_t         controller;        // Ptr to flash controller (unused)
    uint32_t         timingCount;       // Timing count
-   uint32_t         reserved[2];
 };
 
 //! Describe the flash programming code
 struct FlashProgramHeader_t {
-   uint32_t         loadAddress;       // Address where to load this image
-   uint32_t         entry;             // Ptr to entry routine
-   uint32_t         capabilities;      // Capabilities of routine
-   uint32_t         reserved;
-   uint32_t         soptAddress;       // Address of SOPT register
-   uint32_t         flashData;         // Ptr to information about operation
+   uint16_t         loadAddress;       // Address where to load this image
+   uint16_t         entry;             // Ptr to entry routine (for currently loaded routine)
+   uint16_t         capabilities;      // Capabilities of routine
+   uint16_t         copctlAddress;     // Address of COPCTL register
+   uint32_t         clockFactor;       // Calibration factor for speed determination
+   uint16_t         flashData;         // Ptr to information about operation
 } ;
 #pragma pack()
 
@@ -148,9 +145,8 @@ private:
    USBDM_ErrorCode doFlashBlock(FlashImage    *flashImage,
                                 unsigned int   blockSize,
                                 uint32_t      &flashAddress,
-                                uint32_t       flashOperation);
-   USBDM_ErrorCode selectiveEraseFlashSecurity(void);
-   USBDM_ErrorCode applyFlashOperation(FlashImage *flashImage, uint32_t flashOperation);
+                                uint32_t       flashoperation);
+   USBDM_ErrorCode applyFlashOperation(FlashImage *flashImage, uint32_t operation);
    USBDM_ErrorCode doVerify(FlashImage *flashImage);
    USBDM_ErrorCode doSelectiveErase(FlashImage  *flashImage);
    USBDM_ErrorCode doProgram(FlashImage  *flashImage);
@@ -160,9 +156,9 @@ private:
    USBDM_ErrorCode loadTargetProgram(FlashProgramPtr flashProgram);
    USBDM_ErrorCode probeMemory(MemorySpace_t memorySpace, uint32_t address);
    USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImage);
+   USBDM_ErrorCode getPageAddress(MemoryRegionPtr memoryRegionPtr, uint32_t address, uint8_t *pageNo);
 
 public:
-   USBDM_ErrorCode partitionFlexNVM(void);
    USBDM_ErrorCode initTCL(void);
    USBDM_ErrorCode releaseTCL(void);
    USBDM_ErrorCode setDeviceData(const DeviceData  &theParameters);

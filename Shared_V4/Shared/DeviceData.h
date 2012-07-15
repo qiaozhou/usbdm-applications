@@ -209,22 +209,32 @@ public:
     FlexNVMInfo(int backingRatio = 16)
     :backingRatio(backingRatio)
     {
-        print("FlexNVMInfo()\n");
+//        print("FlexNVMInfo()\n");
     }
 
     ~FlexNVMInfo()
     {
-        print("~FlexNVMInfo()\n");
+//        print("~FlexNVMInfo()\n");
     }
 
     const std::string toString() const
     {
         return std::string("FlexNVMInfo - \n");
     }
-
-    std::vector<EeepromSizeValue>      &getEeepromSizeValues();
-    std::vector<FlexNvmPartitionValue> &getFlexNvmPartitionValues();
-
+    //! Returns list of permitted EEEPROM values for use in partition command
+    //!
+    //! @return vector of permitted values
+    //!
+    std::vector<FlexNVMInfo::EeepromSizeValue> &getEeepromSizeValues() {
+        return eeepromSizeValues;
+    }
+    //! Returns list of permitted Partition values for use in partition command
+    //!
+    //! @return vector of permitted values
+    //!
+    std::vector<FlexNVMInfo::FlexNvmPartitionValue> &getFlexNvmPartitionValues() {
+        return flexNvmPartitionValues;
+    }
     void addEeepromSizeValues(const EeepromSizeValue &eeepromSizeValue);
     void addFlexNvmPartitionValues(const FlexNvmPartitionValue &flexNvmPartitionValue);
 
@@ -238,7 +248,7 @@ typedef std::tr1::shared_ptr<FlexNVMInfo> FlexNVMInfoPtr;
 // This may be used to represent a non-contiguous range of memory locations that are related
 // e.g. two ranges of Flash that are controlled by the same Flash controller as occurs in some HCS08s
 //
-class MemoryRegion {
+class MemoryRegion: public SharedInformationItem {
 
 private:
    MemoryRegion(MemoryRegion &);
@@ -260,10 +270,12 @@ public:
    uint32_t        pageAddress;            //!< Paging register address
    uint32_t        securityAddress;        //!< Non-volatile option address
    uint32_t        sectorSize;             //!< Size of sectors i.e. minimum erasable unit
+   uint8_t         alignment;              //!< Memory programming alignment requirement (power of 2)
    uint32_t        lastIndexUsed;          //!< Last used memoryRanges index
    FlashProgramPtr flashProgram;           //!< Region-specific flash algorithm
    SecurityInfoPtr unsecureInfo;           //!< Region-specific unsecure data
    SecurityInfoPtr secureInfo;             //!< Region-specific secure data
+   FlexNVMInfoPtr  flexNVMInfo;
 
 private:
    //! Find the index of the memory range containing the given address
@@ -298,13 +310,15 @@ public:
                  uint32_t registerAddress = 0,
                  uint32_t pageAddress = 0,
                  uint32_t securityAddress = 0,
-                 uint32_t sectorSize = 0) :
+                 uint32_t sectorSize = 0,
+                 uint8_t  alignment = 1) :
       type(type),
       addressType(AddrPaged),
       registerAddress(registerAddress),
       pageAddress(pageAddress),
       securityAddress(securityAddress),
       sectorSize(sectorSize),
+      alignment(alignment),
       lastIndexUsed((uint32_t)-1)
    {
    }
@@ -423,6 +437,8 @@ public:
    uint32_t    getDummyAddress()   const { return memoryRanges[0].end & 0xFFFFFFF0; }
    uint32_t    getSectorSize()     const { return sectorSize; }
    AddressType getAddressType()    const { return addressType; }
+   uint8_t     getAlignment()      const { return alignment; }
+
 #if TARGET == RS08
    uint32_t    getFOPTAddress()    const { return getRegisterAddress();}
    uint32_t    getFLCRAddress()    const { return getRegisterAddress() + 1;}
@@ -475,6 +491,8 @@ public:
       }
       unsecureInfo = info;
    }
+   FlexNVMInfoPtr    getflexNVMInfo()           { return flexNVMInfo; }
+   void setflexNVMInfo(FlexNVMInfoPtr info)     { flexNVMInfo = info; }
 };
 
 typedef std::tr1::shared_ptr<MemoryRegion> MemoryRegionPtr;
@@ -505,77 +523,84 @@ public:
    } FlexNVMParameters;
 
 private:
-   std::string          targetName;             //!< Name of target
-   uint32_t             ramStart;               //!< Start of internal RAM
-   uint32_t             ramEnd;                 //!< End of internal RAM
-   ClockTypes_t         clockType;              //!< Type of clock
-   uint32_t             clockAddress;           //!< Address of Clock register block
-   uint32_t             clockTrimNVAddress;     //!< Address of Non-volatile storage of trim value
-   unsigned long int    clockTrimFreq;          //!< Trim frequency in Hz of the _internal_ clock e.g. 32.7 kHz (0 => no trim required)
-   bool                 connectionFreqGiven;    //!< Use connectionFreq if needed
-   unsigned long int    connectionFreq;         //!< BDM connection frequency in Hz
-   uint32_t             COPCTLAddress;          //!< Address of COPCTL register
-   uint32_t             SOPTAddress;            //!< Address of SOPT1 register
-   uint32_t             SDIDAddress;            //!< Address of SDID registers
-   SecurityOptions_t    security;               //!< Determines security options of programmed target (modifies NVFOPT value)
-   EraseOptions         eraseOption;            //!< How to handle erasing of flash before programming
-   uint16_t             clockTrimValue;         //!< Clock trim value calculated for a particular device
-   unsigned int         targetSDIDCount;        //!< Count of valid SDIDs intargetSDID[]
-   uint16_t             targetSDID[10];         //!< System Device Identification Register value (0=> don't know/care)
-   uint16_t             targetSDIDMask;         //!< Mask for valid bits in SDID
-//   uint32_t             securityAddress;        //!< Address of Security area in Flash
-   unsigned             memoryRegionCount;
-   MemoryRegionPtr      memoryRegions[10];      //!< Different memory regions e.g. EEPROM, RAM etc.
-   MemoryRegionPtr      lastMemoryRegionUsed;
-   TclScriptPtr         flashScripts;
-   FlashProgramPtr      flashProgram;
-   FlexNVMParameters    flexNVMParameters;
-   FlexNVMInfoPtr       flexNVMInfo;
+   std::string                   targetName;             //!< Name of target
+   std::string                   aliasName;              //!< Name of real target if alias
+   bool                          hidden;                 //!< Device is hidden in programmer
+   uint32_t                      ramStart;               //!< Start of internal RAM
+   uint32_t                      ramEnd;                 //!< End of internal RAM
+   ClockTypes_t                  clockType;              //!< Type of clock
+   uint32_t                      clockAddress;           //!< Address of Clock register block
+   uint32_t                      clockTrimNVAddress;     //!< Address of Non-volatile storage of trim value
+   unsigned long int             clockTrimFreq;          //!< Trim frequency in Hz of the _internal_ clock e.g. 32.7 kHz (0 => no trim required)
+   bool                          connectionFreqGiven;    //!< Use connectionFreq if needed
+   unsigned long int             connectionFreq;         //!< BDM connection frequency in Hz
+   uint32_t                      COPCTLAddress;          //!< Address of COPCTL register
+   uint32_t                      SOPTAddress;            //!< Address of SOPT1 register
+   uint32_t                      SDIDAddress;            //!< Address of SDID registers
+   SecurityOptions_t             security;               //!< Determines security options of programmed target (modifies NVFOPT value)
+   EraseOptions                  eraseOption;            //!< How to handle erasing of flash before programming
+   uint16_t                      clockTrimValue;         //!< Clock trim value calculated for a particular device
+   uint16_t                      targetSDIDMask;         //!< Mask for valid bits in SDID
+   std::vector<MemoryRegionPtr>  memoryRegions;          //!< Different memory regions e.g. EEPROM, RAM etc.
+   MemoryRegionPtr               lastMemoryRegionUsed;   //!< To improve memory searches
+   TclScriptPtr                  flashScripts;           //!< Flash script
+   FlashProgramPtr               flashProgram;           //!< Common flash code
+   FlexNVMParameters             flexNVMParameters;      //!< FlexNVM partitioning values
+   FlexNVMInfoPtr                flexNVMInfo;            //!< Table describing FlexNVM partitioning
+   std::vector<uint16_t>         targetSDIDs;            //!< System Device Identification Register values (0=> don't know/care)
 
 public:
-   bool                 valid;
+   bool                       valid;
    static const DeviceData    defaultDevice;
    static const unsigned int  BDMtoBUSFactor = 1;   //!< Factor relating measured BDM frequency to Target BUS frequency\n
                                                     //!< busFrequency = connectionFreq * BDMtoBUSFactor
 public:
-   const std::string getTargetName()              const { return targetName; };
-   uint32_t          getRamStart()                const { return ramStart; };
-   uint32_t          getRamEnd()                  const { return ramEnd; };
-   ClockTypes_t      getClockType()               const { return clockType; };
-   uint32_t          getClockAddress()            const { return clockAddress; };
-   uint32_t          getClockTrimNVAddress()      const { return clockTrimNVAddress; };
-   uint16_t          getClockTrimValue()          const { return clockTrimValue; };
-   unsigned long     getClockTrimFreq() /*Hz*/    const { return clockTrimFreq; };
-   unsigned long     getConnectionFreq() /*Hz*/   const { return connectionFreq; };
-   SecurityOptions_t getSecurity()                const { return security; };
-   EraseOptions      getEraseOption()             const { return eraseOption; };
+   const std::string getTargetName()              const { return targetName; }
+   const std::string getAliasName()               const { return aliasName; }
+   bool              isHidden()                   const { return hidden; }
+   uint32_t          getRamStart()                const { return ramStart; }
+   uint32_t          getRamEnd()                  const { return ramEnd; }
+   ClockTypes_t      getClockType()               const { return clockType; }
+   uint32_t          getClockAddress()            const { return clockAddress; }
+   uint32_t          getClockTrimNVAddress()      const { return clockTrimNVAddress; }
+   uint16_t          getClockTrimValue()          const { return clockTrimValue; }
+   unsigned long     getClockTrimFreq() /*Hz*/    const { return clockTrimFreq; }
+   unsigned long     getConnectionFreq() /*Hz*/   const { return connectionFreq; }
+   SecurityOptions_t getSecurity()                const { return security; }
+   EraseOptions      getEraseOption()             const { return eraseOption; }
 #if (TARGET == HC12)||(TARGET == MC56F80xx)
-   uint32_t          getCOPCTLAddress()           const { return COPCTLAddress; };
+   uint32_t          getCOPCTLAddress()           const { return COPCTLAddress; }
 #else
-   uint32_t          getSOPTAddress()             const { return SOPTAddress; };
+   uint32_t          getSOPTAddress()             const { return SOPTAddress; }
 #endif
 
-   uint32_t          getSDIDAddress()             const { return SDIDAddress; };
+   uint32_t          getSDIDAddress()             const { return SDIDAddress; }
    uint16_t          getSDIDMask()                const { return targetSDIDMask; }
 
    unsigned int      getBDMtoBUSFactor()          const { return BDMtoBUSFactor; }
 
    FlashProgramPtr   getFlashProgram()            const { return flashProgram; }
    TclScriptPtr      getFlashScripts()            const { return flashScripts; }
-   FlexNVMInfoPtr    getflexNVMInfo()             { return flexNVMInfo; }
+   FlexNVMInfoPtr    getflexNVMInfo()             const { return flexNVMInfo; }
+   const std::vector<uint16_t>
+                    &getTargetSDIDs()             const { return targetSDIDs; }
+   void setTargetSDIDs(const std::vector<uint16_t> &value) { targetSDIDs = value; }
 
    MemoryRegionPtr getMemoryRegion(unsigned index) const {
-      if (index >= memoryRegionCount)
+      if (index >= memoryRegions.size()) {
          return MemoryRegionPtr();
+      }
       return memoryRegions[index];
    }
 
    MemoryRegionPtr getMemoryRegionFor(uint32_t address, MemorySpace_t memorySpace=MS_None);
 
    uint16_t getSDID(unsigned index=0) const {
-      if (index >= targetSDIDCount)
-         return 0;
-      return targetSDID[index];
+      return targetSDIDs[index];
+//      if (index >= targetSDIDCount) {
+//         return 0;
+//      }
+//      return targetSDID[index];
    }
    static uint32_t   getDefaultClockTrimFreq(ClockTypes_t clockType);
    static uint32_t   getDefaultClockTrimNVAddress(ClockTypes_t clockType);
@@ -584,21 +609,20 @@ public:
    uint32_t          getDefaultClockTrimNVAddress() const;
    uint32_t          getDefaultClockAddress() const;
 
-   bool              isThisDevice(std::map<uint32_t,uint32_t> targetSDIDs) const ;
-   bool              isThisDevice(uint32_t targetSDID) const ;
+   bool              isThisDevice(std::map<uint32_t,uint32_t> targetSDIDs, bool acceptZero=true) const ;
+   bool              isThisDevice(uint32_t targetSDID, bool acceptZero=true) const ;
 
    MemType_t         getMemoryType(uint32_t address, MemorySpace_t memorySpace=MS_None);
    uint16_t          getPageNo(uint32_t address);
 
    void  addSDID(uint16_t newSDID) {
-      if (targetSDIDCount>= sizeof(targetSDID)/sizeof(targetSDID[0]))
-         throw MyException("DeviceData::addSDID() - Too many SDIDs");
-      targetSDID[targetSDIDCount++] = newSDID;
+      targetSDIDs.push_back(newSDID);
+//      if (targetSDIDCount>= sizeof(targetSDID)/sizeof(targetSDID[0]))
+//         throw MyException("DeviceData::addSDID() - Too many SDIDs");
+//      targetSDID[targetSDIDCount++] = newSDID;
    }
    void addMemoryRegion(MemoryRegionPtr pMemoryRegion) {
-      if (memoryRegionCount >= (sizeof(memoryRegions)/sizeof(memoryRegions[0])))
-         throw MyException("DeviceData::addMemoryRegion() - Too many memory regions");
-      memoryRegions[memoryRegionCount++] = pMemoryRegion;
+      memoryRegions.push_back(pMemoryRegion);
       if (((pMemoryRegion->getMemoryType() == MemRAM)||
            (pMemoryRegion->getMemoryType() == MemXRAM)) && (ramStart == 0)) {
          const MemoryRegion::MemoryRange *mr = pMemoryRegion->getMemoryRange(0);
@@ -609,28 +633,33 @@ public:
          ramStart = mr->start;
          ramEnd   = mr->end;
       }
-//      cerr << *pMemoryRegion << endl;
+      if (pMemoryRegion->getMemoryType() == MemFlexNVM) {
+         // Copy FlexInfo from memory region to device
+         setflexNVMInfo(pMemoryRegion->getflexNVMInfo());
+      }
    }
 
-   void setTargetName(const std::string &value)       { targetName = value; };
-   void setRamStart(uint32_t value)                   { ramStart = value; };
-   void setRamEnd(uint32_t value)                     { ramEnd = value; };
-   void setClockType(ClockTypes_t value)              { clockType = value; };
-   void setClockAddress(uint32_t value)               { clockAddress = value; };
-   void setClockTrimNVAddress(uint32_t value)         { clockTrimNVAddress = value; };
-   void setClockTrimValue(uint16_t value)             { clockTrimValue = value; };
-   void setClockTrimFreq(unsigned long value) /*Hz*/  { clockTrimFreq = value; };
-   void setConnectionFreq(unsigned long value /*Hz*/) { connectionFreq = value; };
-   void setSecurity(SecurityOptions_t value)          { security = value; };
-   void setEraseOption(EraseOptions value)            { eraseOption = value; };
+   void setTargetName(const std::string &value)       { targetName = value; }
+   void setAliasName(const std::string &value)        { aliasName = value; }
+   void setHidden(bool value = true)                  { hidden = value; }
+   void setRamStart(uint32_t value)                   { ramStart = value; }
+   void setRamEnd(uint32_t value)                     { ramEnd = value; }
+   void setClockType(ClockTypes_t value)              { clockType = value; }
+   void setClockAddress(uint32_t value)               { clockAddress = value; }
+   void setClockTrimNVAddress(uint32_t value)         { clockTrimNVAddress = value; }
+   void setClockTrimValue(uint16_t value)             { clockTrimValue = value; }
+   void setClockTrimFreq(unsigned long value) /*Hz*/  { clockTrimFreq = value; }
+   void setConnectionFreq(unsigned long value /*Hz*/) { connectionFreq = value; }
+   void setSecurity(SecurityOptions_t value)          { security = value; }
+   void setEraseOption(EraseOptions value)            { eraseOption = value; }
 #if (TARGET == HC12)||(TARGET == MC56F80xx)
-   void setCOPCTLAddress(uint32_t value)              { COPCTLAddress = value; };
+   void setCOPCTLAddress(uint32_t value)              { COPCTLAddress = value; }
 #else
-   void setSOPTAddress(uint32_t value)                { SOPTAddress = value; };
+   void setSOPTAddress(uint32_t value)                { SOPTAddress = value; }
 #endif
-   void setSDIDAddress(uint32_t value)                { SDIDAddress = value; };
-   void setSDIDMask(uint16_t value)                   { targetSDIDMask = value; };
-//   void setSecurityAddress(uint32_t value)            { securityAddress = value; };
+   void setSDIDAddress(uint32_t value)                { SDIDAddress = value; }
+   void setSDIDMask(uint16_t value)                   { targetSDIDMask = value; }
+//   void setSecurityAddress(uint32_t value)            { securityAddress = value; }
    void setFlashScripts(TclScriptPtr script)          { flashScripts = script; }
    void setFlashProgram(FlashProgramPtr program)      { flashProgram = program; }
    void setflexNVMInfo(FlexNVMInfoPtr info)           { flexNVMInfo = info; }
@@ -640,6 +669,7 @@ public:
    const FlexNVMParameters *getFlexNVMParameters() {
       return &flexNVMParameters;
    }
+   bool isAlias(void) const { return !aliasName.empty();}
 
 //#if (TARGET == HC12)
 //   void setFSECAddress(uint32_t value)                     { FSECAddress = value; }
@@ -665,6 +695,8 @@ public:
                unsigned int         connectFrequency        = 8000,
                uint16_t             clockTrimValue          = 0
                   ) : targetName(targetName),
+                      aliasName(""),
+                      hidden(false),
                       ramStart(ramStart),
                       ramEnd(ramEnd),
                       clockType(clockType),
@@ -679,14 +711,16 @@ public:
                       security(security),
                       eraseOption(eraseAll),
                       clockTrimValue(clockTrimValue),
-                      targetSDIDCount(0),
                       targetSDIDMask(0),
-                      memoryRegionCount(0),
                       valid(true)
                       {
 //      print("DeviceData::DeviceData()\n");
+      flexNVMParameters.eeepromSize  = 0xFF;
+      flexNVMParameters.partionValue = 0xFF;
    };
    DeviceData() : targetName(""),
+                  aliasName(""),
+                  hidden(false),
                   ramStart(0),
                   ramEnd(0),
                   clockType(CLKINVALID),
@@ -701,12 +735,12 @@ public:
                   security(SEC_DEFAULT),
                   eraseOption(eraseAll),
                   clockTrimValue(0),
-                  targetSDIDCount(0),
                   targetSDIDMask(0),
-                  memoryRegionCount(0),
                   valid(true)
                   {
 //      print("DeviceData::DeviceData() - default\n");
+      flexNVMParameters.eeepromSize  = 0xFF;
+      flexNVMParameters.partionValue = 0xFF;
    }
    ~DeviceData();
 };
@@ -726,13 +760,14 @@ private:
    DeviceDataBase &operator=(DeviceDataBase &);
 
 public:
-   bool   loadDeviceData();
+   void   loadDeviceData();
 
    const DeviceData *findDeviceFromName(const std::string &targetName);
    int findDeviceIndexFromName(const std::string &targetName);
    const DeviceData &operator[](unsigned index) {
-      if (index > deviceData.size())
+      if (index > deviceData.size()) {
          throw MyException("DeviceDataBase::operator[] - illegal index");
+      }
       return *deviceData[index];
    };
    std::vector<DeviceData *>::iterator begin() {

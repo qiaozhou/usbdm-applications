@@ -1,10 +1,32 @@
-/*
- * ErrorMessages.h
- *
- *  Created on: 03/05/2012
- *      Author: PODonoghue
- */
+/*! \file
+     ErrorMessages.h
 
+    \verbatim
+    Copyright (C) 2010  Peter O'Donoghue
+
+    Based on material from OSBDM-JM60 Target Interface Software Package
+    Copyright (C) 2009  Freescale
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    Change History
+   +====================================================================
+   |    May 2010 | Created
+   +====================================================================
+    \endverbatim
+*/
 #ifndef USBDMERRORMESSAGES_H_
 #define USBDMERRORMESSAGES_H_
 
@@ -98,6 +120,7 @@ typedef enum  {
  PROGRAMMING_RC_ERROR_TCL_POSTPROGRAM_SCRIPT   = 128,   //!< 28 Execution of TCL script returned a error
  PROGRAMMING_RC_ERROR_OUTSIDE_TARGET_FLASH     = 129,   //!< 29 Image is outside target Flash memory
  PROGRAMMING_RC_ERROR_ILLEGAL_SECURITY         = 130,   //!< 30 Illegal Security value (will lock chip forever)
+ PROGRAMMING_RC_FLEXNVM_CONFIGURATION_FAILED   = 131,   //!< 31 Failed to program FlexNVM Configuration values.
 
  // File Loader errors
  SFILE_RC_OK                                   = 0,    //!< No error

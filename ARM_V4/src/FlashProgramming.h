@@ -28,11 +28,9 @@ struct FlashProgramHeader_t {
    uint32_t         loadAddress;       // Address where to load this image
    uint32_t         entry;             // Ptr to entry routine
    uint32_t         capabilities;      // Capabilities of routine
-// uint8_t          reserved2[32];     // Reserved for target specific use, values may be copied from XML
-   uint16_t         reserved1;
-   uint8_t          reserved3[30];     // Reserved for future programmer use
+   uint32_t         reserved1;
+   uint32_t         reserved2;
    uint32_t         flashData;         // Ptr to information about operation
-   uint8_t          reserved4[32];     // Reserved for target specific use, values may be copied from XML
 } ;
 #pragma pack()
 
@@ -74,34 +72,36 @@ private:
 
    USBDM_ErrorCode initialiseTargetFlash();
    USBDM_ErrorCode initialiseTarget();
-   USBDM_ErrorCode setFlashSecurity(FlashImage      &flashImageDescription,
-                                 MemoryRegionPtr flashRegion);
-   USBDM_ErrorCode setFlashSecurity(FlashImage  &flashImageDescription);
-   USBDM_ErrorCode trimTargetClock(uint32_t           trimAddress,
-                                   unsigned long targetBusFrequency,
-                                   uint16_t           *returnTrimValue,
+   USBDM_ErrorCode setFlashSecurity(FlashImage      &flashImage,
+                                    MemoryRegionPtr flashRegion);
+   USBDM_ErrorCode setFlashSecurity(FlashImage  &flashImage);
+   USBDM_ErrorCode trimTargetClock(uint32_t       trimAddress,
+                                   unsigned long  targetBusFrequency,
+                                   uint16_t      *returnTrimValue,
                                    unsigned long *measuredBusFrequency,
-                                   int           do9BitTrim);
+                                   int            do9BitTrim);
    USBDM_ErrorCode configureExternal_Clock(unsigned long  *busFrequency);
    USBDM_ErrorCode eraseFlash(void);
    USBDM_ErrorCode convertTargetErrorCode(FlashDriverError_t rc);
    USBDM_ErrorCode executeTargetProgram(FlashData_t *flashProgramData, uint32_t size);
    USBDM_ErrorCode determineTargetSpeed(void);
-   USBDM_ErrorCode doFlashBlock(FlashImage    *flashImageDescription,
+   USBDM_ErrorCode doFlashBlock(FlashImage    *flashImage,
                                 unsigned int   blockSize,
                                 uint32_t      &flashAddress,
                                 uint32_t       flashoperation);
-   USBDM_ErrorCode applyFlashOperation(FlashImage *flashImageDescription, uint32_t operation);
-   USBDM_ErrorCode doVerify(FlashImage *flashImageDescription);
-   USBDM_ErrorCode doSelectiveErase(FlashImage  *flashImageDescription);
-   USBDM_ErrorCode doProgram(FlashImage  *flashImageDescription);
-   USBDM_ErrorCode doBlankCheck(FlashImage *flashImageDescription);
+   USBDM_ErrorCode selectiveEraseFlashSecurity(void);
+   USBDM_ErrorCode applyFlashOperation(FlashImage *flashImage, uint32_t operation);
+   USBDM_ErrorCode doVerify(FlashImage *flashImage);
+   USBDM_ErrorCode doSelectiveErase(FlashImage  *flashImage);
+   USBDM_ErrorCode doProgram(FlashImage  *flashImage);
+   USBDM_ErrorCode doBlankCheck(FlashImage *flashImage);
    USBDM_ErrorCode doWriteRam(FlashImage *flashImage);
    USBDM_ErrorCode loadTargetProgram();
    USBDM_ErrorCode loadTargetProgram(FlashProgramPtr flashProgram);
    USBDM_ErrorCode probeMemory(MemorySpace_t memorySpace, uint32_t address);
 
 public:
+   USBDM_ErrorCode partitionFlexNVM(void);
    USBDM_ErrorCode initTCL(void);
    USBDM_ErrorCode releaseTCL(void);
    USBDM_ErrorCode setDeviceData(const DeviceData  &theParameters);
@@ -109,8 +109,8 @@ public:
    USBDM_ErrorCode runTCLScript(TclScriptPtr script);
    USBDM_ErrorCode runTCLCommand(const char *command);
    USBDM_ErrorCode massEraseTarget();
-   USBDM_ErrorCode programFlash(FlashImage *flashImageDescription, CallBackT errorCallBack=NULL, bool doRamWrites=false);
-   USBDM_ErrorCode verifyFlash(FlashImage  *flashImageDescription, CallBackT errorCallBack=NULL, bool doRamWrites=false);
+   USBDM_ErrorCode programFlash(FlashImage *flashImage, CallBackT errorCallBack=NULL, bool doRamWrites=false);
+   USBDM_ErrorCode verifyFlash(FlashImage  *flashImage, CallBackT errorCallBack=NULL, bool doRamWrites=false);
    USBDM_ErrorCode readTargetChipId(uint32_t *targetSDID, bool doInit=false);
    USBDM_ErrorCode confirmSDID(void);
    

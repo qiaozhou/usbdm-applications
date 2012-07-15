@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>DSC_V4</name>
+	<name>HCS08Plus_V4</name>
 	<comment></comment>
 	<projects>
-		<project>DSC_V4</project>
+		<project>Shared_V4</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -28,7 +28,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/wxWidgets/Release}</value>
+					<value>${workspace_loc:/wxWidgets/Debug}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.contents</key>

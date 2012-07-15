@@ -109,9 +109,11 @@ private:
    NumberTextEditCtrl*           resetDurationTextControl;
    NumberTextEditCtrl*           resetReleaseIntervalTextControl;
    NumberTextEditCtrl*           resetRecoveryIntervalTextControl;
+#if (TARGET==CFV1) || (TARGET==ARM)
    wxChoice*                     eeepromSizeChoiceControl;
    wxChoice*                     flexNvmPartitionChoiceControl;
    wxStaticText*                 flexNvmDescriptionStaticControl;
+#endif
    USBDM_ExtendedOptions_t       bdmOptions;
    static const string           settingsKey;
    int                           eeepromSizeChoice;      // Choice for eeepromSizeChoice control & index for eeepromSizeValues[]

@@ -88,11 +88,11 @@ private:
    USBDM_ErrorCode setFlashSecurity(FlashImage      &flashImageDescription,
                                     MemoryRegionPtr flashRegion);
    USBDM_ErrorCode setFlashSecurity(FlashImage  &flashImageDescription);
-   USBDM_ErrorCode trimTargetClock(uint32_t           trimAddress,
-                                   unsigned long targetBusFrequency,
-                                   uint16_t           *returnTrimValue,
+   USBDM_ErrorCode trimTargetClock(uint32_t       trimAddress,
+                                   unsigned long  targetBusFrequency,
+                                   uint16_t      *returnTrimValue,
                                    unsigned long *measuredBusFrequency,
-                                   int           do9BitTrim);
+                                   int            do9BitTrim);
    USBDM_ErrorCode configureExternal_Clock(unsigned long  *busFrequency);
    USBDM_ErrorCode eraseFlash(void);
    USBDM_ErrorCode convertTargetErrorCode(FlashDriverError_t rc);

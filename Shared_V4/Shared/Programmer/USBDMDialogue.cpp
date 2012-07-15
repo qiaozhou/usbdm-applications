@@ -650,7 +650,7 @@ void USBDMDialogue::getBdmOptions( USBDM_ExtendedOptions_t &bdmOptions ) {
 //! @param event The event to handle.
 //!
 void USBDMDialogue::OnSelChanging( wxNotebookEvent& event ) {
-   print("USBDMDialogue::OnSelChanging(%d => %d)\n", event.GetOldSelection(), event.GetSelection());
+//   print("USBDMDialogue::OnSelChanging(%d => %d)\n", event.GetOldSelection(), event.GetSelection());
 
    int leavingPage = event.GetOldSelection();
    if (leavingPage < 0) {
@@ -687,7 +687,7 @@ void USBDMDialogue::OnSelChanging( wxNotebookEvent& event ) {
 //! @param event The event to handle.
 //!
 void USBDMDialogue::OnSelChanged( wxNotebookEvent& event ) {
-   print("USBDMDialogue::OnSelChanged(%d => %d)\n", event.GetOldSelection(), event.GetSelection());
+//   print("USBDMDialogue::OnSelChanged(%d => %d)\n", event.GetOldSelection(), event.GetSelection());
 #ifdef FLASH_PROGRAMMER
    int enteringPage = event.GetSelection();
    if (enteringPage < 0) {

@@ -9,6 +9,92 @@
 
 class ProgressTimer;
 
+#pragma pack(1)
+//! Header at the start of flash programming code (describes flash code)
+struct LargeTargetImageHeader {
+   uint16_t         loadAddress;       // Address where to load this image
+   uint16_t         entry;             // Ptr to entry routine (for currently loaded routine)
+   uint16_t         capabilities;      // Capabilities of routine
+   uint32_t         clockFactor;       // Calibration factor for speed determination
+   uint16_t         flashData;         // Ptr to information about operation
+};
+
+// Timing information
+struct LargeTimingData {
+   uint16_t         errorCode;         // Error code from action
+   uint16_t         flags;             // Controls actions of routine
+   uint16_t         controller;        // Ptr to flash controller (unused)
+   uint32_t         timingCount;       // Timing count
+};
+
+//! Header at the start of flash programming buffer (controls program action)
+struct LargeTargetFlashDataHeader {
+   uint16_t         errorCode;         // Error code from action
+   uint16_t         flags;             // Controls actions of routine
+   uint16_t         controller;        // Ptr to flash controller
+   uint16_t         watchdogAddress;   // Address of watch-dog register
+   uint16_t         frequency;         // Target frequency (kHz)
+   uint16_t         sectorSize;        // Size of Flash memory sectors (smallest erasable block)
+   uint32_t         address;           // Memory address being accessed (reserved/page/address)
+   uint16_t         dataSize;          // Size of memory range being accessed
+   uint16_t         dataAddress;       // Address of RAM data buffer
+};
+
+//! Header at the start of flash programming code (describes flash code)
+struct SmallTargetImageHeader {
+   uint8_t          flags;
+   uint8_t          program;         // Offset of flash programming code in image
+   uint8_t          massErase;       // Offset of flash mass erase code in image
+   uint8_t          blankCheck;      // Offset of flash blank check code in image
+   uint8_t          selectiveErase;  // Offset of flash selective code in image
+   uint8_t          verify;          // Offset of flash verify code in image
+};
+
+//! Header at the start of flash programming buffer (controls program action)
+struct SmallTargetFlashDataHeader {
+   uint16_t         flashAddress;            // Memory flashAddress being programmed/erased
+   uint16_t         controller;              // Ptr to flash controller
+   uint16_t         dataAddress_sectorSize;  // Ptr to data buffer or sector size
+   uint16_t         dataSize_sectorCount;    // Size of memory range being accessed or number of sectors
+   uint16_t         pageAddress;             // Address of PPAGE or EPAGE register
+   uint8_t          pageNum;                 // Page number
+};
+//!
+struct ResultStruct {
+   uint16_t          errorCode;              // Error code from operation
+   uint8_t           reserved[9];
+};
+//!
+struct LoadInfoStruct {
+   uint8_t          flags;                   // B7 => small program
+};
+#pragma pack()
+
+//! Describes the flash programming code (created from loaded flash routines)
+struct TargetProgramInfo {
+   uint16_t         entry;                   //!< Address of entry routine (for currently loaded routine)
+   uint16_t         headerAddress;           //!< Address where to load data image (including header)
+   uint16_t         dataOffset;              //!< Offset to data buffer within image
+   uint16_t         maxDataSize;             //!< Maximum data buffer size
+   uint32_t         clockFactor;
+   uint16_t         capabilities;
+   bool             smallProgram;            // Indicates small version of flash code being used
+   bool             usePagedAddresses;       // Set up paged addressing information
+};
+
+enum FlashOperation {OpNone, OpProgram, OpSelectiveErase, OpMassErase, OpVerify, OpBlankCheck, OpWriteRam};
+//! Describes the flash operation to be done
+struct FlashOperationInfo {
+   uint8_t          operation;               // Controls actions of routine
+   uint32_t         controller;              // Address of flash controller
+   uint32_t         pageAddress;             // Address of PPAGE or EPAGE register
+   uint32_t         flashAddress;            // Memory flashAddress being programmed/erased (may include pageNo etc)
+   uint32_t         dataSize;                // Size of data to program/verify
+   uint16_t         sectorSize;              // Sector size
+   uint32_t         targetBusFrequency;      // Measured target bus frequency (kHz)
+   uint32_t         alignment;               // Flash programming alignment (1,2,4,8,16,32 bytes)
+};
+
 class FlashProgrammer {
 
 private:
@@ -70,30 +156,35 @@ private:
 
    typedef USBDM_ErrorCode (*CallBackT)(USBDM_ErrorCode status, int percent, const char *message);
 
-   DeviceData              parameters;       //!< Parameters describing the target device
-   Tcl_Interp              *tclInterpreter;  //!< TCL interpreter
+   DeviceData              parameters;               //!< Parameters describing the target device
+   Tcl_Interp              *tclInterpreter;          //!< TCL interpreter
    bool                    useTCLScript;
-   bool                    flashReady;       //!< Safety check - only TRUE when flash is ready for programming
-   bool                    initTargetDone;   //! Indicates initTarget() has been done.
-   uint32_t                targetBusFrequency;  //! kHz
+   bool                    flashReady;               //!< Safety check - only TRUE when flash is ready for programming
+   bool                    initTargetDone;           //!< Indicates initTarget() has been done.
+   TargetProgramInfo       targetProgramInfo;        //!< Describes loaded flash code
+   FlashOperationInfo      flashOperationInfo;       //!< Describes flash operation
+
    FlashProgramPtr         currentFlashProgram;
+   FlashOperation          currentFlashOperation;
+   uint32_t                currentFlashAlignment;
+   uint32_t                offset;
    ProgressTimer          *progressTimer;
    bool                    doRamWrites;
 
    USBDM_ErrorCode initialiseTargetFlash();
    USBDM_ErrorCode initialiseTarget();
-   USBDM_ErrorCode setFlashSecurity(FlashImage      &flashImageDescription,
+   USBDM_ErrorCode setFlashSecurity(FlashImage      &flashImage,
                                     MemoryRegionPtr flashRegion);
-   USBDM_ErrorCode setFlashSecurity(FlashImage  &flashImageDescription);
-   USBDM_ErrorCode trimTargetClock(uint32_t           trimAddress,
-                                   unsigned long targetBusFrequency,
-                                   uint16_t           *returnTrimValue,
+   USBDM_ErrorCode setFlashSecurity(FlashImage  &flashImage);
+   USBDM_ErrorCode trimTargetClock(uint32_t       trimAddress,
+                                   unsigned long  targetBusFrequency,
+                                   uint16_t      *returnTrimValue,
                                    unsigned long *measuredBusFrequency,
-                                   int           do9BitTrim);
+                                   int            do9BitTrim);
    USBDM_ErrorCode trimICS_Clock(ICS_ClockParameters_t *clockParameters);
    USBDM_ErrorCode trimICG_Clock(ICG_ClockParameters_t *clockParameters);
    USBDM_ErrorCode trimMCG_Clock(MCG_ClockParameters_t *clockParameters);
-   USBDM_ErrorCode setFlashTrimValues(FlashImage *flashImageDescription);
+   USBDM_ErrorCode setFlashTrimValues(FlashImage *flashImage);
 
    USBDM_ErrorCode configureICS_Clock(unsigned long         *busFrequency,
                                       ICS_ClockParameters_t *clockParameters);
@@ -103,16 +194,40 @@ private:
                                       MCG_ClockParameters_t *clockParameters);
    USBDM_ErrorCode configureTargetClock(unsigned long  *busFrequency);
    USBDM_ErrorCode configureExternal_Clock(unsigned long  *busFrequency);
-   USBDM_ErrorCode programBlock(FlashImage    *flashImageDescription,
+   USBDM_ErrorCode eraseFlash(void);
+   USBDM_ErrorCode convertTargetErrorCode(FlashDriverError_t rc);
+   USBDM_ErrorCode initSmallTargetBuffer(uint8_t *buffer);
+   USBDM_ErrorCode initLargeTargetBuffer(uint8_t *buffer);
+   USBDM_ErrorCode executeTargetProgram(uint8_t *buffer=0, uint32_t size=0);
+   USBDM_ErrorCode determineTargetSpeed(void);
+   USBDM_ErrorCode doFlashBlock(FlashImage    *flashImage,
                                 unsigned int   blockSize,
-                                uint32_t       flashAddress);
-   USBDM_ErrorCode doVerify(FlashImage *flashImageDescription);
-   USBDM_ErrorCode blankCheckBlock(FlashImage   *flashImageDescription,
-                                unsigned int  blockSize,
-                                unsigned int  flashAddress);
-   USBDM_ErrorCode loadTargetProgram();
+                                uint32_t      &flashAddress,
+                                FlashOperation flashOperation);
+   USBDM_ErrorCode selectiveEraseFlashSecurity(void);
+   USBDM_ErrorCode doTargetVerify(FlashImage *flashImage);
+   USBDM_ErrorCode doReadbackVerify(FlashImage *flashImage);
+   USBDM_ErrorCode applyFlashOperation(FlashImage *flashImage, FlashOperation flashOperation);
+   USBDM_ErrorCode doVerify(FlashImage *flashImage);
+   USBDM_ErrorCode doSelectiveErase(FlashImage  *flashImage);
+   USBDM_ErrorCode doProgram(FlashImage  *flashImage);
+   USBDM_ErrorCode doBlankCheck(FlashImage *flashImage);
+   USBDM_ErrorCode doWriteRam(FlashImage *flashImage);
+   USBDM_ErrorCode loadTargetProgram(FlashOperation flashOperation);
+   USBDM_ErrorCode loadTargetProgram(FlashProgramPtr flashProgram, FlashOperation flashOperation);
+   USBDM_ErrorCode loadSmallTargetProgram(memoryElementType *buffer,
+                                          uint32_t           loadAddress,
+                                          uint32_t           size,
+                                          FlashProgramPtr    flashProgram,
+                                          FlashOperation     flashOperation);
+   USBDM_ErrorCode loadLargeTargetProgram(memoryElementType *buffer,
+                                          uint32_t           loadAddress,
+                                          uint32_t           size,
+                                          FlashProgramPtr    flashProgram,
+                                          FlashOperation     flashOperation);
    USBDM_ErrorCode probeMemory(MemorySpace_t memorySpace, uint32_t address);
-   USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImageDescription);
+   USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImage);
+   USBDM_ErrorCode getPageAddress(MemoryRegionPtr memoryRegionPtr, uint32_t address, uint8_t *pageNo);
    USBDM_ErrorCode setPageRegisters(uint32_t physicalAddress);
 
 public:
@@ -123,8 +238,8 @@ public:
    USBDM_ErrorCode runTCLScript(TclScriptPtr script);
    USBDM_ErrorCode runTCLCommand(const char *command);
    USBDM_ErrorCode massEraseTarget();
-   USBDM_ErrorCode programFlash(FlashImage *flashImageDescription, CallBackT errorCallBack=NULL, bool doRamWrites=false);
-   USBDM_ErrorCode verifyFlash(FlashImage  *flashImageDescription, CallBackT errorCallBack=NULL);
+   USBDM_ErrorCode programFlash(FlashImage *flashImage, CallBackT errorCallBack=NULL, bool doRamWrites=false);
+   USBDM_ErrorCode verifyFlash(FlashImage  *flashImage, CallBackT errorCallBack=NULL);
    USBDM_ErrorCode readTargetChipId(uint32_t *targetSDID, bool doInit=false);
    USBDM_ErrorCode confirmSDID(void);
    
@@ -138,7 +253,8 @@ public:
       useTCLScript(true),
       flashReady(false),
       initTargetDone(false),
-      targetBusFrequency(0),
+      currentFlashOperation(OpNone),
+      currentFlashAlignment(0),
       progressTimer(NULL),
       doRamWrites(false) {
 //      print("FlashProgrammer()\n");

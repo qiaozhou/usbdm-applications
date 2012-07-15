@@ -279,34 +279,38 @@ int sub;
 //!
 //! @return true/false result of check
 //!
-bool DeviceData::isThisDevice(uint32_t  desiredSDID) const {
+bool DeviceData::isThisDevice(uint32_t  desiredSDID, bool acceptZero) const {
    unsigned int index;
 
-   if (targetSDID[0] == 0) // 0x0000 matches all
+   if (((targetSDIDs.size() == 0)||(targetSDIDs[0]) == 0) && acceptZero) {
+      // 0x0000 or empty matches all
       return true;
-   for (index=0; index<targetSDIDCount; index++) {
+   }
+   for (index=0; index<targetSDIDs.size(); index++) {
 //      print("Comparing 0x%04X with 0x%04X\n", targetSDID[index], desiredSDID);
-      if (((targetSDID[index]^desiredSDID)&targetSDIDMask) == 0x0000)
+      if (((targetSDIDs[index]^desiredSDID)&targetSDIDMask) == 0x0000)
          return true;
    }
    return false;
 }
 
-//! Checks if the SDID is used by the device
+//! Checks if any of the SDIDs provided are used by the device
 //!
-//! @param desiredSDIDs list of SDIDs to check against
+//! @param desiredSDIDs map of {SDIDaddress,SDIDs} to check against
 //!
 //! @return true/false result of check
 //!
-bool DeviceData::isThisDevice(std::map<uint32_t,uint32_t> desiredSDIDs) const {
+bool DeviceData::isThisDevice(std::map<uint32_t,uint32_t> desiredSDIDs, bool acceptZero) const {
    map<uint32_t,uint32_t>::iterator sdidEntry;
 
-   if (targetSDID[0] == 0) // 0x0000 matches all
+   if (((targetSDIDs.size() == 0)||(targetSDIDs[0]) == 0) && acceptZero) {
+      // 0x0000 or empty matches all
       return true;
+   }
    for (sdidEntry = desiredSDIDs.begin();
         sdidEntry != desiredSDIDs.end();
         sdidEntry++) {
-      if ((SDIDAddress == sdidEntry->first) && isThisDevice(sdidEntry->second ))
+      if ((SDIDAddress == sdidEntry->first) && isThisDevice(sdidEntry->second, acceptZero ))
          return true;
       }
    return false;
@@ -383,25 +387,40 @@ uint16_t DeviceData::getPageNo(uint32_t address) {
 //!
 //! @returns entry found or NULL if no suitable device found
 //!
+//! @note - If the device is an alias then it will return the true device
+//!
 const DeviceData *DeviceDataBase::findDeviceFromName(const string &targetName) {
 
-   print("findDeviceFromName(%s)\n", (const char *)targetName.c_str());
+   static int recursionCheck = 0;
+//   print("findDeviceFromName(%s)\n", (const char *)targetName.c_str());
 
+   if (recursionCheck++>5) {
+      throw MyException("Recursion limit in DeviceDataBase::findDeviceFromName");
+   }
    // Note - Assumes ASCII string
    char buff[50];
    strncpy(buff, targetName.c_str(), sizeof(buff));
    buff[sizeof(buff)-1] = '\0';
    strupr(buff);
 
+   const DeviceData *theDevice = NULL;
    vector<DeviceData *>::iterator it;
    for (it = deviceData.begin(); it != deviceData.end(); it++) {
       if (strcmp((*it)->getTargetName().c_str(), buff) == 0) {
-         print("findDeviceFromName(%s) found %s\n", buff, (const char *)((*it)->getTargetName().c_str()));
-         return *it;
+         theDevice = *it;
+         print("findDeviceFromName(%s) found %s%s\n",
+               buff, (const char *)(theDevice->getTargetName().c_str()), theDevice->isAlias()?"(alias)":"");
+         if (theDevice->isAlias()) {
+            theDevice = findDeviceFromName(theDevice->getAliasName());
+         }
+         break;
       }
    }
-   print("findDeviceFromName(%s) => Device not found\n", (const char *)targetName.c_str());
-   return NULL;
+   recursionCheck--;
+   if (theDevice == NULL) {
+      print("findDeviceFromName(%s) => Device not found\n", (const char *)targetName.c_str());
+   }
+   return theDevice;
 }
 
 //! Searches the known devices for a device with given name
@@ -426,7 +445,7 @@ const DeviceData *DeviceDataBase::defaultDevice = NULL;
 
 //! \brief Loads the known devices list from the configuration file.
 //!
-bool DeviceDataBase::loadDeviceData(void) {
+void DeviceDataBase::loadDeviceData(void) {
 #if TARGET == HCS08
    #define configFilename "hcs08_devices.xml"
 #elif TARGET == RS08
@@ -447,31 +466,34 @@ bool DeviceDataBase::loadDeviceData(void) {
    try {
       string appFilePath = getApplicationFilePath("Device_data/" configFilename);
       if (appFilePath.empty()) {
-         throw MyException("DeviceDataBase::loadDeviceData() - failed to find device file");
+         throw MyException("DeviceDataBase::loadDeviceData() - failed to find device database file");
       }
       DeviceXmlParser::loadDeviceData(appFilePath, this);
-//      // Find default device
-//      const DeviceData *defaultDevice = findDeviceFromName("_Default");
-//      if (defaultDevice == NULL) {
-//         throw MyException("DeviceDataBase::loadDeviceData() - failed to find default device");
-//      }
-//      this->defaultDevice = defaultDevice;
    }
    catch (MyException &exception) {
       // Create dummy default device
-//      defaultDevice = *deviceData.insert(deviceData.end(), new DeviceData()).base();
-      print("DeviceXmlParser::loadDeviceData() - Exception %s\n", exception.what());
-      return false;
+//      defaultDevice = *aDevice.insert(aDevice.end(), new DeviceData()).base();
+      print("DeviceDataBase::loadDeviceData() - Exception \'%s\'\n", exception.what());
+      deviceData.clear();
+      DeviceData *aDevice = new DeviceData();
+      aDevice->setTargetName("Invalid Database");
+      setDefaultDevice(aDevice);
+      addDevice(aDevice);
+      throw exception;
    }
    catch (...) {
-      print("DeviceXmlParser::loadDeviceData() - Unknown exception\n");
-      return false;
+      print("DeviceDataBase::loadDeviceData() - Unknown exception\n");
+      deviceData.clear();
+      DeviceData *aDevice = new DeviceData();
+      aDevice->setTargetName("Invalid Database");
+      setDefaultDevice(aDevice);
+      addDevice(aDevice);
+      throw MyException("DeviceDataBase::loadDeviceData() - Unknown exception");
    }
 #ifdef LOG
    listDevices();
 #endif
    print("DeviceDataBase::loadDeviceData() - %d devices loaded\n", deviceData.size());
-   return true;
 }
 
 void DeviceDataBase::listDevices() {
@@ -480,6 +502,19 @@ void DeviceDataBase::listDevices() {
    int lineCount = 0;
    try {
       for (it = deviceData.begin(); it != deviceData.end(); it++) {
+         const DeviceData *deviceData = (*it);
+         if (deviceData == NULL) {
+            print("Null device pointer\n");
+            continue;
+         }
+         bool aliased = deviceData->isAlias();
+         if (aliased) {
+            deviceData = findDeviceFromName(deviceData->getTargetName());
+            if (deviceData == NULL) {
+               print("Failed to find alias\n");
+               continue;
+            }
+         }
 #if (TARGET == ARM) || (TARGET == CFVx)
          if (lineCount == 0) {
             print("\n"
@@ -487,40 +522,40 @@ void DeviceDataBase::listDevices() {
                   "#    Target           Address    SDID          Script? Flash?              \n"
                   "#=========================================================================\n");
          }
-         print("%-20s 0x%08X 0x%08X %7s %7s\n",
-               (*it)->getTargetName().c_str(),
-//                  ClockTypes::getClockName((*it)->getClockType()).c_str(),
-//                  (*it)->getClockAddress(),
-//                  (*it)->getClockTrimNVAddress(),
-//                  (*it)->getClockTrimFreq()/1000.0,
-               (*it)->getSDIDAddress(),
-               (*it)->getSDID(),
-               (*it)->getFlashScripts()?"Yes":"No",
-               (*it)->getFlashProgram()?"Yes":"No"
+         print("%-20s%s 0x%08X 0x%08X %7s %7s\n",
+               deviceData->getTargetName().c_str(), aliased?"(A)":"   ",
+//                  ClockTypes::getClockName(deviceData->getClockType()).c_str(),
+//                  deviceData->getClockAddress(),
+//                  deviceData->getClockTrimNVAddress(),
+//                  deviceData->getClockTrimFreq()/1000.0,
+               deviceData->getSDIDAddress(),
+               deviceData->getSDID(),
+               deviceData->getFlashScripts()?"Yes":"No",
+               deviceData->getFlashProgram()?"Yes":"No"
          );
 #else
          if (lineCount == 0) {
             print("\n"
-                  "#                      RAM       Clock    Clock   NVTRIM    Trim                                    \n"
-                  "#    Target        Start   End    Name     Addr     Addr     Freq.    SDIDA    SDID Scripts? FlashP? \n"
-                  "#==================================================================================================\n");
+                  "#                      RAM          Clock    Clock   NVTRIM    Trim                                     \n"
+                  "# Target         Start     End      Name     Addr     Addr     Freq.  SDIDA    SDID  Scripts? FlashP?   \n"
+                  "#=======================================================================================================\n");
          }
-         print("%-14s 0x%06X 0x%06X %10s 0x%06X 0x%06X %6f %08X %08X %4s %4s\n",
-               (*it)->getTargetName().c_str(),
-               (*it)->getRamStart(), (*it)->getRamEnd(),
-               ClockTypes::getClockName((*it)->getClockType()).c_str(),
-               (*it)->getClockAddress(),
-               (*it)->getClockTrimNVAddress(),
-               (*it)->getClockTrimFreq()/1000.0,
-               (*it)->getSDIDAddress(),
-               (*it)->getSDID(),
-               (*it)->getFlashScripts()?"Y":"N",
-               (*it)->getFlashProgram()?"Y":"N"
+         print("%-14s%s 0x%06X 0x%06X %10s 0x%06X 0x%06X %6.2f %08X %08X %4s %4s\n",
+               deviceData->getTargetName().c_str(), aliased?"(A)":"   ",
+               deviceData->getRamStart(), deviceData->getRamEnd(),
+               ClockTypes::getClockName(deviceData->getClockType()).c_str(),
+               deviceData->getClockAddress(),
+               deviceData->getClockTrimNVAddress(),
+               deviceData->getClockTrimFreq()/1000.0,
+               deviceData->getSDIDAddress(),
+               deviceData->getSDID(),
+               deviceData->getFlashScripts()?"Y":"N",
+               deviceData->getFlashProgram()?"Y":"N"
          );
 #endif
-#if 0
-         for (int regionNum=0; (*it)->getMemoryRegion(regionNum) != NULL; regionNum++) {
-            MemoryRegionPtr reg=(*it)->getMemoryRegion(regionNum);
+#if 1
+         for (int regionNum=0; deviceData->getMemoryRegion(regionNum) != NULL; regionNum++) {
+            MemoryRegionPtr reg=deviceData->getMemoryRegion(regionNum);
             print("      %10s: ", reg->getMemoryTypeName());
             if (reg->getFlashprogram())
                print("FP=Yes, ");
@@ -529,26 +564,35 @@ void DeviceDataBase::listDevices() {
             print("SS=%6d ", reg->getSectorSize());
             for(unsigned index=0; ; index++) {
                const MemoryRegion::MemoryRange *memoryRange = reg->getMemoryRange(index);
-               if (memoryRange == NULL)
+               if (memoryRange == NULL) {
                   break;
-               print("(0x%08X,0x%08X)", memoryRange->start, memoryRange->end);
                }
+               print("(0x%08X,0x%08X", memoryRange->start, memoryRange->end);
+               if ((memoryRange->pageNo != MemoryRegion::DefaultPageNo) &&
+                   (memoryRange->pageNo != MemoryRegion::NoPageNo) &&
+                   (memoryRange->pageNo != ((memoryRange->start>>16)&0xFF))){
+                  print(",P=0x%02X)", memoryRange->pageNo);
+               }
+               else {
+                  print(")", memoryRange->start, memoryRange->end);
+               }
+            }
             print("\n");
          }
          print("\n");
 #endif
 //         const TclScript *tclScript;
-//         tclScript = (*it)->getPreSequence();
+//         tclScript = deviceData->getPreSequence();
 //         if (tclScript != NULL) {
 //            print("preSequence \n=========================\n"
 //                  "%s\n========================\n", tclScript->toString().c_str());
 //         }
-//         tclScript = (*it)->getPostSequence();
+//         tclScript = deviceData->getPostSequence();
 //         if (tclScript != NULL) {
 //            print("postSequence \n=========================\n"
 //                  "%s\n========================\n", tclScript->toString().c_str());
 //         }
-//         tclScript = (*it)->getUnsecureSequence();
+//         tclScript = deviceData->getUnsecureSequence();
 //         if (tclScript != NULL) {
 //            print("unsecureSequence \n=========================\n"
 //                  "%s\n========================\n", tclScript->toString().c_str());
@@ -556,21 +600,21 @@ void DeviceDataBase::listDevices() {
          //         std::stringstream buffer;
          //         buffer.exceptions(std::ios::badb(*it) | std::ios::failbit);
          //         buffer.str("");
-         //         buffer << setw(15) << (*it)->getTargetName();
-         //         buffer << setw(14) << ClockTypes::getClockName((*it)->getClockType());
+         //         buffer << setw(15) << deviceData->getTargetName();
+         //         buffer << setw(14) << ClockTypes::getClockName(deviceData->getClockType());
          //         buffer << setiosflags (ios_base::showbase | ios_base::hex);
-         //         buffer << setw(8) << (*it)->getClockAddress();
-         //         buffer << setw(8) << (*it)->getClockAddress();
+         //         buffer << setw(8) << deviceData->getClockAddress();
+         //         buffer << setw(8) << deviceData->getClockAddress();
          //         buffer << resetiosflags (ios_base::showbase | ios_base::hex);
-         //         buffer << setw(6) << (*it)->getClockTrimFreq()/1000.0;
+         //         buffer << setw(6) << deviceData->getClockTrimFreq()/1000.0;
          //         for (int memIndex=0; true; memIndex++) {
-         //            const MemoryRegion *pMemRegion = (*it)->getMemoryRegion(memIndex);
+         //            const MemoryRegion *pMemRegion = deviceData->getMemoryRegion(memIndex);
          //            if (pMemRegion == NULL)
          //               break;
          //             buffer << " " << *pMemRegion;
          //         }
          //         for (int sdidIndex=0; true; sdidIndex++) {
-         //            uint32_t sdid = (*it)->getSDID(sdidIndex);
+         //            uint32_t sdid = deviceData->getSDID(sdidIndex);
          //            if (sdid == 0)
          //               break;
          //             buffer << " " << sdid;
@@ -582,6 +626,7 @@ void DeviceDataBase::listDevices() {
    } catch (...) {
 
    }
+#if 0
    print("================================================\n"
          "Shared data, #elements = %d\n", sharedInformation.size());
    map<const string, SharedInformationItemPtr>::iterator mapIt;
@@ -598,6 +643,7 @@ void DeviceDataBase::listDevices() {
 //      }
    }
    print("================================================\n");
+#endif
 }
 
 DeviceDataBase::~DeviceDataBase() {
@@ -730,22 +776,6 @@ bool MemoryRegion::isCompatibleType(MemType_t memoryType, MemorySpace_t memorySp
 //!
 unsigned FlexNVMInfo::getBackingRatio() const {
     return backingRatio;
-}
-
-//! Returns list of permitted EEEPROM values for use in partition command
-//!
-//! @return vector of permitted values
-//!
-std::vector<FlexNVMInfo::EeepromSizeValue> &FlexNVMInfo::getEeepromSizeValues() {
-    return eeepromSizeValues;
-}
-
-//! Returns list of permitted Partition values for use in partition command
-//!
-//! @return vector of permitted values
-//!
-std::vector<FlexNVMInfo::FlexNvmPartitionValue> &FlexNVMInfo::getFlexNvmPartitionValues() {
-    return flexNvmPartitionValues;
 }
 
 //! Adds a permitted EEEPROM values for use in partition command

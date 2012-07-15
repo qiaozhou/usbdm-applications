@@ -152,7 +152,7 @@ proc unsecureFlash {} {
 ;######################################################################################
 ;#
 ;#
-proc initTarget {} {
+proc initTarget { args } {
 set DBGMCU_CR 0xE0042004
 
     # Disable watchdog timers etc in debug mode

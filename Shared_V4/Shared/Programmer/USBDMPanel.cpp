@@ -753,7 +753,7 @@ void USBDMPanel::populateBDMChoices(void) {
       print("USBDMPanel::populateBDMChoices() - no devices\n");
       return;
    }
-   // Add device names to choice box, client data is device number
+   // Add device names to choice box, client data is device number from usb scan
    vector<BdmInformation>::iterator it;
    for ( it=bdmInformation.begin(); it < bdmInformation.end(); it++ ) {
       int index = bdmSelectChoiceControl->Append(wxString::FromUTF8(it->serialNumber.c_str()));
@@ -767,7 +767,7 @@ void USBDMPanel::populateBDMChoices(void) {
    bdmDeviceNum      = (int)bdmSelectChoiceControl->GetClientData();
    bdmIdentification = wxString::FromUTF8(bdmInformation[bdmDeviceNum].serialNumber.c_str());
    bdmSelectChoiceControl->Enable(deviceCount>1);
-   print("USBDMPanel::populateBDMChoices() - %d devices\n", deviceCount);
+   print("USBDMPanel::populateBDMChoices() - %d device(s) added.\n", deviceCount);
 }
 
 //! wxEVT_COMMAND_BUTTON_CLICKED event handler for wxID_DEFAULT

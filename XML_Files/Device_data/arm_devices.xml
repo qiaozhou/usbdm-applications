@@ -10,7 +10,7 @@
 <!ENTITY Custom-Devices                    SYSTEM "Custom/custom-arm.xml">
 ]>
 <root version="4.9.5">
-   <description>ARM device characteristics v4.6.0 1/5/2011</description>
+   <description>ARM device characteristics 1/7/2012</description>
    <sharedInformation>
       <flashProgram id="default-STM32F100xx-FlashProgram">
       &STM32F100xx-default-flashProgram;
@@ -31,849 +31,642 @@
       <!-- Kinetis Secured value = backdoor[0-7],FPROT[0-3],EEPROT,FOPT,FSEC -->
       <securityInfo size="16" type="on" id="Kinetis-default-security-on">
          FFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFF
-      </securityInfo>
-      <flexNVMInfo id="defaultKinetisFlexPartition" backingRatio="16">
-         <eeepromEntry description="None"    eeeSize="0"    value="0xFF" />
-         <eeepromEntry description="A=16, B=16"   eeeSize="32"   value="0x39" />
-         <eeepromEntry description="A=32, B=32"   eeeSize="64"   value="0x38" />
-         <eeepromEntry description="A=64, B=64"   eeeSize="128"  value="0x37" />
-         <eeepromEntry description="A=128, B=128" eeeSize="256"  value="0x36" />
-         <eeepromEntry description="A=256, B=256" eeeSize="512"  value="0x35" />
-         <eeepromEntry description="A=512, B=512" eeeSize="1K"   value="0x34" />
-         <eeepromEntry description="A=1K, B=1K"   eeeSize="2K"   value="0x33" />
-         <eeepromEntry description="A=2K, B=2K"   eeeSize="4K"   value="0x32" />
-         <partitionEntry description="DFlash=256, No EEPROM"  eeSize="0"    value="0xFF" />
-         <partitionEntry description="DFlash=224, EEPROM=32"  eeSize="32K"  value="0x03" />
-         <partitionEntry description="DFlash=192, EEPROM=64"  eeSize="64K"  value="0x04" />
-         <partitionEntry description="DFlash=128, EEPROM=128" eeSize="128K" value="0x05" />
-         <partitionEntry description="DFlash=64, EEPROM=192"  eeSize="192K" value="0x0C" />
-         <partitionEntry description="DFlash=32, EEPROM=224"  eeSize="224K" value="0x0B" />
-         <partitionEntry description="DFlash=0,  EEPROM=256"  eeSize="256K" value="0x08" />
+      </securityInfo>  
+      <flexNVMInfo id="kinetis32K_FlexPartitionInfo" backingRatio="16">
+         <eeepromEntry   description="Unchanged/None"         eeeSize="0"     value="0xFF" />
+         <eeepromEntry   description="32"                     eeeSize="32"    value="0x09" />
+         <eeepromEntry   description="64"                     eeeSize="64"    value="0x08" />
+         <eeepromEntry   description="128"                    eeeSize="128"   value="0x07" />
+         <eeepromEntry   description="256"                    eeeSize="256"   value="0x06" />
+         <eeepromEntry   description="512"                    eeeSize="512"   value="0x05" />
+         <eeepromEntry   description="1024"                   eeeSize="1024"  value="0x04" />
+         <eeepromEntry   description="2048"                   eeeSize="2048"  value="0x03" />
+         <partitionEntry description="DFlash=32, No EEPROM"   eeSize="0K"     value="0xFF" />
+         <partitionEntry description="DFlash=24, EEPROM=8"    eeSize="8K"     value="0x01" />
+         <partitionEntry description="DFlash=16, EEPROM=16"   eeSize="16K"    value="0x0A" />
+         <partitionEntry description="DFlash=8, EEPROM=24"    eeSize="24K"    value="0x09" />
+         <partitionEntry description="No DFlash, EEPROM=32"   eeSize="32K"    value="0x08" />
       </flexNVMInfo>
+      <flexNVMInfo id="kinetis128K_FlexPartitionInfo" backingRatio="16">
+         <eeepromEntry   description="Unchanged/None"         eeeSize="0"     value="0xFF" />
+         <eeepromEntry   description="A=4, B=28"              eeeSize="32"    value="0x09" />
+         <eeepromEntry   description="A=8, B=24"              eeeSize="32"    value="0x19" />
+         <eeepromEntry   description="A=16, B=16"             eeeSize="32"    value="0x29" />
+         <eeepromEntry   description="A=8, B=56"              eeeSize="64"    value="0x08" />
+         <eeepromEntry   description="A=16, B=48"             eeeSize="64"    value="0x18" />
+         <eeepromEntry   description="A=32, B=32"             eeeSize="64"    value="0x28" />
+         <eeepromEntry   description="A=16, B=112"            eeeSize="128"   value="0x07" />
+         <eeepromEntry   description="A=32, B=96"             eeeSize="128"   value="0x17" />
+         <eeepromEntry   description="A=64, B=64"             eeeSize="128"   value="0x27" />
+         <eeepromEntry   description="A=32, B=224"            eeeSize="256"   value="0x06" />
+         <eeepromEntry   description="A=64, B=192"            eeeSize="256"   value="0x16" />
+         <eeepromEntry   description="A=128, B=128"           eeeSize="256"   value="0x26" />
+         <eeepromEntry   description="A=64, B=448"            eeeSize="512"   value="0x05" />
+         <eeepromEntry   description="A=128, B=384"           eeeSize="512"   value="0x15" />
+         <eeepromEntry   description="A=256, B=256"           eeeSize="512"   value="0x25" />
+         <eeepromEntry   description="A=128, B=896"           eeeSize="1024"  value="0x04" />
+         <eeepromEntry   description="A=256, B=768"           eeeSize="1024"  value="0x14" />
+         <eeepromEntry   description="A=512, B=512"           eeeSize="1024"  value="0x24" />
+         <eeepromEntry   description="A=256, B=1792"          eeeSize="2048"  value="0x03" />
+         <eeepromEntry   description="A=512, B=1536"          eeeSize="2048"  value="0x13" />
+         <eeepromEntry   description="A=1024, B=1024"         eeeSize="2048"  value="0x23" />
+         <eeepromEntry   description="A=512, B=3584"          eeeSize="4096"  value="0x02" />
+         <eeepromEntry   description="A=1024, B=3072"         eeeSize="4096"  value="0x12" />
+         <eeepromEntry   description="A=2048, B=2048"         eeeSize="4096"  value="0x22" />
+         <partitionEntry description="DFlash=128, No EEPROM"  eeSize="0K"     value="0xFF" />
+         <partitionEntry description="DFlash=96, EEPROM=32"   eeSize="32K"    value="0x03" />
+         <partitionEntry description="DFlash=64, EEPROM=64"   eeSize="64K"    value="0x0C" />
+         <partitionEntry description="DFlash=32, EEPROM=96"   eeSize="96K"    value="0x0B" />
+         <partitionEntry description="No DFlash, EEPROM=128"  eeSize="128K"   value="0x08" />
+      </flexNVMInfo>
+      <flexNVMInfo id="kinetis256K_FlexPartitionInfo" backingRatio="16">
+         <eeepromEntry   description="Unchanged/None"         eeeSize="0"     value="0xFF" />
+         <eeepromEntry   description="A=4, B=28"              eeeSize="32"    value="0x09" />
+         <eeepromEntry   description="A=8, B=24"              eeeSize="32"    value="0x19" />
+         <eeepromEntry   description="A=16, B=16"             eeeSize="32"    value="0x29" />
+         <eeepromEntry   description="A=8, B=56"              eeeSize="64"    value="0x08" />
+         <eeepromEntry   description="A=16, B=48"             eeeSize="64"    value="0x18" />
+         <eeepromEntry   description="A=32, B=32"             eeeSize="64"    value="0x28" />
+         <eeepromEntry   description="A=16, B=112"            eeeSize="128"   value="0x07" />
+         <eeepromEntry   description="A=32, B=96"             eeeSize="128"   value="0x17" />
+         <eeepromEntry   description="A=64, B=64"             eeeSize="128"   value="0x27" />
+         <eeepromEntry   description="A=32, B=224"            eeeSize="256"   value="0x06" />
+         <eeepromEntry   description="A=64, B=192"            eeeSize="256"   value="0x16" />
+         <eeepromEntry   description="A=128, B=128"           eeeSize="256"   value="0x26" />
+         <eeepromEntry   description="A=64, B=448"            eeeSize="512"   value="0x05" />
+         <eeepromEntry   description="A=128, B=384"           eeeSize="512"   value="0x15" />
+         <eeepromEntry   description="A=256, B=256"           eeeSize="512"   value="0x25" />
+         <eeepromEntry   description="A=128, B=896"           eeeSize="1024"  value="0x04" />
+         <eeepromEntry   description="A=256, B=768"           eeeSize="1024"  value="0x14" />
+         <eeepromEntry   description="A=512, B=512"           eeeSize="1024"  value="0x24" />
+         <eeepromEntry   description="A=256, B=1792"          eeeSize="2048"  value="0x03" />
+         <eeepromEntry   description="A=512, B=1536"          eeeSize="2048"  value="0x13" />
+         <eeepromEntry   description="A=1024, B=1024"         eeeSize="2048"  value="0x23" />
+         <eeepromEntry   description="A=512, B=3584"          eeeSize="4096"  value="0x02" />
+         <eeepromEntry   description="A=1024, B=3072"         eeeSize="4096"  value="0x12" />
+         <eeepromEntry   description="A=2048, B=2048"         eeeSize="4096"  value="0x22" />
+         <partitionEntry description="DFlash=256, No EEPROM"  eeSize="0K"     value="0xFF" />
+         <partitionEntry description="DFlash=224, EEPROM=32"  eeSize="32K"    value="0x03" />
+         <partitionEntry description="DFlash=192, EEPROM=64"  eeSize="64K"    value="0x04" />
+         <partitionEntry description="DFlash=128, EEPROM=128" eeSize="128K"   value="0x0D" />
+         <partitionEntry description="DFlash=64, EEPROM=192"  eeSize="192K"   value="0x0C" />
+         <partitionEntry description="DFlash=32, EEPROM=224"  eeSize="224K"   value="0x0B" />
+         <partitionEntry description="No DFlash, EEPROM=256"  eeSize="256K"   value="0x08" />
+      </flexNVMInfo>
+      <flexNVMInfo id="kinetis512K_FlexPartitionInfo" backingRatio="16">
+         <eeepromEntry   description="Unchanged/None"         eeeSize="0"     value="0xFF" />
+         <eeepromEntry   description="A=4, B=28"              eeeSize="32"    value="0x09" />
+         <eeepromEntry   description="A=8, B=24"              eeeSize="32"    value="0x19" />
+         <eeepromEntry   description="A=16, B=16"             eeeSize="32"    value="0x29" />
+         <eeepromEntry   description="A=8, B=56"              eeeSize="64"    value="0x08" />
+         <eeepromEntry   description="A=16, B=48"             eeeSize="64"    value="0x18" />
+         <eeepromEntry   description="A=32, B=32"             eeeSize="64"    value="0x28" />
+         <eeepromEntry   description="A=16, B=112"            eeeSize="128"   value="0x07" />
+         <eeepromEntry   description="A=32, B=96"             eeeSize="128"   value="0x17" />
+         <eeepromEntry   description="A=64, B=64"             eeeSize="128"   value="0x27" />
+         <eeepromEntry   description="A=32, B=224"            eeeSize="256"   value="0x06" />
+         <eeepromEntry   description="A=64, B=192"            eeeSize="256"   value="0x16" />
+         <eeepromEntry   description="A=128, B=128"           eeeSize="256"   value="0x26" />
+         <eeepromEntry   description="A=64, B=448"            eeeSize="512"   value="0x05" />
+         <eeepromEntry   description="A=128, B=384"           eeeSize="512"   value="0x15" />
+         <eeepromEntry   description="A=256, B=256"           eeeSize="512"   value="0x25" />
+         <eeepromEntry   description="A=128, B=896"           eeeSize="1024"  value="0x04" />
+         <eeepromEntry   description="A=256, B=768"           eeeSize="1024"  value="0x14" />
+         <eeepromEntry   description="A=512, B=512"           eeeSize="1024"  value="0x24" />
+         <eeepromEntry   description="A=256, B=1792"          eeeSize="2048"  value="0x03" />
+         <eeepromEntry   description="A=512, B=1536"          eeeSize="2048"  value="0x13" />
+         <eeepromEntry   description="A=1024, B=1024"         eeeSize="2048"  value="0x23" />
+         <eeepromEntry   description="A=512, B=3584"          eeeSize="4096"  value="0x02" />
+         <eeepromEntry   description="A=1024, B=3072"         eeeSize="4096"  value="0x12" />
+         <eeepromEntry   description="A=2048, B=2048"         eeeSize="4096"  value="0x22" />
+         <eeepromEntry   description="A=1024, B=7168"         eeeSize="8192"  value="0x01" />
+         <eeepromEntry   description="A=2048, B=6144"         eeeSize="8192"  value="0x11" />
+         <eeepromEntry   description="A=4096, B=4096"         eeeSize="8192"  value="0x21" />
+         <eeepromEntry   description="A=2048, B=14336"        eeeSize="16384" value="0x00" />
+         <eeepromEntry   description="A=4096, B=12288"        eeeSize="16384" value="0x10" />
+         <eeepromEntry   description="A=8192, B=8192"         eeeSize="16384" value="0x20" />
+         <partitionEntry description="DFlash=512, No EEPROM"  eeSize="0K"     value="0xFF" />
+         <partitionEntry description="DFlash=448, EEPROM=64"  eeSize="64K"    value="0x04" />
+         <partitionEntry description="DFlash=384, EEPROM=128" eeSize="128K"   value="0x05" />
+         <partitionEntry description="DFlash=256, EEPROM=256" eeSize="256K"   value="0x0E" />
+         <partitionEntry description="DFlash=128, EEPROM=384" eeSize="384K"   value="0x0D" />
+         <partitionEntry description="DFlash=64, EEPROM=448"  eeSize="448K"   value="0x0C" />
+         <partitionEntry description="No DFlash, EEPROM=512"  eeSize="512K"   value="0x08" />
+      </flexNVMInfo>      
+      <!--  Ram -->
+      <memory id="kinetis8K_Ram" type="ram">
+         <memoryRange middle="0x20000000" size="8K" />
+      </memory>
+      <memory id="kinetis16K_Ram" type="ram">
+         <memoryRange middle="0x20000000" size="16K" />
+      </memory>
+      <memory id="kinetis32K_Ram" type="ram">
+         <memoryRange middle="0x20000000" size="32K" />
+      </memory>
+      <memory id="kinetis64K_Ram" type="ram">
+         <memoryRange middle="0x20000000" size="64K" />
+      </memory>
+      <memory id="kinetis128K_Ram" type="ram">
+         <memoryRange middle="0x20000000" size="128K" />
+      </memory>
+      <memory id="kinetis256K_Ram" type="ram">
+         <memoryRange middle="0x20000000" size="256K" />
+      </memory>
+      <!--  Flash -->
+      <memory id="kinetis32K_Flash" type="flash" registerAddress="0x40020000" securityAddress="0x0400"  sectorSize="1024">
+         <securityInfoRef ref="Kinetis-default-security-off" />
+         <securityInfoRef ref="Kinetis-default-security-on" />
+         <memoryRange start="0x00000000" size="32K" />
+      </memory>
+      <memory id="kinetis64K_Flash" type="flash" registerAddress="0x40020000" securityAddress="0x0400"  sectorSize="1024">
+         <securityInfoRef ref="Kinetis-default-security-off" />
+         <securityInfoRef ref="Kinetis-default-security-on" />
+         <memoryRange start="0x00000000" size="64K" />
+      </memory>
+      <memory id="kinetis128K_Flash" type="flash" registerAddress="0x40020000" securityAddress="0x0400"  sectorSize="1024">
+         <securityInfoRef ref="Kinetis-default-security-off" />
+         <securityInfoRef ref="Kinetis-default-security-on" />
+         <memoryRange start="0x00000000" size="128K" />
+      </memory>
+      <memory id="kinetis256K_Flash" type="flash" registerAddress="0x40020000" securityAddress="0x0400"  sectorSize="1024">
+         <securityInfoRef ref="Kinetis-default-security-off" />
+         <securityInfoRef ref="Kinetis-default-security-on" />
+         <memoryRange start="0x00000000" size="256K" />
+      </memory>
+      <memory id="kinetis512K_Flash" type="flash" registerAddress="0x40020000" securityAddress="0x0400"  sectorSize="1024">
+         <securityInfoRef ref="Kinetis-default-security-off" />
+         <securityInfoRef ref="Kinetis-default-security-on" />
+         <memoryRange start="0x00000000" size="512K" />
+      </memory>
+      <memory id="kinetis1024K_Flash" type="flash" registerAddress="0x40020000" securityAddress="0x0400"  sectorSize="1024" >
+         <securityInfoRef ref="Kinetis-default-security-off" />
+         <securityInfoRef ref="Kinetis-default-security-on" />
+         <memoryRange start="0x00000000" end="0x000FFFFF" />
+      </memory>
+      <!--  flexNVM memory that may be used as EEEPROM backing store or dFlash -->
+      <memory id="kinetis32K_FlexNVM" type="flexNVM" registerAddress="0x40020000"  sectorSize="1024">
+         <flexNVMInfoRef ref="kinetis32K_FlexPartitionInfo" />
+         <memoryRange start="0x10000000" size="32K" />
+      </memory>
+      <memory id="kinetis128K_FlexNVM" type="flexNVM" registerAddress="0x40020000"  sectorSize="1024">
+         <flexNVMInfoRef ref="kinetis128K_FlexPartitionInfo" />
+         <memoryRange start="0x10000000" size="128K" />
+      </memory>
+      <memory id="kinetis256K_FlexNVM" type="flexNVM" registerAddress="0x40020000"  sectorSize="1024">
+         <flexNVMInfoRef ref="kinetis256K_FlexPartitionInfo" />
+         <memoryRange start="0x10000000" size="256K" />
+      </memory>
+      <memory id="kinetis512K_FlexNVM" type="flexNVM" registerAddress="0x40020000"  sectorSize="1024">
+         <flexNVMInfoRef ref="kinetis512K_FlexPartitionInfo" />
+         <memoryRange start="0x10000000" size="512K" />
+      </memory>
    </sharedInformation>
    <deviceList>
       <device name="_Default" family="ARM" isDefault="true">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400"  sectorSize="1024">
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0FFFFFFF" />
+         <!-- Regular flash or pFlash memory -->
+         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" sectorSize="1024">
+            <memoryRange start="0x00000000" size="256K" />
+         </memory>
+         <!-- flexNVM memory that may be used as EEEPROM backing store or dFlash -->
+         <memory registerAddress="0xFF9820" type="flexNVM" sectorSize="1024">
+            <memoryRange start="0x10000000" size="256K" />
+         </memory>
+         <memory registerAddress="0xFF9820" type="dFlash" sectorSize="1024">
+            <memoryRange start="0x10000000" size="256K" />
          </memory>
          <memory type="ram">
             <memoryRange start="0x1FFFC000" end="0x20003FFF" />
          </memory>
          <sdidAddress value="0x40048024" />
+         <sdidMask value="0x00000FF0" />
          <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="default-Kinetis-Scripts" />
          <flashProgramRef ref="default-Kinetis-FlashProgram" />
          <note>Default ARM Device</note>
       </device>
+      <device name="MK10DN128" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DN32" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis8K_Ram" />
+         <memoryRef ref="kinetis32K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DN512" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DN64" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis64K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DX128_100MHz" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis128K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DX128_50MHz" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DX128_72MHz" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DX256_100MHz" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DX256_72MHz" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DX32" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis8K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis32K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK10DX64" family="ARM" subfamily="K10">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis64K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DN128" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DN32" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis8K_Ram" />
+         <memoryRef ref="kinetis32K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DN512" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DN64" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis64K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DX128_100MHz" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis128K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DX128_50MHz" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DX128_72MHz" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DX256_100MHz" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DX256_72MHz" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DX32" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis8K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis32K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20DX64" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis64K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20FN1M0" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis1024K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK20FX512" family="ARM" subfamily="K20">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_FlexNVM" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK30DN512Z" family="ARM" subfamily="K30">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK30DX128" family="ARM" subfamily="K30">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK30DX128Z" family="ARM" subfamily="K30">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis128K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK30DX256" family="ARM" subfamily="K30">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK30DX256Z" family="ARM" subfamily="K30">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK30DX64" family="ARM" subfamily="K30">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis64K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK40DN512Z" family="ARM" subfamily="K40">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK40DX128" family="ARM" subfamily="K40">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK40DX128Z" family="ARM" subfamily="K40">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis128K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK40DX256" family="ARM" subfamily="K40">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK40DX256Z" family="ARM" subfamily="K40">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK40DX64" family="ARM" subfamily="K40">
+         <memoryRef ref="kinetis16K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis64K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK50DN512Z" family="ARM" subfamily="K50">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK50DX128" family="ARM" subfamily="K50">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK50DX256" family="ARM" subfamily="K50">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK50DX256Z" family="ARM" subfamily="K50">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK51DN256Z" family="ARM" subfamily="K51">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK51DN512Z" family="ARM" subfamily="K51">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK51DX128" family="ARM" subfamily="K51">
+         <memoryRef ref="kinetis32K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis128K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK51DX256" family="ARM" subfamily="K51">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis32K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK51DX256Z" family="ARM" subfamily="K51">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK52DN512Z" family="ARM" subfamily="K53">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK53DN512Z" family="ARM" subfamily="K53">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK53DX256Z" family="ARM" subfamily="K53">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK60DN256Z" family="ARM" subfamily="K60">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK60DN512Z" family="ARM" subfamily="K60">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK60DX256Z" family="ARM" subfamily="K60">
+         <memoryRef ref="kinetis64K_Ram" />
+         <memoryRef ref="kinetis256K_FlexNVM" />
+         <memoryRef ref="kinetis256K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK60FN1M0" family="ARM" subfamily="K60">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis1024K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK60FX512" family="ARM" subfamily="K60">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_FlexNVM" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK61FN1M0" family="ARM" subfamily="K61">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis1024K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK61FX512" family="ARM" subfamily="K61">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_FlexNVM" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK70FN1M0" family="ARM" subfamily="K70">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis1024K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="MK70FX512" family="ARM" subfamily="K70">
+         <memoryRef ref="kinetis128K_Ram" />
+         <memoryRef ref="kinetis512K_FlexNVM" />
+         <memoryRef ref="kinetis512K_Flash" />
+         <sdid value="0x00000000" />
+      </device>
+      <device name="PK10N512" alias="MK10DN512"/>
+      <device name="PK10X128" alias="MK10DX128_100MHz"/>
+      <device name="PK10X256" alias="MK10DX256_100MHz"/>
+      <device name="PK20N512" alias="MK20DN512"/>
+      <device name="PK20X128" alias="MK20DX128_100MHz"/>
+      <device name="PK20X256" alias="MK20DX256_100MHz"/>
+      <device name="PK30N512" alias="MK30DN512Z"/>
+      <device name="PK30X128" alias="MK30DX128Z"/>
+      <device name="PK30X256" alias="MK30DX256Z"/>
+      <device name="PK40N512" alias="MK40DN512Z"/>
+      <device name="PK40X128" alias="MK40DX128Z"/>
+      <device name="PK40X256" alias="MK40DX256Z">
+         <sdid value="0x00000120" />
+      </device>
+      <device name="PK60N256" alias="MK60DN256Z"/>
+      <device name="PK60N512" alias="MK60DN512Z">
+         <sdid value="0x00000140" />
+      </device>
+      <device name="PK60X256" alias="MK60DX256Z"/>
+      <device name="K10DN128" alias="MK10DN128" hidden="true"/>
+      <device name="K10DN32" alias="MK10DN32" hidden="true"/>
+      <device name="K10DN512M10" alias="MK10DN512" hidden="true"/>
+      <device name="K10DN512Z" alias="MK10DN512" hidden="true"/>
+      <device name="K10DN64" alias="MK10DN64" hidden="true"/>
+      <device name="K10DX128" alias="MK10DX128_50MHz" hidden="true"/>
+      <device name="K10DX128M10" alias="MK10DX128_100MHz" hidden="true"/>
+      <device name="K10DX128M7" alias="MK10DX128_72MHz" hidden="true"/>
+      <device name="K10DX128Z" alias="MK10DX128_100MHz" hidden="true"/>
+      <device name="K10DX256M10" alias="MK10DX256_100MHz" hidden="true"/>
+      <device name="K10DX256M7" alias="MK10DX256_72MHz" hidden="true"/>
+      <device name="K10DX256Z" alias="MK10DX256_100MHz" hidden="true"/>
+      <device name="K10DX32" alias="MK10DX32" hidden="true"/>
+      <device name="K10DX64" alias="MK10DX64" hidden="true"/>
+      <device name="K10DX64M7" alias="MK10DX64" hidden="true"/>
+      <device name="K20DN128" alias="MK20DN128" hidden="true"/>
+      <device name="K20DN32" alias="MK20DN32" hidden="true"/>
+      <device name="K20DN512M10" alias="MK20DN512" hidden="true"/>
+      <device name="K20DN512Z" alias="MK20DN512" hidden="true"/>
+      <device name="K20DN64" alias="MK20DN64" hidden="true"/>
+      <device name="K20DX128" alias="MK20DX128_50MHz" hidden="true"/>
+      <device name="K20DX128M10" alias="MK20DX128_100MHz" hidden="true"/>
+      <device name="K20DX128M7" alias="MK20DX128_72MHz" hidden="true"/>
+      <device name="K20DX128Z" alias="MK20DX128_100MHz" hidden="true"/>
+      <device name="K20DX256M10" alias="MK20DX256_100MHz" hidden="true"/>
+      <device name="K20DX256M7" alias="MK20DX256_72MHz" hidden="true"/>
+      <device name="K20DX256Z" alias="MK20DX256_100MHz" hidden="true"/>
+      <device name="K20DX32" alias="MK20DX32" hidden="true"/>
+      <device name="K20DX64" alias="MK20DX64" hidden="true"/>
+      <device name="K20DX64M7" alias="MK20DX64" hidden="true"/>
+      <device name="K20FN1M0" alias="MK20FN1M0" hidden="true"/>
+      <device name="K20FX512" alias="MK20FX512" hidden="true"/>
+      <device name="K30DN512M10" alias="MK30DN512Z" hidden="true"/>
+      <device name="K30DN512Z" alias="MK30DN512Z" hidden="true"/>
+      <device name="K30DX128M10" alias="MK30DX128Z" hidden="true"/>
+      <device name="K30DX128M7" alias="MK30DX128" hidden="true"/>
+      <device name="K30DX128Z" alias="MK30DX128Z" hidden="true"/>
+      <device name="K30DX256M10" alias="MK30DX256Z" hidden="true"/>
+      <device name="K30DX256M7" alias="MK30DX256" hidden="true"/>
+      <device name="K30DX256Z" alias="MK30DX256Z" hidden="true"/>
+      <device name="K30DX64M7" alias="MK30DX64" hidden="true"/>
+      <device name="K40DN512M10" alias="MK40DN512Z" hidden="true"/>
+      <device name="K40DN512Z" alias="MK40DN512Z" hidden="true"/>
+      <device name="K40DX128M10" alias="MK40DX128Z" hidden="true"/>
+      <device name="K40DX128M7" alias="MK40DX128" hidden="true"/>
+      <device name="K40DX128Z" alias="MK40DX128Z" hidden="true"/>
+      <device name="K40DX256M10" alias="MK40DX256Z" hidden="true"/>
+      <device name="K40DX256M7" alias="MK40DX256" hidden="true"/>
+      <device name="K40DX256Z" alias="MK40DX256Z" hidden="true"/>
+      <device name="K40DX64M7" alias="MK40DX64" hidden="true"/>
+      <device name="K50DN512M10" alias="MK50DN512Z" hidden="true"/>
+      <device name="K50DN512Z" alias="MK50DN512Z" hidden="true"/>
+      <device name="K50DX128M7" alias="MK50DX128" hidden="true"/>
+      <device name="K50DX256M10" alias="MK50DX256Z" hidden="true"/>
+      <device name="K50DX256M7" alias="MK50DX256" hidden="true"/>
+      <device name="K50DX256Z" alias="MK50DX256Z" hidden="true"/>
+      <device name="K51DN256M10" alias="MK51DN256Z" hidden="true"/>
+      <device name="K51DN256Z" alias="MK51DN256Z" hidden="true"/>
+      <device name="K51DN512M10" alias="MK51DN512Z" hidden="true"/>
+      <device name="K51DN512Z" alias="MK51DN512Z" hidden="true"/>
+      <device name="K51DX128M7" alias="MK51DX128" hidden="true"/>
+      <device name="K51DX256M10" alias="MK51DX256Z" hidden="true"/>
+      <device name="K51DX256M7" alias="MK51DX256" hidden="true"/>
+      <device name="K51DX256Z" alias="MK51DX256Z" hidden="true"/>
+      <device name="K52DN512M10" alias="MK52DN512Z" hidden="true"/>
+      <device name="K52DN512Z" alias="MK52DN512Z" hidden="true"/>
+      <device name="K53DN512M10" alias="MK53DN512Z" hidden="true"/>
+      <device name="K53DN512Z" alias="MK53DN512Z" hidden="true"/>
+      <device name="K53DX256M10" alias="MK53DX256Z" hidden="true"/>
+      <device name="K53DX256Z" alias="MK53DX256Z" hidden="true"/>
+      <device name="K60DN256M10" alias="MK60DN256Z" hidden="true"/>
+      <device name="K60DN256Z" alias="MK60DN256Z" hidden="true"/>
+      <device name="K60DN512M10" alias="MK60DN512Z" hidden="true"/>
+      <device name="K60DN512Z" alias="MK60DN512Z" hidden="true"/>
+      <device name="K60DX256M10" alias="MK60DX256Z" hidden="true"/>
+      <device name="K60DX256Z" alias="MK60DX256Z" hidden="true"/>
+      <device name="K60FN1M0" alias="MK60FN1M0" hidden="true"/>
+      <device name="K60FX512" alias="MK60FX512" hidden="true"/>
+      <device name="K61FN1M0" alias="MK61FN1M0" hidden="true"/>
+      <device name="K61FX512" alias="MK61FX512" hidden="true"/>
+      <device name="K70FN1M0" alias="MK70FN1M0" hidden="true"/>
+      <device name="K70FX512" alias="MK70FX512" hidden="true"/>
       &Custom-Devices;
-      <device name="K10DN128" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0001FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFE000" end="0x20001FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10DN32" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x00007FFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFF000" end="0x20000FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10DN64" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0000FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFE000" end="0x20001FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10DX128" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0001FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFE000" end="0x20001FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10DX128Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0001FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFC000" end="0x20003FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10DX256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10DX32" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x00007FFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFF000" end="0x20000FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10DX64" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0000FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFE000" end="0x20001FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10FN1M0" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x000FFFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K10FX512" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DN128" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0001FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFE000" end="0x20001FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DN32" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x00007FFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFF000" end="0x20000FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DN64" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0000FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFE000" end="0x20001FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DX128" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0001FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFE000" end="0x20001FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DX128Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0001FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFC000" end="0x20003FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DX256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DX32" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x00007FFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFF000" end="0x20000FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20DX64" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0000FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFE000" end="0x20001FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20FN1M0" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x000FFFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K20FX512" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K30DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K30DX128Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0001FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFC000" end="0x20003FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K30DX256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K40DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K40DX128Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0001FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFFC000" end="0x20003FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-         <flexNVMInfoRef ref="defaultKinetisFlexPartition" />
-      </device>
-      <device name="K40DX256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" size="256K" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x20000000" size="32K" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" size="32K" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K50DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K50DX256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K51DN256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K51DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K51DX256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K52DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K53DN512" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K53DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K53DX256" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K53DX256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K60DN256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K60DN512Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K60DX256Z" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0003FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF8000" end="0x20007FFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K60FN1M0" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x000FFFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K60FX512" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K61FN1M0" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x000FFFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K61FX512" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K70FN1M0" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x000FFFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
-      <device name="K70FX512" family="ARM">
-         <clock type="External" />
-         <memory type="flash" registerAddress="0x40020000" securityAddress="0x0400" >
-            <securityInfoRef ref="Kinetis-default-security-off" />
-            <securityInfoRef ref="Kinetis-default-security-on" />
-            <memoryRange start="0x00000000" end="0x0007FFFF" />
-         </memory>
-         <memory type="ram">
-            <memoryRange start="0x1FFF0000" end="0x2000FFFF" />
-         </memory>
-         <sdidAddress value="0x40048024" />
-         <sdid value="0x00000000" />
-         <flashScripts>
-            <tclScriptRef ref="default-Kinetis-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="default-Kinetis-FlashProgram" />
-      </device>
 &Old-Kinetis-Devices;
 &STM-Devices;
    </deviceList>

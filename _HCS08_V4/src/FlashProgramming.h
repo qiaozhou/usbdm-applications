@@ -9,39 +9,6 @@
 
 class ProgressTimer;
 
-#pragma pack(1)
-
-// Describes a block to be programmed & result
-struct FlashData_t {
-   uint16_t         flags;             // Controls actions of routine
-   uint16_t         errorCode;         // Error code from action
-   uint16_t         controller;        // Ptr to flash controller
-   uint16_t         frequency;         // Target frequency (kHz)
-   uint16_t         sectorSize;        // Size of Flash memory sectors (smallest erasable block)
-   uint32_t         address;           // Memory address being accessed (reserved/page/address)
-   uint16_t         size;              // Size of memory range being accessed
-   uint16_t         data;              // Ptr to data to program
-} ;
-
-// Timing information
-struct TimingData_t {
-   uint16_t         flags;             // Controls actions of routine
-   uint16_t         errorCode;         // Error code from action
-   uint16_t         controller;        // Ptr to flash controller (unused)
-   uint32_t         timingCount;       // Timing count
-};
-
-//! Describe the flash programming code
-struct FlashProgramHeader_t {
-   uint16_t         loadAddress;       // Address where to load this image
-   uint16_t         entry;             // Ptr to entry routine
-   uint16_t         capabilities;      // Capabilities of routine
-   uint16_t         copctlAddress;     // Address of COPCTL register
-   uint32_t         clockFactor;       // Calibration factor for speed determination
-   uint16_t         flashData;         // Ptr to information about operation
-} ;
-#pragma pack()
-
 class FlashProgrammer {
 
 private:
@@ -108,8 +75,6 @@ private:
    bool                    useTCLScript;
    bool                    flashReady;       //!< Safety check - only TRUE when flash is ready for programming
    bool                    initTargetDone;   //! Indicates initTarget() has been done.
-   FlashProgramHeader_t    flashProgramHeader;
-   FlashData_t             flashData;
    uint32_t                targetBusFrequency;  //! kHz
    FlashProgramPtr         currentFlashProgram;
    ProgressTimer          *progressTimer;
@@ -138,25 +103,17 @@ private:
                                       MCG_ClockParameters_t *clockParameters);
    USBDM_ErrorCode configureTargetClock(unsigned long  *busFrequency);
    USBDM_ErrorCode configureExternal_Clock(unsigned long  *busFrequency);
-   USBDM_ErrorCode eraseFlash(void);
-   USBDM_ErrorCode convertTargetErrorCode(FlashDriverError_t rc);
-   USBDM_ErrorCode executeTargetProgram(FlashData_t *flashProgramData, uint32_t size);
-   USBDM_ErrorCode determineTargetSpeed(void);
-   USBDM_ErrorCode doFlashBlock(FlashImage    *flashImageDescription,
+   USBDM_ErrorCode programBlock(FlashImage    *flashImageDescription,
                                 unsigned int   blockSize,
-                                uint32_t      &flashAddress,
-                                uint32_t       flashoperation);
-   USBDM_ErrorCode applyFlashOperation(FlashImage *flashImageDescription, uint32_t operation);
+                                uint32_t       flashAddress);
    USBDM_ErrorCode doVerify(FlashImage *flashImageDescription);
-   USBDM_ErrorCode doSelectiveErase(FlashImage  *flashImageDescription);
-   USBDM_ErrorCode doProgram(FlashImage  *flashImageDescription);
-   USBDM_ErrorCode doBlankCheck(FlashImage *flashImageDescription);
-   USBDM_ErrorCode doWriteRam(FlashImage *flashImage);
+   USBDM_ErrorCode blankCheckBlock(FlashImage   *flashImageDescription,
+                                unsigned int  blockSize,
+                                unsigned int  flashAddress);
    USBDM_ErrorCode loadTargetProgram();
-   USBDM_ErrorCode loadTargetProgram(FlashProgramPtr flashProgram);
    USBDM_ErrorCode probeMemory(MemorySpace_t memorySpace, uint32_t address);
    USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImageDescription);
-   USBDM_ErrorCode getPageAddress(MemoryRegionPtr memoryRegionPtr, uint32_t address, uint8_t *pageNo);
+   USBDM_ErrorCode setPageRegisters(uint32_t physicalAddress);
 
 public:
    USBDM_ErrorCode initTCL(void);

@@ -1,5 +1,5 @@
 /*! \file
-    \brief Header file for USBDM_API.c
+     ErrorMessages.h
 
     \verbatim
     Copyright (C) 2010  Peter O'Donoghue
@@ -91,7 +91,7 @@ typedef enum  {
  PROGRAMMING_RC_OK                             = 0,     //!<  0 Success
  PROGRAMMING_RC_ERROR_FIRST_MESSAGE            = 101,
  PROGRAMMING_RC_ERROR_ILLEGAL_PARAMS           = 101,   //!<  1 Programming parameters incorrect
- PROGRAMMING_RC_ERROR_WRONG_SDID               = 102,   //!<  2 Wrong SDID
+ PROGRAMMING_RC_ERROR_WRONG_SDID               = 102,   //!<  2 Incorrect target device
  PROGRAMMING_RC_ERROR_FAILED_VERIFY            = 103,   //!<  3 Verification of Flash failed
  PROGRAMMING_RC_ERROR_BDM                      = 104,   //!<  4 General BDM error
  PROGRAMMING_RC_ERROR_NOT_BLANK                = 105,   //!<  5 Device is not blank/failed erase
@@ -120,6 +120,7 @@ typedef enum  {
  PROGRAMMING_RC_ERROR_TCL_POSTPROGRAM_SCRIPT   = 128,   //!< 28 Execution of TCL script returned a error
  PROGRAMMING_RC_ERROR_OUTSIDE_TARGET_FLASH     = 129,   //!< 29 Image is outside target Flash memory
  PROGRAMMING_RC_ERROR_ILLEGAL_SECURITY         = 130,   //!< 30 Illegal Security value (will lock chip forever)
+ PROGRAMMING_RC_FLEXNVM_CONFIGURATION_FAILED   = 131,   //!< 31 Failed to program FlexNVM Configuration values.
 
  // File Loader errors
  SFILE_RC_OK                                   = 0,    //!< No error

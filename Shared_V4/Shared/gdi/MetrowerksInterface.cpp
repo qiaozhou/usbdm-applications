@@ -370,7 +370,18 @@ USBDM_ErrorCode getDeviceData(DeviceData &deviceData) {
    print("getDeviceData() - Device name = \'%s\'\n", (const char *)deviceName.c_str());
 
    DeviceDataBase deviceDataBase;
-   if (!deviceDataBase.loadDeviceData()) {
+   try {
+      deviceDataBase.loadDeviceData();
+   }
+   catch (MyException &exception) {
+      print("getDeviceData() - Failed to load device database\n");
+      string("Failed to load device database\nReason: ")+exception.what();
+      displayDialogue((string("Failed to load device database\nReason: ")+exception.what()).c_str(),
+                   "Error loading devices",
+                   wxOK);
+      return BDM_RC_DEVICE_DATABASE_ERROR;
+   }
+   catch (...){
       print("getDeviceData() - Failed to load device database\n");
       displayDialogue("Failed to load device database\n",
                       "Error loading devices",

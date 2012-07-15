@@ -22,286 +22,158 @@
       <securityInfo size="24" type="on" id="CFV2-default-security-on">
          FFFFFFFFFFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF C0004AC8
       </securityInfo>
+      <memory id="coldfire4K_Ram" type="ram">
+         <memoryRange start="0x20000000" size="4K" />
+      </memory>
+      <memory id="coldfire8K_Ram" type="ram">
+         <memoryRange start="0x20000000" size="4K" />
+      </memory>
+      <memory id="coldfire16K_Ram" type="ram">
+         <memoryRange start="0x20000000" size="16K" />
+      </memory>
+      <memory id="coldfire32K_Ram" type="ram">
+         <memoryRange start="0x20000000" size="32K" />
+      </memory>
+      <memory id="coldfire64K_Ram" type="ram">
+         <memoryRange start="0x20000000" size="64K" />
+      </memory>
+      <memory id="coldfire64K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400"
+         sectorSize="2048">
+         <flashProgramRef ref="default-CFV2-FlashProgram" />
+         <securityInfoRef ref="CFV2-default-security-off" />
+         <securityInfoRef ref="CFV2-default-security-on" />
+         <memoryRange start="0x000000" size="512K" />
+      </memory>
+      <memory id="coldfire128K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400"
+         sectorSize="2048">
+         <flashProgramRef ref="default-CFV2-FlashProgram" />
+         <securityInfoRef ref="CFV2-default-security-off" />
+         <securityInfoRef ref="CFV2-default-security-on" />
+         <memoryRange start="0x000000" size="128K" />
+      </memory>
+      <memory id="coldfire256K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400"
+         sectorSize="2048">
+         <flashProgramRef ref="default-CFV2-FlashProgram" />
+         <securityInfoRef ref="CFV2-default-security-off" />
+         <securityInfoRef ref="CFV2-default-security-on" />
+         <memoryRange start="0x000000" size="256K" />
+      </memory>
+      <memory id="coldfire512K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400"
+         sectorSize="2048">
+         <flashProgramRef ref="default-CFV2-FlashProgram" />
+         <securityInfoRef ref="CFV2-default-security-off" />
+         <securityInfoRef ref="CFV2-default-security-on" />
+         <memoryRange start="0x000000" size="512K" />
+      </memory>
    </sharedInformation>
    <deviceList>
       <device family="CFVx" name="_Default" isDefault="true">
          <clock type="External" registerAddress="0" />
          <memory type="ram">
-            <memoryRange size="4K" start="0x20000000"/>
+            <memoryRange start="0x20000000" size="4K" />
          </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400"  sectorSize="2048">
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
+         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" sectorSize="2048">
             <securityInfoRef ref="CFV2-default-security-off" />
             <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="512K" start="0x000000" />
+            <memoryRange start="0x000000" size="512K" />
          </memory>
          <sdidAddress value="0x4011000A" />
          <sdidMask value="0xFFC0" />
          <sdid value="0x0000" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="default-CFV2-Scripts" />
+         <flashProgramRef ref="default-CFV2-FlashProgram" />
          <note>Default CFV1 Device</note>
       </device>
       &Custom-Devices;
       <device family="CFVx" name="MCF52221">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="16K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400">
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire128K_Flash" />
          <sdid value="0x1400" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52223">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="16K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400">
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire128K_Flash" />
          <sdid value="0x14C0" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52230">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="32K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire128K_Flash" />
          <sdid value="0x1200" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52231">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="32K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire128K_Flash" />
          <sdid value="0x1240" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52232">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="32K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
-         <sdid value="0x0" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire128K_Flash" />
+         <sdid value="0x0000" />
       </device>
       <device family="CFVx" name="MCF52233">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="32K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="256K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire256K_Flash" />
          <sdid value="0x1280" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52234">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="32K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400">
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="256K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire256K_Flash" />
          <sdid value="0x12C0" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52235">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="32K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="256K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire256K_Flash" />
          <sdid value="0x1300" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52236">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="32K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="256K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire256K_Flash" />
          <sdid value="0x1280" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52210">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="16K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="64K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire64K_Flash" />
          <sdid value="0x0" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52211">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="16K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire128K_Flash" />
          <sdid value="0x0" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52212">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="8K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="64K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire8K_Ram" />
+         <memoryRef ref="coldfire64K_Flash" />
          <sdid value="0x0" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
       <device family="CFVx" name="MCF52213">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="8K" start="0x20000000" />
-         </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire8K_Ram" />
+         <memoryRef ref="coldfire128K_Flash" />
          <sdid value="0x1580" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
-<!-- 
-    ======================================================================= 
--->
+      <!--
+         =======================================================================
+      -->
       <device family="CFVx" name="MCF52259">
          <clock type="External" registerAddress="0" />
-         <memory type="ram">
-            <memoryRange size="64K" start="0x20000000" />
-         </memory>
+         <memoryRef ref="coldfire64K_Ram" />
          <memory type="io">
             <memoryRange size="1024M" start="0x40000000" />
          </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" >
-            <flashProgramRef ref="default-CFV2-FlashProgram" />
-            <securityInfoRef ref="CFV2-default-security-off" />
-            <securityInfoRef ref="CFV2-default-security-on" />
-            <memoryRange size="512K" start="0x000000" />
-         </memory>
-         <sdidAddress value="0x4011000A" />
-         <sdidMask value="0xFFC0" />
+         <memoryRef ref="coldfire512K_Flash" />
          <sdid value="0x2481" />
-         <flashScripts>
-            <tclScriptRef ref="default-CFV2-Scripts" />
-         </flashScripts>
       </device>
-
    </deviceList>
 </root>

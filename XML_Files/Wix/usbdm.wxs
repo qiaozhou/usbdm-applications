@@ -240,6 +240,14 @@
             </ProgId>         
          </Component>
          
+         <Component Id='C.HCS08OldProgrammer' Guid='*'>
+            <File Id='HCS08Old_FlashProgrammerEXE' DiskId='1'
+               Source='bin\HCS08Old_FlashProgrammer.exe' KeyPath='yes'>
+               <Shortcut Id="startmenuUSBDM_2a" Directory="D.UsbdmProgramMenuDir" Name="HCS08 Old Programmer"
+                  WorkingDirectory='INSTALLDIR' Icon="ChipIcon.ico" IconIndex="0" Advertise="yes" />
+            </File>
+         </Component>
+         
          <Component Id='C.RS08Programmer' Guid='*'>
             <File Id='RS08_FlashProgrammerEXE' DiskId='1'
                Source='bin\RS08_FlashProgrammer.exe' KeyPath='yes'>
@@ -429,7 +437,7 @@
          </Component>
          <Component Id='C.Manual3' Guid='*' >
             <File Id='F.CFJS16CHM'           DiskId='1' Source='..\Documentation\USBDM_CF_JS16.chm' KeyPath="yes">
-               <Shortcut Id="startmenuUSBDM_112" Directory="D.ProgramMenuHelpDir" Name="JS16 Minmal (Coldfire V2-4, DSC, Kinetis) Manual"
+               <Shortcut Id="startmenuUSBDM_112" Directory="D.ProgramMenuHelpDir" Name="JS16 (Coldfire V2-4, DSC, Kinetis) Manual"
                   WorkingDirectory='INSTALLDIR' Advertise="yes"/>
             </File>
          </Component>
@@ -547,6 +555,15 @@
                   AllowAdvertise="no"
                   Level='1'>
                <ComponentRef Id='C.HCS08Programmer' />
+               <ComponentRef Id='C.CommonFiles' />
+               <ComponentGroupRef Id='Cg.DeviceDataInstall'/>
+            </Feature>
+            <Feature Id='F.HCS08OldProgrammer'
+                  Title='HCS08 Programmer (Old)'
+                  Description='Stand-alone HCS08 flash programmer.'
+                  AllowAdvertise="no"
+                  Level='1'>
+               <ComponentRef Id='C.HCS08OldProgrammer' />
                <ComponentRef Id='C.CommonFiles' />
                <ComponentGroupRef Id='Cg.DeviceDataInstall'/>
             </Feature>

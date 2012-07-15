@@ -34,7 +34,7 @@ proc loadSymbols {} {
    set ::CFV1_DRegCSR2byte   [expr $::CFV1_ByteRegs+$::CFV1_DRegCSR2] ;# - CSR2.msb
    set ::CFV1_DRegCSR3byte   [expr $::CFV1_ByteRegs+$::CFV1_DRegCSR3] ;# - CSR3.msb
 
-   set ::PRDIV8       0x40
+   set ::PRDIV8                 0x40
 
    set ::CFV1_XCSR_HALT         0x80
    set ::CFV1_XCSR_CSTAT_MASS   0x00

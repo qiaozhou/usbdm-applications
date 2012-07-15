@@ -177,7 +177,7 @@ public:
    void loadSettings(const AppSettings &settings);
    void saveSettings(AppSettings &settings);
 
-   bool chooseDevice(const wxString &deviceName);
+   bool chooseDevice(const string &deviceName);
    void getDialogueValues(DeviceData *state);
 
    void failBeep() {

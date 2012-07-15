@@ -8,6 +8,18 @@
 <!ENTITY New-ColdfileV1-Devices         SYSTEM "cfv1_newDevices.xml">
 <!ENTITY Custom-Devices                 SYSTEM "Custom/custom-cfv1.xml">
 ]>
+<!--  Notes
+Coldfire
+  Memory types should be either
+     ram       Programming buffer
+     flash     Programmable memory (may be multiple blocks)
+
+Coldfire+
+     ram       Programming buffer
+     flash     Programmable memory - Block 0 or only flash present  
+     flexNVM   Flash that may be partitioned between dFlash and emulated EEPROM backing store
+     dFlash    Data flash - as for flash but Block 1
+ -->
 <root version="4.9.5">
    <description>Coldfire V1 Device characteristics v4.8.0 25/12/2011</description>
    <sharedInformation>
@@ -39,557 +51,611 @@
       <securityInfo size="16" type="on" id="CFV1-default-security-on">
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBE
       </securityInfo>
-      <flexNVMInfo id="defaultCFPlusFlexPartition" backingRatio="16">
-         <eeepromEntry description="None" eeeSize="0"    value="0xFF" />
-         <eeepromEntry description="32"   eeeSize="32"   value="0x39" />
-         <eeepromEntry description="64"   eeeSize="64"   value="0x38" />
-         <eeepromEntry description="128"  eeeSize="128"  value="0x37" />
-         <eeepromEntry description="256"  eeeSize="256"  value="0x36" />
-         <eeepromEntry description="512"  eeeSize="512"  value="0x35" />
-         <eeepromEntry description="1024" eeeSize="1024" value="0x34" />
-         <eeepromEntry description="2048" eeeSize="2048" value="0x33" />
+      <flexNVMInfo id="coldfirePlus32kFlexPartionInfo" backingRatio="16">
+         <eeepromEntry description="Unchanged/None" eeeSize="0"    value="0xFF" />
+         <eeepromEntry description="32"             eeeSize="32"   value="0x39" />
+         <eeepromEntry description="64"             eeeSize="64"   value="0x38" />
+         <eeepromEntry description="128"            eeeSize="128"  value="0x37" />
+         <eeepromEntry description="256"            eeeSize="256"  value="0x36" />
+         <eeepromEntry description="512"            eeeSize="512"  value="0x35" />
+         <eeepromEntry description="1024"           eeeSize="1024" value="0x34" />
+         <eeepromEntry description="2048"           eeeSize="2048" value="0x33" />
          <partitionEntry description="DFlash=32, No EEPROM" eeSize="0"   value="0xFF" />
          <partitionEntry description="DFlash=24, EEPROM=8"  eeSize="8K"  value="0x01" />
          <partitionEntry description="DFlash=16, EEPROM=16" eeSize="16K" value="0x02" />
          <partitionEntry description="DFlash=8,  EEPROM=24" eeSize="24K" value="0x09" />
          <partitionEntry description="DFlash=0,  EEPROM=32" eeSize="32K" value="0x03" />
       </flexNVMInfo>
+      <flexNVMInfo id="coldfirePlus16kFlexPartionInfo" backingRatio="16">
+         <eeepromEntry description="Unchanged/None" eeeSize="0"    value="0xFF" />
+         <eeepromEntry description="32"             eeeSize="32"   value="0x39" />
+         <eeepromEntry description="64"             eeeSize="64"   value="0x38" />
+         <eeepromEntry description="128"            eeeSize="128"  value="0x37" />
+         <eeepromEntry description="256"            eeeSize="256"  value="0x36" />
+         <eeepromEntry description="512"            eeeSize="512"  value="0x35" />
+         <eeepromEntry description="1024"           eeeSize="1024" value="0x34" />
+         <partitionEntry description="DFlash=32, No EEPROM" eeSize="0"   value="0xFF" />
+         <partitionEntry description="DFlash=24, EEPROM=8"  eeSize="8K"  value="0x01" />
+         <partitionEntry description="DFlash=16, EEPROM=16" eeSize="16K" value="0x02" />
+      </flexNVMInfo>
+      <memory id="coldfire8K_Ram" type="ram">
+         <memoryRange start="0x800000" size="8K" />
+      </memory>
+      <memory id="coldfire16K_Ram" type="ram">
+         <memoryRange start="0x800000" size="16K" />
+      </memory>
+      <memory id="coldfire24K_Ram" type="ram">
+         <memoryRange start="0x800000" size="24K" />
+      </memory>
+      <memory id="coldfire32K_Ram" type="ram">
+         <memoryRange start="0x800000" size="32K" />
+      </memory>
+      <memory id="coldfirePlus32K_Flash" type="flash" registerAddress="0xFF84E0" securityAddress="0x0400"
+         sectorSize="1024">
+         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <securityInfoRef ref="CFV1Plus-default-security-off" />
+         <securityInfoRef ref="CFV1Plus-default-security-on" />
+         <memoryRange start="0x000000" size="32K" />
+      </memory>
+      <memory id="coldfirePlus64K_Flash" type="flash" registerAddress="0xFF84E0" securityAddress="0x0400"
+         sectorSize="1024">
+         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <securityInfoRef ref="CFV1Plus-default-security-off" />
+         <securityInfoRef ref="CFV1Plus-default-security-on" />
+         <memoryRange start="0x000000" size="64K" />
+      </memory>
+      <memory id="coldfirePlus128K_Flash" type="flash" registerAddress="0xFF84E0" securityAddress="0x0400"
+         sectorSize="1024">
+         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <securityInfoRef ref="CFV1Plus-default-security-off" />
+         <securityInfoRef ref="CFV1Plus-default-security-on" />
+         <memoryRange start="0x000000" size="128K" />
+      </memory>
+      <memory id="coldfire16K_FlexNVM" type="flexNVM" registerAddress="0xFF84E0" sectorSize="1024">
+         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="coldfirePlus16kFlexPartionInfo" />
+         <memoryRange start="0x200000" size="16K" />
+      </memory>
+      <memory id="coldfire32K_FlexNVM" type="flexNVM" registerAddress="0xFF84E0" sectorSize="1024">
+         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
+         <flexNVMInfoRef ref="coldfirePlus32kFlexPartionInfo" />
+         <memoryRange start="0x200000" size="32K" />
+      </memory>
    </sharedInformation>
    <deviceList>
       <device family="CFV1" name="_Default" isDefault="true">
          <clock type="External" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire16K_Ram" />
+         <!-- Regular flash or pFlash memory -->
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400" sectorSize="1024">
-            <memoryRange size="128K" start="0x000000" />
+            <memoryRange start="0x000000" size="128K" />
          </memory>
-         <memory registerAddress="0xFF9820" type="dFlash" sectorSize="256">
-            <memoryRange size="128K" start="0x000000" />
+         <!-- Data flash -->
+         <memory registerAddress="0xFF9820" type="dFlash" sectorSize="1024">
+            <memoryRange start="0x010000" size="128K" />
          </memory>
-         <memory registerAddress="0xFF9820" type="pFlash" sectorSize="1024">
-            <memoryRange size="128K" start="0x000000" />
+         <!-- flexNVM memory that may be used as EEEPROM backing store or dFlash -->
+         <memory registerAddress="0xFF9820" type="flexNVM" sectorSize="1024">
+            <memoryRange start="0x20000" size="32K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdidMask value="0x0FFF" />
          <sdid value="0x0000" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1-default-FlashProgram" />
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <note>Default CFV1 Device</note>
       </device>
 &Custom-Devices;
       <device family="CFV1" name="MCF51AC128A">
          <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire32K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
+            <memoryRange start="0x000000" size="128K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C1B" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51AC128C">
          <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire16K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
+            <memoryRange start="0x000000" size="128K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C1B" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51AC256A">
          <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire32K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="256K" start="0x000000" />
+            <memoryRange start="0x000000" size="256K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C1B" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51AC256B">
          <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire32K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="256K" start="0x000000" />
+            <memoryRange start="0x000000" size="256K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C1B" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1-default-FlashProgram" />
-      </device>
-      <device family="CFV1" name="MCF51AG128">
-         <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1-default-security-off" />
-            <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <soptAddress value="0xFF9802" />
-         <sdidAddress value="0xFF9806" />
-         <sdid value="0x0C05" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51AG96">
          <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire16K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="96K" start="0x000000" />
+            <memoryRange start="0x000000" size="96K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C05" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
+         <flashProgramRef ref="CFV1-default-FlashProgram" />
+      </device>
+      <device family="CFV1" name="MCF51AG128">
+         <clock registerAddress="0xFF8048" type="S08MCGV3" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
+            <securityInfoRef ref="CFV1-default-security-off" />
+            <securityInfoRef ref="CFV1-default-security-on" />
+            <memoryRange start="0x000000" size="128K" />
+         </memory>
+         <soptAddress value="0xFF9802" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0C05" />
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51CN128">
          <clock registerAddress="0xFF8240" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x805FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire24K_Ram" />
          <memory registerAddress="0xFF82E0" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
+            <memoryRange start="0x000000" size="128K" />
          </memory>
          <soptAddress value="0xFF8101" />
          <sdidAddress value="0xFF8106" />
          <sdid value="0x0C2F" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51EM128">
          <clock registerAddress="0xFF8220" type="S08ICSV3" />
-         <memory type="ram">
-            <memoryRange end="0x801FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire8K_Ram" />
          <memory registerAddress="0xFF8780" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="64K" start="0x000000" />
+            <memoryRange start="0x000000" size="64K" />
          </memory>
          <memory registerAddress="0xFF87A0" type="flash" securityAddress="0x020400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="64K" start="0x010000" />
+            <memoryRange start="0x010000" size="64K" />
          </memory>
          <soptAddress value="0xFF8281" />
          <sdidAddress value="0xFF8284" />
          <sdid value="0x0C02" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51EM256">
          <clock registerAddress="0xFF8220" type="S08ICSV3" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire16K_Ram" />
          <memory registerAddress="0xFF8780" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
+            <memoryRange start="0x000000" size="128K" />
          </memory>
          <memory registerAddress="0xFF87A0" type="flash" securityAddress="0x020400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x020000" />
+            <memoryRange start="0x020000" size="128K" />
          </memory>
          <soptAddress value="0xFF8281" />
          <sdidAddress value="0xFF8284" />
          <sdid value="0x0C02" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51JE128">
          <clock registerAddress="0xFF8038" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire32K_Ram" />
          <memory registerAddress="0xFF9920" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="64K" start="0x000000" />
+            <memoryRange start="0x000000" size="64K" />
          </memory>
          <memory registerAddress="0xFF9930" type="flash" securityAddress="0x010400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="64K" start="0x010000" />
+            <memoryRange start="0x010000" size="64K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C04" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51JE256">
          <clock registerAddress="0xFF8038" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire32K_Ram" />
          <memory registerAddress="0xFF9920" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
+            <memoryRange start="0x000000" size="128K" />
          </memory>
          <memory registerAddress="0xFF9930" type="flash" securityAddress="0x020400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x020000" />
+            <memoryRange start="0x020000" size="128K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C04" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
-      </device>
-      <device family="CFV1Plus" name="MCF51JF128">
-         <clock type="External" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF84E0" type="flash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1Plus-default-security-off" />
-            <securityInfoRef ref="CFV1Plus-default-security-on"  />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF80D0" />
-         <sdid value="0x0D3F" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1Plus-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
-         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
       </device>
       <device family="CFV1Plus" name="MCF51JF32">
          <clock type="External" />
-         <memory type="ram">
-            <memoryRange end="0x801FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF84E0" type="flash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1Plus-default-security-off" />
-            <securityInfoRef ref="CFV1Plus-default-security-on"  />
-            <memoryRange size="32K" start="0x000000" />
-         </memory>
+         <memoryRef ref="coldfire8K_Ram" />
+         <memoryRef ref="coldfire16K_FlexNVM" />
+         <memoryRef ref="coldfirePlus32K_Flash" />
          <soptAddress value="0xFF80C0" />
          <sdidAddress value="0xFF80D0" />
-         <sdid value="0x0000" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1Plus-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
-         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D01" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
       </device>
       <device family="CFV1Plus" name="MCF51JF64">
          <clock type="External" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF84E0" type="flash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1Plus-default-security-off" />
-            <securityInfoRef ref="CFV1Plus-default-security-on"  />
-            <memoryRange size="64K" start="0x000000" />
-         </memory>
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus64K_Flash" />
          <soptAddress value="0xFF80C0" />
          <sdidAddress value="0xFF80D0" />
-         <sdid value="0x0000" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1Plus-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
-         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D01" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
       </device>
-      <device family="CFV1Plus" name="MCF51JU128">
+      <device family="CFV1Plus" name="MCF51JF128">
          <clock type="External" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF84E0" type="pFlash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1Plus-default-security-off" />
-            <securityInfoRef ref="CFV1Plus-default-security-on"  />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <memory registerAddress="0xFF84E0" type="dFlash">
-            <memoryRange size="32K" start="0x200000" />
-         </memory>
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus128K_Flash" />
          <soptAddress value="0xFF80C0" />
          <sdidAddress value="0xFF80D0" />
-         <sdid value="0x0000" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1Plus-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
-         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D01" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
       </device>
       <device family="CFV1Plus" name="MCF51JU32">
          <clock type="External" />
-         <memory type="ram">
-            <memoryRange end="0x801FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF84E0" type="flash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1Plus-default-security-off" />
-            <securityInfoRef ref="CFV1Plus-default-security-on"  />
-            <memoryRange size="32K" start="0x000000" />
-         </memory>
+         <memoryRef ref="coldfire8K_Ram" />
+         <memoryRef ref="coldfire16K_FlexNVM" />
+         <memoryRef ref="coldfirePlus32K_Flash" />
          <soptAddress value="0xFF80C0" />
          <sdidAddress value="0xFF80D0" />
-         <sdid value="0x0000" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1Plus-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
-         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D02" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
       </device>
       <device family="CFV1Plus" name="MCF51JU64">
          <clock type="External" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF84E0" type="flash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1Plus-default-security-off" />
-            <securityInfoRef ref="CFV1Plus-default-security-on"  />
-            <memoryRange size="64K" start="0x000000" />
-         </memory>
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus64K_Flash" />
          <soptAddress value="0xFF80C0" />
          <sdidAddress value="0xFF80D0" />
-         <sdid value="0x0000" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1Plus-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
-         <flexNVMInfoRef ref="defaultCFPlusFlexPartition" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D02" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
       </device>
-      <device family="CFV1" name="MCF51JM128">
-         <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1-default-security-off" />
-            <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <soptAddress value="0xFF9802" />
-         <sdidAddress value="0xFF9806" />
-         <sdid value="0x0C16" />
-         <sdid value="0x0C17" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1-default-FlashProgram" />
+      <device family="CFV1Plus" name="MCF51JU128">
+         <clock type="External" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus128K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF80D0" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D02" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
       </device>
       <device family="CFV1" name="MCF51JM32">
          <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x803FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire16K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="32K" start="0x000000" />
+            <memoryRange start="0x000000" size="32K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C16" />
          <sdid value="0x0C17" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51JM64">
          <clock registerAddress="0xFF8048" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x801FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire8K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="64K" start="0x000000" />
+            <memoryRange start="0x000000" size="64K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C16" />
          <sdid value="0x0C17" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
+         <flashProgramRef ref="CFV1-default-FlashProgram" />
+      </device>
+      <device family="CFV1" name="MCF51JM128">
+         <clock registerAddress="0xFF8048" type="S08MCGV3" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
+            <securityInfoRef ref="CFV1-default-security-off" />
+            <securityInfoRef ref="CFV1-default-security-on" />
+            <memoryRange start="0x000000" size="128K" />
+         </memory>
+         <soptAddress value="0xFF9802" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0C16" />
+         <sdid value="0x0C17" />
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51MM128">
          <clock registerAddress="0xFF8038" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire32K_Ram" />
          <memory registerAddress="0xFF9920" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="64K" start="0x000000" />
+            <memoryRange start="0x000000" size="64K" />
          </memory>
          <memory registerAddress="0xFF9920" type="flash" securityAddress="0x020400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="64K" start="0x010000" />
+            <memoryRange start="0x010000" size="64K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C04" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51MM256">
          <clock registerAddress="0xFF8038" type="S08MCGV3" />
-         <memory type="ram">
-            <memoryRange end="0x807FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire32K_Ram" />
          <memory registerAddress="0xFF9920" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
+            <memoryRange start="0x000000" size="128K" />
          </memory>
          <memory registerAddress="0xFF9930" type="flash" securityAddress="0x020400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x020000" />
+            <memoryRange start="0x020000" size="128K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C04" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
-         <flashProgramRef ref="CFV1-default-FlashProgram" />
-      </device>
-      <device family="CFV1" name="MCF51QE128">
-         <clock registerAddress="0xFF8038" type="S08ICSV3" />
-         <memory type="ram">
-            <memoryRange end="0x801FFF" start="0x800000" />
-         </memory>
-         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
-            <securityInfoRef ref="CFV1-default-security-off" />
-            <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="128K" start="0x000000" />
-         </memory>
-         <soptAddress value="0xFF9802" />
-         <sdidAddress value="0xFF9806" />
-         <sdid value="0x0C15" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51QE32">
          <clock registerAddress="0xFF8038" type="S08ICSV3" />
-         <memory type="ram">
-            <memoryRange end="0x801FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire8K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="32K" start="0x000000" />
+            <memoryRange start="0x000000" size="32K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C15" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51QE64">
          <clock registerAddress="0xFF8038" type="S08ICSV3" />
-         <memory type="ram">
-            <memoryRange end="0x801FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire8K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="64K" start="0x000000" />
+            <memoryRange start="0x000000" size="64K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C15" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51QE96">
          <clock registerAddress="0xFF8038" type="S08ICSV3" />
-         <memory type="ram">
-            <memoryRange end="0x801FFF" start="0x800000" />
-         </memory>
+         <memoryRef ref="coldfire8K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
             <securityInfoRef ref="CFV1-default-security-on" />
-            <memoryRange size="96K" start="0x000000" />
+            <memoryRange start="0x000000" size="96K" />
          </memory>
          <soptAddress value="0xFF9802" />
          <sdidAddress value="0xFF9806" />
          <sdid value="0x0C15" />
-         <flashScripts>
-            <tclScriptRef ref="CFV1-default-Scripts" />
-         </flashScripts>
+         <tclScriptRef ref="CFV1-default-Scripts" />
          <flashProgramRef ref="CFV1-default-FlashProgram" />
+      </device>
+      <device family="CFV1" name="MCF51QE128">
+         <clock registerAddress="0xFF8038" type="S08ICSV3" />
+         <memoryRef ref="coldfire8K_Ram" />
+         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
+            <securityInfoRef ref="CFV1-default-security-off" />
+            <securityInfoRef ref="CFV1-default-security-on" />
+            <memoryRange start="0x000000" size="128K" />
+         </memory>
+         <soptAddress value="0xFF9802" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0C15" />
+         <tclScriptRef ref="CFV1-default-Scripts" />
+         <flashProgramRef ref="CFV1-default-FlashProgram" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QF32">
+         <clock type="External" />
+         <memoryRef ref="coldfire8K_Ram" />
+         <memoryRef ref="coldfire16K_FlexNVM" />
+         <memoryRef ref="coldfirePlus32K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D05" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QF64">
+         <clock type="External" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus64K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D05" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QF128">
+         <clock type="External" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus128K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D05" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QH32">
+         <clock type="External" />
+         <memoryRef ref="coldfire8K_Ram" />
+         <memoryRef ref="coldfire16K_FlexNVM" />
+         <memoryRef ref="coldfirePlus32K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D04" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QH64">
+         <clock type="External" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus64K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D04" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QH128">
+         <clock type="External" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus128K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D04" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QM32">
+         <clock type="External" />
+         <memoryRef ref="coldfire8K_Ram" />
+         <memoryRef ref="coldfire16K_FlexNVM" />
+         <memoryRef ref="coldfirePlus32K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D03" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QM64">
+         <clock type="External" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus64K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D03" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QM128">
+         <clock type="External" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus128K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D03" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QU32">
+         <clock type="External" />
+         <memoryRef ref="coldfire8K_Ram" />
+         <memoryRef ref="coldfire16K_FlexNVM" />
+         <memoryRef ref="coldfirePlus32K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D06" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QU64">
+         <clock type="External" />
+         <memoryRef ref="coldfire16K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus64K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D06" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
+      </device>
+      <device family="CFV1Plus" name="MCF51QU128">
+         <clock type="External" />
+         <memoryRef ref="coldfire32K_Ram" />
+         <memoryRef ref="coldfire32K_FlexNVM" />
+         <memoryRef ref="coldfirePlus128K_Flash" />
+         <soptAddress value="0xFF80C0" />
+         <sdidAddress value="0xFF9806" />
+         <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
+         <sdid value="0x0D06" />
+         <tclScriptRef ref="CFV1Plus-default-Scripts" />
       </device>
 &New-ColdfileV1-Devices;
    </deviceList>

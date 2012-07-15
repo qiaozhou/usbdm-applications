@@ -608,7 +608,7 @@ USBDM_ErrorCode FlashProgrammer::massEraseTarget(void) {
 //==============================================================================
 // Flag masks
 #define DO_INIT_FLASH         (1<<0) // Do (one-off) initialisation of flash
-#define DO_MASS_ERASE         (1<<1) // Mass erase device
+#define DO_MASS_ERASE         (1<<1) // Mass erase flash array
 #define DO_ERASE_RANGE        (1<<2) // Erase range (including option region)
 #define DO_BLANK_CHECK_RANGE  (1<<3) // Blank check region
 #define DO_PROGRAM_RANGE      (1<<4) // Program range (including option region)
@@ -1070,6 +1070,9 @@ USBDM_ErrorCode getRunStatus(void) {
 //!
 //! @return error code, see \ref USBDM_ErrorCode
 //!
+//! @param flashHeader - header describing operation
+//! @param size        - size of data following header in memoryElementType units
+//!
 USBDM_ErrorCode FlashProgrammer::executeTargetProgram(FlashData_t *flashHeader, uint32_t size) {
 
    if (size == 0) {
@@ -1301,8 +1304,6 @@ USBDM_ErrorCode FlashProgrammer::determineTargetSpeed(void) {
 //! Erase Target Flash memory
 //!
 //! @return error code see \ref USBDM_ErrorCode.
-//!
-//! @note - Assumes flash programming code has already been loaded to target.
 //!
 USBDM_ErrorCode FlashProgrammer::eraseFlash(void) {
    USBDM_ErrorCode rc = BDM_RC_OK;
@@ -1691,24 +1692,11 @@ USBDM_ErrorCode FlashProgrammer::doFlashBlock(FlashImage     *flashImage,
                                               uint32_t       &flashAddress,
                                               uint32_t       flashOperation) {
 
-   const unsigned int MaxSplitBlockSize = 0x4000;
-   struct {
-      FlashData_t          targetFlashData;
-      memoryElementType    data[MaxSplitBlockSize+10];
-   } buffer;
-
    print("FlashProgrammer::doFlashBlock() [0x%06X..0x%06X]\n", flashAddress, flashAddress+blockSize-1);
 
    if (!flashReady) {
       print("FlashProgrammer::doFlashBlock() - Error, Flash not ready\n");
       return PROGRAMMING_RC_ERROR_INTERNAL_CHECK_FAILED;
-   }
-   // Maximum split block size must be made less than buffer RAM available
-   unsigned int maxSplitBlockSize = this->flashData.size;
-
-   // Maximum split block size must be made less than above buffer
-   if (maxSplitBlockSize > MaxSplitBlockSize) {
-      maxSplitBlockSize = MaxSplitBlockSize;
    }
    // OK for empty block
    if (blockSize==0) {
@@ -1793,6 +1781,7 @@ USBDM_ErrorCode FlashProgrammer::doFlashBlock(FlashImage     *flashImage,
    print("FlashProgrammer::doFlashBlock() - Processing %s[0x%06X..0x%06X]\n",
          MemoryRegion::getMemoryTypeName(memoryType),
          flashAddress, flashAddress+blockSize-1);
+
    USBDM_ErrorCode rc = loadTargetProgram(memoryRegionPtr->getFlashprogram());
    if (rc != PROGRAMMING_RC_OK) {
       return rc;
@@ -1809,7 +1798,7 @@ USBDM_ErrorCode FlashProgrammer::doFlashBlock(FlashImage     *flashImage,
       targetAddress = (1<<31)|flashAddress;
    }
    else {
-      uint8_t      pageNo;
+      uint8_t pageNo;
       rc = getPageAddress(memoryRegionPtr, flashAddress, &pageNo);
       if (rc != PROGRAMMING_RC_OK) {
          return rc;
@@ -1820,6 +1809,20 @@ USBDM_ErrorCode FlashProgrammer::doFlashBlock(FlashImage     *flashImage,
       targetAddress |= ADDRESS_EEPROM;
    }
 #endif
+
+   // Maximum split block size must be made less than buffer RAM available
+   unsigned int maxSplitBlockSize = this->flashData.size;
+
+   const unsigned int MaxSplitBlockSize = 0x4000;
+   struct {
+      FlashData_t          targetFlashData;
+      memoryElementType    data[MaxSplitBlockSize+10];
+   } buffer;
+
+   // Maximum split block size must be made less than above buffer
+   if (maxSplitBlockSize > MaxSplitBlockSize) {
+      maxSplitBlockSize = MaxSplitBlockSize;
+   }
    uint32_t alignMask = ((1<<((this->flashProgramHeader.capabilities&CAP_ALIGN_MASK)>>CAP_ALIGN_OFFS))-1);
    print("FlashProgrammer::doFlashBlock() - align mask = 0x%08X\n", alignMask);
 
@@ -1917,12 +1920,13 @@ USBDM_ErrorCode FlashProgrammer::doFlashBlock(FlashImage     *flashImage,
 //!
 //! @return error code see \ref USBDM_ErrorCode
 //!
-USBDM_ErrorCode FlashProgrammer::applyFlashOperation(FlashImage    *flashImage,
-                                                     uint32_t       operation) {
+USBDM_ErrorCode FlashProgrammer::applyFlashOperation(FlashImage     *flashImage,
+                                                     uint32_t       flashOperation) {
    USBDM_ErrorCode rc = PROGRAMMING_RC_OK;
    FlashImage::Enumerator *enumerator = flashImage->getEnumerator();
 
-   print("FlashProgrammer::applyFlashOperation() - Total Bytes = %d\n", flashImage->getByteCount());
+   print("FlashProgrammer::applyFlashOperation() - Total Bytes = %d\n", 
+         flashImage->getByteCount());
    // Go through each allocated block of memory applying operation
    while (enumerator->isValid()) {
       // Start address of block to program to flash
@@ -1934,7 +1938,7 @@ USBDM_ErrorCode FlashProgrammer::applyFlashOperation(FlashImage    *flashImage,
 
       if (blockSize>0) {
          // Process block [startBlock..endBlock]
-         rc = doFlashBlock(flashImage, blockSize, startBlock, operation);
+         rc = doFlashBlock(flashImage, blockSize, startBlock, flashOperation);
          if (rc != PROGRAMMING_RC_OK) {
             print("FlashProgrammer::applyFlashOperation() - Error \n");
             break;
@@ -1959,7 +1963,7 @@ USBDM_ErrorCode FlashProgrammer::applyFlashOperation(FlashImage    *flashImage,
 USBDM_ErrorCode FlashProgrammer::doProgram(FlashImage *flashImage) {
 
    print("FlashProgrammer::doProgram()\n");
-   progressTimer->restart("Programming && Verifying...");
+   progressTimer->restart("Programming & Verifying...");
 
    USBDM_ErrorCode rc;
    rc = applyFlashOperation(flashImage,
@@ -2025,8 +2029,7 @@ USBDM_ErrorCode FlashProgrammer::doBlankCheck(FlashImage *flashImage) {
    print("FlashProgrammer::doBlankCheck()\n");
    progressTimer->restart("Blank Checking...");
 
-   USBDM_ErrorCode rc;
-   rc = applyFlashOperation(flashImage,
+   USBDM_ErrorCode rc = applyFlashOperation(flashImage,
                             DO_INIT_FLASH|DO_BLANK_CHECK_RANGE);
    if (rc != PROGRAMMING_RC_OK) {
       print("FlashProgrammer::doBlankCheck() - Blank check failed, Reason= %s\n", USBDM_GetErrorString(rc));
@@ -2043,11 +2046,10 @@ USBDM_ErrorCode FlashProgrammer::doBlankCheck(FlashImage *flashImage) {
 //!
 USBDM_ErrorCode FlashProgrammer::doWriteRam(FlashImage *flashImage) {
 
-   print("FlashProgrammer::doBlankCheck()\n");
-   progressTimer->restart("Blank Checking...");
+   print("FlashProgrammer::doWriteRam()\n");
+   progressTimer->restart("Writing RAM...");
 
-   USBDM_ErrorCode rc;
-   rc = applyFlashOperation(flashImage, DO_WRITE_RAM);
+   USBDM_ErrorCode rc applyFlashOperation(flashImage, DO_WRITE_RAM);
    if (rc != PROGRAMMING_RC_OK) {
       print("FlashProgrammer::doWriteRam() - failed, Reason= %s\n", USBDM_GetErrorString(rc));
    }
@@ -2137,12 +2139,6 @@ USBDM_ErrorCode FlashProgrammer::verifyFlash(FlashImage  *flashImage,
    if (rc != PROGRAMMING_RC_OK) {
       return rc;
    }
-#if (TARGET == CFVx)
-   rc = determineTargetSpeed();
-   if (rc != PROGRAMMING_RC_OK) {
-      return rc;
-   }
-#endif
 #if (TARGET == CFVx) || (TARGET == MC56F80xx)
    rc = determineTargetSpeed();
    if (rc != PROGRAMMING_RC_OK) {

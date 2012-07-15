@@ -127,6 +127,8 @@ static const char *programmingErrorMessages[] = {
    /* 128 */ "Execution of TCL post-program script returned an error",
    /* 129 */ "Program data not within target Flash Memory",
    /* 130 */ "Illegal Flash Security value (will lock chip forever)",
+   /* 130 */ "Failed to program FlexNVM configuration.\n"
+             "  Device may already be configured",
 };
 
 //! Error code returned by the various routines

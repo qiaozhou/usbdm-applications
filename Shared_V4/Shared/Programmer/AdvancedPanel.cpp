@@ -188,6 +188,7 @@ bool AdvancedPanel::CreateControls() {
 
    row++;
 
+#if (TARGET==CFV1) || (TARGET==ARM)
    //================================================================================
    itemStaticBox = new wxStaticBox(panel, wxID_ANY, _("FlexNVM Parameters"));
    itemStaticBoxSizer = new wxStaticBoxSizer(itemStaticBox, wxHORIZONTAL);
@@ -201,38 +202,43 @@ bool AdvancedPanel::CreateControls() {
    //===
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("EEEPROM Size"), wxDefaultPosition, wxDefaultSize, 0 );
    gridBagSizer->Add(itemStaticText, wxGBPosition(row,0), wxGBSpan(1,1), wxLEFT|wxRIGHT|wxTOP, 5);
-   eeepromSizeChoiceControl = new wxChoice( panel, ID_EEPROM_SIZE_CHOICE, wxDefaultPosition, wxSize(150, -1));
-   gridBagSizer->Add(eeepromSizeChoiceControl, wxGBPosition(row,1), wxGBSpan(1,2), wxLEFT|wxRIGHT|wxTOP, 5);
-   eeepromSizeChoiceControl->SetToolTip(_("Controls size of EEPROM emulation region in FlexRAM"));
+   eeepromSizeChoiceControl = new wxChoice( panel, ID_EEPROM_SIZE_CHOICE, wxDefaultPosition , wxSize(150, -1));
+   gridBagSizer->Add(eeepromSizeChoiceControl, wxGBPosition(row,1), wxGBSpan(1,1), wxLEFT|wxRIGHT|wxTOP|wxEXPAND, 5);
+   eeepromSizeChoiceControl->SetToolTip(_("Controls size of emulated EEPROM region(s) in FlexRAM"));
 
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("bytes"), wxDefaultPosition, wxDefaultSize, 0 );
-   gridBagSizer->Add(itemStaticText, wxGBPosition(row,3), wxGBSpan(1,1), wxLEFT|wxRIGHT|wxTOP, 5);
+   gridBagSizer->Add(itemStaticText, wxGBPosition(row,2), wxGBSpan(1,1), wxLEFT|wxRIGHT|wxTOP, 5);
 
    row++;
 
    //===
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("FlexNVM Partition"), wxDefaultPosition, wxDefaultSize, 0 );
    gridBagSizer->Add(itemStaticText, wxGBPosition(row,0), wxGBSpan(1,1), wxLEFT|wxRIGHT|wxTOP, 5);
-   flexNvmPartitionChoiceControl = new wxChoice( panel, ID_FLEXNVM_PARTITION_CHOICE, wxDefaultPosition, wxSize(150, -1));
-   gridBagSizer->Add(flexNvmPartitionChoiceControl, wxGBPosition(row,1), wxGBSpan(1,2), wxLEFT|wxRIGHT|wxTOP, 5);
+   flexNvmPartitionChoiceControl = new wxChoice( panel, ID_FLEXNVM_PARTITION_CHOICE, wxDefaultPosition , wxSize(150, -1));
+   gridBagSizer->Add(flexNvmPartitionChoiceControl, wxGBPosition(row,1), wxGBSpan(1,1), wxLEFT|wxRIGHT|wxTOP, 5);
    flexNvmPartitionChoiceControl->SetToolTip(_("Controls how FlexNVM is divided between Data Flash and EEPROM backing store\n"
-                                               "EEPROM backing size >= 16 x EEPROM size"));
+                                               "EEPROM backing store size >= 16 x EEEPROM size - affects flash lifetime"));
 //   flexNvmPartitionChoiceControl->SetMinSize(wxSize(100,0));
    itemStaticText = new wxStaticText( panel, wxID_STATIC, _("Kbytes"), wxDefaultPosition, wxDefaultSize, 0 );
-   gridBagSizer->Add(itemStaticText, wxGBPosition(row,3), wxGBSpan(1,1), wxLEFT|wxRIGHT|wxTOP, 5);
+   gridBagSizer->Add(itemStaticText, wxGBPosition(row,2), wxGBSpan(1,1), wxLEFT|wxRIGHT|wxTOP, 5);
 
+   wxSize sz(flexNvmPartitionChoiceControl->GetMinSize());
+   sz.x += 10;
+   flexNvmPartitionChoiceControl->SetMinSize(sz);
    row++;
    //===
-   flexNvmDescriptionStaticControl = new wxStaticText( panel, wxID_STATIC, _("Estimated 16-bit write cycles (based on JU128 specs) = -"), wxDefaultPosition, wxDefaultSize, 0 );
+   flexNvmDescriptionStaticControl = new wxStaticText( panel, wxID_STATIC, _("Estimated 16-bit write cycles (based on JU128 specs) = ----------"), wxDefaultPosition, wxDefaultSize, 0 );
    gridBagSizer->Add(flexNvmDescriptionStaticControl, wxGBPosition(row,0), wxGBSpan(1,3), wxLEFT|wxRIGHT|wxTOP, 5);
    row++;
 
    populateEepromControl();
    populatePartitionControl();
+#endif
 
    return true;
 }
 
+#if (TARGET==CFV1) || (TARGET==ARM)
 //! Populates eeepromSizeChoiceControl with EEEPROM sizes
 //! Selects 1st entry if reload is necessary (devcie changed)
 //!
@@ -250,7 +256,7 @@ void AdvancedPanel::populateEepromControl() {
    }
    FlexNVMInfoPtr flexNVMInfo = currentDevice->getflexNVMInfo();
    if (flexNVMInfo == NULL) {
-      print("AdvancedPanel::populateEepromControl() - flexNVMInfo device not set\n");
+      print("AdvancedPanel::populatePartitionControl() - device has no flexNVMInfo\n");
       lastFlexNVMInfo.reset();
       eeepromSizeChoiceControl->Clear();
       eeepromSizeChoiceControl->Append(_("[EEEPROM not supported]"));
@@ -339,6 +345,7 @@ void AdvancedPanel::populatePartitionControl() {
    }
    FlexNVMInfoPtr flexNVMInfo = currentDevice->getflexNVMInfo();
    if (flexNVMInfo == NULL) {
+      print("AdvancedPanel::populatePartitionControl() - device has no flexNVMInfo\n");
       flexNvmPartitionChoiceControl->Append(_("[EEEPROM not supported]"));
       flexNvmPartitionChoiceControl->Select(0);
       flexNvmPartitionChoiceControl->Enable(false);
@@ -348,7 +355,7 @@ void AdvancedPanel::populatePartitionControl() {
    vector<FlexNVMInfo::EeepromSizeValue> &eeepromSizeValues(flexNVMInfo->getEeepromSizeValues());
    vector<FlexNVMInfo::FlexNvmPartitionValue> &flexNvmPartitionValues(flexNVMInfo->getFlexNvmPartitionValues());
    if (eeepromSizeChoice<=0) {
-      flexNvmPartitionChoiceControl->Append(_("[Disabled]"));
+      flexNvmPartitionChoiceControl->Append(_("[All DFlash]"));
       flexNvmPartitionChoiceControl->Enable(false);
       flexNvmPartitionIndex = 0;
    }
@@ -419,25 +426,30 @@ void AdvancedPanel::OnFlexNvmPartionChoiceSelected( wxCommandEvent& event ) {
    print("FlashPanel::OnFlexNvmPartionChoiceSelected(): Partition value =0x%02X\n", flexNvmPartitionIndex);
    TransferDataToWindow();
 }
+#endif
 
 //! Updates GUI from internal state
 //!
 //! @note values are validated
 //!
 void AdvancedPanel::updateFlashNVM() {
+#if (TARGET==CFV1) || (TARGET==ARM)
+
    static const double writeEfficiency = 0.5;     // Assume 16/32-bit writes
    static const double endurance       = 10000.0; // From JU128 specification sheet
    print("FlashPanel::updateFlashNVM()\n");
    populateEepromControl();
    eeepromSizeChoiceControl->SetSelection(eeepromSizeChoice);
    populatePartitionControl();
-   if (eeepromSizeChoice == 0) {
-      flexNvmDescriptionStaticControl->SetLabel(_("EEPROM emulation disabled"));
-      return;
-   }
    FlexNVMInfoPtr flexNVMInfo = currentDevice->getflexNVMInfo();
    if (flexNVMInfo == NULL) {
-      flexNvmDescriptionStaticControl->SetLabel(_("EEPROM emulation disabled"));
+      flexNvmDescriptionStaticControl->SetLabel(_("EEPROM emulation not available"));
+      eeepromSizeChoice     = 0;
+      flexNvmPartitionIndex = 0;
+      return;
+   }
+   if (eeepromSizeChoice == 0) {
+      flexNvmDescriptionStaticControl->SetLabel(_("EEPROM emulation will be disabled if device is mass-erased"));
       return;
    }
    vector<FlexNVMInfo::EeepromSizeValue>      &eeepromSizeValues(flexNVMInfo->getEeepromSizeValues());
@@ -450,6 +462,7 @@ void AdvancedPanel::updateFlashNVM() {
               eeepromSize, eepromSize, (double)eepromSize/eeepromSize, estimatedFlexRamWrites);
    snprintf(buff, sizeof(buff),"Estimated 16-bit write cycles (based on JU128 specs) = %.2g", estimatedFlexRamWrites);
    flexNvmDescriptionStaticControl->SetLabel(buff);
+#endif
 }
 
 /*
@@ -461,8 +474,10 @@ IMPLEMENT_CLASS( AdvancedPanel, wxPanel )
  * FlashPanel event table definition
  */
 BEGIN_EVENT_TABLE( AdvancedPanel, wxPanel )
+#if (TARGET==CFV1) || (TARGET==ARM)
 EVT_CHOICE( ID_EEPROM_SIZE_CHOICE,         AdvancedPanel::OnEeepromSizeChoiceSelected )
 EVT_CHOICE( ID_FLEXNVM_PARTITION_CHOICE,   AdvancedPanel::OnFlexNvmPartionChoiceSelected )
+#endif
 END_EVENT_TABLE()
 
 #define settingsKey "AdvancedPanel"
@@ -489,6 +504,7 @@ void AdvancedPanel::loadSettings(const AppSettings &settings) {
    bdmOptions.resetReleaseInterval     = settings.getValue(resetReleaseIntervalKey,    bdmOptions.resetReleaseInterval);
    bdmOptions.resetRecoveryInterval    = settings.getValue(resetRecoveryIntervalKey,   bdmOptions.resetRecoveryInterval);
 
+#if (TARGET==CFV1) || (TARGET==ARM)
    int eepromSize = settings.getValue(eeepromSizeKey,             0);
    eeepromSizeChoice = findEeepromSizeIndex(eepromSize);
    if (eeepromSizeChoice == 0) {
@@ -498,6 +514,7 @@ void AdvancedPanel::loadSettings(const AppSettings &settings) {
       int partitionSize = settings.getValue(flexNvmPartitionSizeKey,        0);
       flexNvmPartitionIndex = findPartitionControlIndex(partitionSize);
    }
+#endif
    TransferDataToWindow();
 }
 
@@ -515,6 +532,7 @@ void AdvancedPanel::saveSettings(AppSettings &settings) {
    settings.addValue(resetReleaseIntervalKey,      bdmOptions.resetReleaseInterval);
    settings.addValue(resetRecoveryIntervalKey,     bdmOptions.resetRecoveryInterval);
 
+#if (TARGET==CFV1) || (TARGET==ARM)
    FlexNVMInfoPtr flexNVMInfo = currentDevice->getflexNVMInfo();
    if (flexNVMInfo == NULL) {
       return;
@@ -525,6 +543,7 @@ void AdvancedPanel::saveSettings(AppSettings &settings) {
    if (eeepromSizeChoice>0) {
       settings.addValue(flexNvmPartitionSizeKey,   flexNvmPartitionValues[flexNvmPartitionIndex].backingStore);
    }
+#endif
 }
 
 //! Get bdm options from dialogue
@@ -551,19 +570,16 @@ void AdvancedPanel::getBdmOptions(USBDM_ExtendedOptions_t *_bdmOptions) {
 //! @note - _bdmOptions should be set to default values beforehand
 //!
 void AdvancedPanel::getDeviceOptions(DeviceDataPtr deviceData) {
-
    print("USBDMPanel::getDeviceOptions()\n");
 
-   DeviceData::FlexNVMParameters flexParameters;
-
+   DeviceData::FlexNVMParameters flexParameters = {0xFF,0xFF}; // Default value for no parameters
    FlexNVMInfoPtr flexNVMInfo = currentDevice->getflexNVMInfo();
-   if (flexNVMInfo == NULL) {
-      return;
+   if (flexNVMInfo != NULL) {
+      vector<FlexNVMInfo::EeepromSizeValue>      &eeepromSizeValues(flexNVMInfo->getEeepromSizeValues());
+      vector<FlexNVMInfo::FlexNvmPartitionValue> &flexNvmPartitionValues(flexNVMInfo->getFlexNvmPartitionValues());
+      flexParameters.eeepromSize  = eeepromSizeValues[eeepromSizeChoice].value;
+      flexParameters.partionValue = flexNvmPartitionValues[flexNvmPartitionIndex].value;
    }
-   vector<FlexNVMInfo::EeepromSizeValue>      &eeepromSizeValues(flexNVMInfo->getEeepromSizeValues());
-   vector<FlexNVMInfo::FlexNvmPartitionValue> &flexNvmPartitionValues(flexNVMInfo->getFlexNvmPartitionValues());
-   flexParameters.eeepromSize  = eeepromSizeValues[eeepromSizeChoice].value;
-   flexParameters.partionValue = flexNvmPartitionValues[flexNvmPartitionIndex].value;
    deviceData->setFlexNVMParameters(&flexParameters);
 }
 

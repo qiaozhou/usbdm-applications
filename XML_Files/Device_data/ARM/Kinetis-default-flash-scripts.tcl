@@ -216,7 +216,7 @@ proc eraseBlock { addr } {
 ;######################################################################################
 ;#
 ;#
-proc initTarget {} {
+proc initTarget { args } {
 ;# Not used
 }
 
@@ -269,6 +269,8 @@ proc massEraseTarget { } {
    if [expr ( [expr $mdmApControl & $::MDM_AP_C_MASS_ERASE]) != 0] {
       error "Flash mass erase failed"
    }
+   reset s h
+   connect
 }
 
 ;######################################################################################

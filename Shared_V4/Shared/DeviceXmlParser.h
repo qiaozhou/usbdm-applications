@@ -22,6 +22,7 @@ private:
    DualString   tag_device;
    DualString   tag_clock;
    DualString   tag_memory;
+   DualString   tag_memoryRef;
    DualString   tag_memoryRange;
    DualString   tag_sdid;
    DualString   tag_sdidMask;
@@ -48,14 +49,23 @@ private:
    DualString   tag_partitionEntry;
 
    DualString   attr_name;
-   DualString   attr_family;
    DualString   attr_isDefault;
+   DualString   attr_alias;
+   DualString   attr_hidden;
+   DualString   attr_family;
+   DualString   attr_subFamily;
+   DualString   attr_speed;
    DualString   attr_type;
-   DualString   attr_subtype;
+   DualString   attr_subType;
    DualString   attr_start;
+   DualString   attr_middle;
    DualString   attr_end;
    DualString   attr_size;
    DualString   attr_pageNo;
+   DualString   attr_pageStart;
+   DualString   attr_pageEnd;
+   DualString   attr_pageReset;
+   DualString   attr_pages;
    DualString   attr_pageAddress;
    DualString   attr_registerAddress;
    DualString   attr_securityAddress;
@@ -67,6 +77,9 @@ private:
    DualString   attr_description;
    DualString   attr_eeeSize;
    DualString   attr_eeSize;
+   DualString   attr_alignment;
+
+   static char  currentDeviceName[100];
 
    bool         isDefault; // Indicates that the current device is the default device
 
@@ -76,16 +89,16 @@ private:
    xercesc::ErrorHandler*    errHandler;
    xercesc::DOMDocument*     document;
 
-   const XMLCh* currentDeviceName;
 
 private:
    TclScript    *parseTCLScript(xercesc::DOMElement *xmlTclScript);
    FlashProgram *parseFlashProgram(xercesc::DOMElement *xmlFlashProgram);
    void          parseSharedXML(void);
    void          parseDeviceXML(void);
+   DeviceData   *parseDevice(xercesc::DOMElement *deviceEl);
    TclScriptPtr  parseSequence(xercesc::DOMElement *sequence);
    MemoryRegion *parseMemory(xercesc::DOMElement *currentProperty);
-   MemoryRegion *parseFlashMemoryDetails(xercesc::DOMElement *currentProperty, MemType_t memoryType, long &defaultSectorSize);
+   MemoryRegion *parseFlashMemoryDetails(xercesc::DOMElement *currentProperty, MemType_t memoryType, uint32_t &defaultSectorSize, uint8_t &defaultAlignment);
    SecurityInfo *parseSecurity(xercesc::DOMElement *currentProperty);
    //   void  parseActionSequence(xercesc::DOMElement *sharedRoot, std::map<const string, SharedInformationItem> &shareInformation);
    FlexNVMInfo *parseFlexNVMInfo(xercesc::DOMElement *currentProperty);

@@ -75,6 +75,7 @@ proc initTarget { flashAddresses } {
 
    halt   ;# in case sleeping
    wb $::HCS08_SOPT $::HCS08_SOPT_INIT ;# Disable COP
+   rb $::HCS08_SOPT
 }
 
 ;######################################################################################
