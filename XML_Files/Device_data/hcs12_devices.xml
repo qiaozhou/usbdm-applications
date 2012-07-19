@@ -8,6 +8,7 @@
 <!ENTITY HCS12-MMCV4-FTS-flash-program    SYSTEM "HCS12/HCS12-MMCV4-FTS-flash-program.s19">
 <!ENTITY HCS12-MMCV4-FTS_2-flash-program  SYSTEM "HCS12/HCS12-MMCV4-FTS_2-flash-program.s19">
 <!ENTITY HCS12-PMMC-FTMRCK-flash-program  SYSTEM "HCS12/HCS12-PMMC-FTMRCK-flash-program.s19">
+<!ENTITY HCS12-GMMC-FTMRG-flash-program   SYSTEM "HCS12/HCS12-GMMC-FTMRG-flash-program.s19">
 <!ENTITY HCS12-XMMC-XFTMRK-flash-program  SYSTEM "HCS12/HCS12-XMMC-XFTMRK-flash-program.s19">
 <!ENTITY HCS12-XMMC-XFTXK-flash-program   SYSTEM "HCS12/HCS12-XMMC-XFTXK-flash-program.s19">
 
@@ -35,6 +36,9 @@
       </flashProgram>
       <flashProgram id="HCS12-PMMC-FTMRCK-flash-program">
          &HCS12-PMMC-FTMRCK-flash-program;
+      </flashProgram>
+      <flashProgram id="HCS12-GMMC-FTMRG-flash-program">
+         &HCS12-GMMC-FTMRG-flash-program;
       </flashProgram>
       <flashProgram id="HCS12-XMMC-XFTMRK-flash-program">
          &HCS12-XMMC-XFTMRK-flash-program;
@@ -955,6 +959,31 @@
       </device>
 <!-- 
 ===================================================================================
+-->      
+      <device family="HCS12" name="MC9S12G128">
+         <clock type="External" />
+         <memory type="ram">
+            <memoryRange size="8K" end="0x3FFF" />
+         </memory>
+         <memory registerAddress="0x0100" type="eeprom" sectorSize="4">
+            <memoryRange start="0x000400" size="4K" />
+         </memory>
+         <memory pageAddress="0x0015" registerAddress="0x0100" type="flash" securityAddress="0xFF00" sectorSize="512">
+            <securityInfoRef ref="HCS12-default-security-off" />
+            <securityInfoRef ref="HCS12-default-security-on" />
+            <memoryRange start="0x1400" end="0x1FFF" />
+            <memoryRange start="0x4000" end="0x7FFF" />
+            <memoryRange start="0x8000" end="0xBFFF" pages="8"  pageEnd="0x0F" />
+            <memoryRange start="0xC000" end="0xFFFF" />
+         </memory>
+         <sdid value="0xF180" />
+         <flashScripts>
+            <tclScriptRef ref="HCS12-FTMRCK-flash-scripts" />
+         </flashScripts>
+         <flashProgramRef ref="HCS12-GMMC-FTMRG-flash-program" />
+      </device>
+<!-- 
+===================================================================================
  -->      
       <device family="HCS12" name="MC9S12GC16">
          <clock type="External" />
@@ -1562,8 +1591,8 @@
             <securityInfoRef ref="HCS12-default-security-off" />
             <securityInfoRef ref="HCS12-default-security-on" />
             <memoryRange start="0x4000" end="0x7FFF" />
-            <memoryRange start="0x8000" end="0xBFFF" pageReset="0xFE" pages="128K"  pageStart="0xE0" />
-            <memoryRange start="0x8000" end="0xBFFF" pages="128K"  pageEnd="0xFF" />
+            <memoryRange start="0x8000" end="0xBFFF" pages="128K"  pageStart="0xE0" />
+            <memoryRange start="0x8000" end="0xBFFF" pageReset="0xFE" pages="128K"  pageEnd="0xFF" />
             <memoryRange start="0xC000" end="0xFFFF" />
          </memory>
          <sdid value="0xC410" />

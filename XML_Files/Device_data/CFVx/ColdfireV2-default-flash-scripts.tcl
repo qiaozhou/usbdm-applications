@@ -51,7 +51,7 @@ proc loadSymbols {} {
 ;######################################################################################
 ;#
 ;#
-proc initTarget {} {
+proc initTarget { args } {
    wcreg $::VBR_REG      $::RAMBASE
    wcreg $::RAMBAR_REG   [expr $::RAMBASE+$::RAMBAR_OPTS]
    wcreg $::FLASHBAR_REG [expr $::FLASHBASE+$::FLASHBAR_OPTS]

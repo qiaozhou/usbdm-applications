@@ -106,11 +106,11 @@ private:
 
    typedef USBDM_ErrorCode (*CallBackT)(USBDM_ErrorCode status, int percent, const char *message);
 
-   DeviceData              parameters;       //!< Parameters describing the target device
-   Tcl_Interp              *tclInterpreter;  //!< TCL interpreter
+   DeviceData              parameters;               //!< Parameters describing the target device
+   Tcl_Interp              *tclInterpreter;          //!< TCL interpreter
    bool                    useTCLScript;
-   bool                    flashReady;       //!< Safety check - only TRUE when flash is ready for programming
-   bool                    initTargetDone;   //! Indicates initTarget() has been done.
+   bool                    flashReady;               //!< Safety check - only TRUE when flash is ready for programming
+   bool                    initTargetDone;           //!< Indicates initTarget() has been done.
    FlashProgramHeader_t    flashProgramHeader;
    FlashData_t             flashData;
    uint32_t                targetBusFrequency;  //! kHz

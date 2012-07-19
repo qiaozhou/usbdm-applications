@@ -1428,12 +1428,11 @@ USBDM_ErrorCode FlashProgrammer::eraseFlash(void) {
          addressFlag |= (1<<23);
       }
 #endif
-      // Address is is relative to start of flash block so is not needed
       FlashData_t targetFlashData = {0};
       targetFlashData.flags      = nativeToTarget32(DO_INIT_FLASH|DO_MASS_ERASE);
       targetFlashData.controller = nativeToTarget32(flashData.controller);
       targetFlashData.frequency  = nativeToTarget32(flashData.frequency);
-      targetFlashData.address    = nativeToTarget32(addressFlag);
+      targetFlashData.address    = nativeToTarget32(memoryRegionPtr->getDummyAddress()|addressFlag);
       targetFlashData.sectorSize = nativeToTarget16(memoryRegionPtr->getSectorSize());
       rc = executeTargetProgram(&targetFlashData, 0);
       if (rc != PROGRAMMING_RC_OK) {

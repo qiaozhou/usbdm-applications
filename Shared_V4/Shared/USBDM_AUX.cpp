@@ -99,6 +99,33 @@ USBDM_ErrorCode getBDMStatus(USBDMStatus_t *USBDMStatus) {
    return BDM_RC_OK;
 }
 
+static USBDM_ErrorCode retryConnection(USBDMStatus_t *usbdmStatus) {
+   USBDMStatus_t status;
+
+#if TARGET == CFVx
+   USBDM_ControlPins(PIN_BKPT_LOW|PIN_RESET_3STATE);   // Release RESET (BKPT stays low)
+#else
+   USBDM_ControlPins(PIN_BKGD_LOW|PIN_RESET_3STATE);   // Release RESET (BKGD stays low)
+#endif
+   milliSleep(bdmOptions.resetReleaseInterval);        // Make sure BKPT/BKGD are seen after reset
+   USBDM_ControlPins(PIN_RELEASE);                     // Release all pins
+   milliSleep(bdmOptions.resetRecoveryInterval);       // Give target time to recover from reset
+
+   // Get status twice to clear spurious reset flag
+   getBDMStatus(&status);
+   USBDM_ErrorCode rc = getBDMStatus(&status);
+   if (usbdmStatus != NULL) {
+      *usbdmStatus = status;
+   }
+   if (rc != BDM_RC_OK) {
+      // Fatal error
+      print("USBDM_TargetConnectWithRetry() - USBDM_GetBDMStatus() failed!\n");
+      return rc;
+   }
+   // Retry connection
+   return USBDM_Connect();    // Try connect again
+}
+
 //! Connects to Target (RS08/HCS08/HCS12/CFV1/CFVx only)
 //!
 //! @note If there are connection problems, the user may be prompted to cycle
@@ -241,13 +268,17 @@ USBDM_ErrorCode USBDM_TargetConnectWithRetry(USBDMStatus_t *usbdmStatus, RetryMo
          // Target may require power cycle for guaranteed connection
          else {
             if (bdmOptions.cycleVddOnConnect) {
-               message = "Connection with the target has failed.\n\n"
-                     "Target power has been cycled.\n\n"
-                     "Retry connection?";
                USBDM_SetTargetVdd(BDM_TARGET_VDD_DISABLE);
                milliSleep(bdmOptions.powerOffDuration);
                USBDM_SetTargetVdd(BDM_TARGET_VDD_ENABLE);
                milliSleep(bdmOptions.powerOnRecoveryInterval);
+               rc = retryConnection(usbdmStatus);
+               if (rc == BDM_RC_OK) {
+                  break;
+               }
+               message = "Connection with the target has failed.\n\n"
+                     "Target power has been cycled.\n\n"
+                     "Retry connection?";
             }
             else {
             message = "Connection with the target has failed.\n\n"
@@ -260,27 +291,7 @@ USBDM_ErrorCode USBDM_TargetConnectWithRetry(USBDMStatus_t *usbdmStatus, RetryMo
                "USBDM - Target Connection Failure",
                style
          );
-#if TARGET == CFVx
-         USBDM_ControlPins(PIN_BKPT_LOW|PIN_RESET_3STATE);   // Release RESET (BKPT stays low)
-#else
-         USBDM_ControlPins(PIN_BKGD_LOW|PIN_RESET_3STATE);   // Release RESET (BKGD stays low)
-#endif
-         milliSleep(bdmOptions.resetReleaseInterval);        // Make sure BKPT/BKGD are seen after reset
-         USBDM_ControlPins(PIN_RELEASE);                     // Release all pins
-         milliSleep(bdmOptions.resetRecoveryInterval);       // Give target time to recover from reset
-
-         // Get status twice to clear spurious reset flag
-         getBDMStatus(&status);
-         USBDM_ErrorCode rc2 = getBDMStatus(&status);
-         if (usbdmStatus != NULL)
-            *usbdmStatus = status;
-         if (rc2 != BDM_RC_OK) {
-            // Fatal error
-            print("USBDM_TargetConnectWithRetry() - USBDM_GetBDMStatus() failed!\n");
-            break;
-         }
-         // Retry connection even if aborted - this may leave connection speed correctly set
-         rc = USBDM_Connect();    // Try connect again
+         rc = retryConnection(usbdmStatus);
       } while ((rc != BDM_RC_OK) && (getYesNo == wxYES));
    }
    if (rc != BDM_RC_OK) {

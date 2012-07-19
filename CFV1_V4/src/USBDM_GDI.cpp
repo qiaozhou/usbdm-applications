@@ -24,6 +24,7 @@
 \verbatim
 Change History
 -============================================================================================
+|  May  7 2012 | Changed to using RESET_DEFAULT for ARM in DiExecResetChild()      - pgo V4.9.5
 |  Mar 30 2012 | Fixed block address error in DIMemoryWrite() when flashing        - pgo V4.9.4
 |  Mar 30 2012 | Changed to USBDM_SetExtendedOptions() etc.                        - pgo V4.9.4
 |  Mar 24 2012 | Added actions to PROCESS_DETACH (for DSC programmer)              - pgo V4.9.4
@@ -90,8 +91,9 @@ Change History
 #include "MetrowerksInterface.h"
 
 // Nasty hack - records the first pc write to use as reset PC on future resets
-bool     pcWritten    = false;
-uint32_t pcResetValue = 0x000000;
+bool     pcWritten            = false;
+uint32_t pcResetValue         = 0x000000;
+bool     programmingSupported = false;
 
 bool usbdm_gdi_dll_open(void);
 bool usbdm_gdi_dll_close(void);
@@ -251,7 +253,7 @@ DiReturnT setErrorState(DiReturnT   errorCode,
    return currentError;
 }
 
-DiReturnT setErrorState(DiReturnT   errorCode,
+DiReturnT setErrorState(DiReturnT       errorCode,
                         USBDM_ErrorCode rc) {
 
    return setErrorState(errorCode, USBDM_GetErrorString(rc));
@@ -283,7 +285,8 @@ static DiReturnT closeBDM(void) {
 //===================================================================
 //! Does the following:
 //!   - Initialises USBDM interface
-//!   - Loads settings from Codewarrior
+//!   - Legacy  - Display USBDM Dialogue to obtain settings
+//!   - Eclipse - Loads settings from Codewarrior
 //!   - Loads device data from database
 //!   - Opens BDM
 //!   - Sets BDM options
@@ -297,16 +300,18 @@ static DiReturnT closeBDM(void) {
 //!     DI_OK              => OK \n
 //!     DI_ERR_FATAL       => Error see \ref currentErrorString
 //!
-static DiReturnT initialiseBDMInterface(void) {
+static USBDM_ErrorCode initialiseBDMInterface(void) {
    print("initialiseBDMInterface()\n");
 
    USBDM_ErrorCode bdmRC;
+
+   programmingSupported = false;
 
    bdmRC = USBDM_Init();
    if (bdmRC != BDM_RC_OK) {
       USBDM_Exit();
       print("initialiseBDMInterface() - failed, reason = %s\n", USBDM_GetErrorString(bdmRC));
-      return setErrorState(DI_ERR_FATAL, bdmRC);
+      return bdmRC;
    }
    // Close any existing connection
    closeBDM();
@@ -345,14 +350,10 @@ static DiReturnT initialiseBDMInterface(void) {
       softConnectOptions    = (RetryMode)(retryAlways);
    }
    bdmOptions.cycleVddOnConnect = FALSE;
-#ifdef FLASH_PROGRAMMING
-   // Load description of device
-   if (bdmRC == BDM_RC_OK)
-      bdmRC = getDeviceData(deviceOptions);
-#endif
 
-   if (bdmRC == BDM_RC_OK)
+   if (bdmRC == BDM_RC_OK) {
    	bdmRC = USBDM_OpenBySerialNumberWithRetry(targetType, preferredBdm);
+   }
 #if TARGET == CFVx
    if (bdmRC == BDM_RC_OK) {
       HardwareCapabilities_t capabilities;
@@ -363,8 +364,9 @@ static DiReturnT initialiseBDMInterface(void) {
       }
    }
 #endif
-   if (bdmRC == BDM_RC_OK)
+   if (bdmRC == BDM_RC_OK) {
    	bdmRC = USBDM_SetOptionsWithRetry(&bdmOptions);
+   }
 #endif
    // Set Target
    if (bdmRC == BDM_RC_OK) {
@@ -373,17 +375,25 @@ static DiReturnT initialiseBDMInterface(void) {
    if (bdmRC != BDM_RC_OK) {
       USBDM_Exit();
       print("initialiseBDMInterface() - failed, reason = %s\n", USBDM_GetErrorString(bdmRC));
-      return setErrorState(DI_ERR_FATAL, bdmRC);
+      return bdmRC;
    }
 #ifdef FLASH_PROGRAMMING
-#if ((TARGET == RS08)||(TARGET == HCS08)||(TARGET == HC12))
+   // Set up flash programmer for target
+   if (flashProgrammer != NULL) {
+      delete flashProgrammer;
+   }
+   // Load description of device
+   bdmRC = getDeviceData(deviceOptions);
+   if (bdmRC != BDM_RC_OK) {
+      return bdmRC;
+   }
+#if (TARGET == RS08)
    DeviceData::EraseOptions eraseOptions = deviceOptions.getEraseOption();
    if ((eraseOptions == DeviceData::eraseSelective) || (eraseOptions == DeviceData::eraseAll)) {
       // These targets only support mass erase
       deviceOptions.setEraseOption(DeviceData::eraseMass);
    }
 #endif
-
    deviceOptions.setSecurity(SEC_INTELLIGENT);
    
    // Copy required options for Flash programming.
@@ -393,15 +403,12 @@ static DiReturnT initialiseBDMInterface(void) {
    USBDM_GetDefaultExtendedOptions(&bdmProgrammingOptions);
    bdmProgrammingOptions.targetVdd           = bdmOptions.targetVdd;
    bdmProgrammingOptions.interfaceFrequency  = bdmOptions.interfaceFrequency;
-
-   // Set up flash programmer for target
-   if (flashProgrammer != NULL)
-      delete flashProgrammer;
    flashProgrammer = new FlashProgrammer;
    flashProgrammer->setDeviceData(deviceOptions);
+   programmingSupported = true;
 #endif
 
-   return setErrorState(DI_OK);
+   return bdmRC;
 }
 
 //===================================================================
@@ -676,7 +683,7 @@ USBDM_ErrorCode initialConnect(void) {
 //!
 USBDM_GDI_API
 DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
-   DiReturnT rc;
+   USBDM_ErrorCode bdmRc;
 
    mtwksDisplayLine("\n"
          "=============================================\n"
@@ -702,17 +709,18 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
 #endif
 
    // Open & Configure BDM
-   rc = initialiseBDMInterface();
-   if (rc != DI_OK) {
+   bdmRc = initialiseBDMInterface();
+   if ((bdmRc != BDM_RC_OK)&&(bdmRc != BDM_RC_UNKNOWN_DEVICE)) {
+      DiReturnT rc = setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       print("DiGdiInitIO() - Failed - %s\n", currentErrorString);
       return rc;
    }
 #ifndef USE_MEE
    // Initial connect is treated differently
-   USBDM_ErrorCode bdmRc = initialConnect();
    if (bdmRc != BDM_RC_OK) {
+      DiReturnT rc = setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       print("DiGdiInitIO() - Failed - %s\n", currentErrorString);
-      return setErrorState(DI_ERR_COMMUNICATION, bdmRc);
+      return rc;
    }
 #else
    print("DiGdiInitIO() - doing mtwksSetMEE()\n");
@@ -891,16 +899,18 @@ void DiErrorGetMessage ( DiConstStringT *pszErrorMsg ) {
 
    *pszErrorMsg = getGDIErrorMessage();
 
-   if (pszErrorMsg == NULL)
+   if (pszErrorMsg == NULL) {
       print("DiErrorGetMessage() => not set\n");
-   else
+   }
+   else {
       print("DiErrorGetMessage() => %s\n", *pszErrorMsg);
-
+   }
    mtwksDisplayLine("DiErrorGetMessage() => %s\n", getGDIErrorMessage());
 
    // Clear all errors apart from fatal
-   if (currentError != DI_ERR_FATAL)
+   if (currentError != DI_ERR_FATAL) {
       setErrorState(DI_OK);
+   }
 }
 
 //! 2.2.4.1 Configure Target Memory
@@ -1061,6 +1071,9 @@ DiReturnT DiMemoryDownload ( DiBoolT            fUseAuxiliaryPath,
 
    CHECK_ERROR_STATE();
 
+   if (!programmingSupported) {
+      return setErrorState(DI_ERR_NOTSUPPORTED);
+   }
    if ((ddfDownloadFormat.dafAbsFileFormat & (DI_ABSF_FILENAME|DI_ABSF_BINARY)) == 0) {
       print("DiMemoryDownload() - unsupported format %X\n",
             ddfDownloadFormat.dafAbsFileFormat);
@@ -2474,15 +2487,18 @@ BOOL DllMain(HINSTANCE _hDLLInst,
 
    switch (fdwReason) {
       case DLL_PROCESS_ATTACH:
+         print("DLL_PROCESS_ATTACH\n");
 //         dll_initialize();
          break;
       case DLL_PROCESS_DETACH:
 //         dll_uninitialize();
          break;
       case DLL_THREAD_ATTACH:
+//         print("DLL_THREAD_ATTACH\n");
 //         dll_initialize(_hDLLInst);
          break;
       case DLL_THREAD_DETACH:
+//         print("DLL_THREAD_DETACH\n");
 //         dll_uninitialize();
          break;
    }

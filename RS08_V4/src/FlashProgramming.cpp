@@ -485,11 +485,11 @@ USBDM_ErrorCode FlashProgrammer::initialiseTarget() {
    initTargetDone = true;
    print("FlashProgrammer::initialiseTarget()\n");
 
-   char args[200] = "initTarget \"";
-   char *argPtr = args+strlen(args);
+
 
 #if (TARGET == HCS08)
-   // Add address of each flash region
+   char args[200] = "initTarget \"";
+   char *argPtr = args+strlen(args);   // Add address of each flash region
    for (int index=0; ; index++) {
       MemoryRegionPtr memoryRegionPtr = parameters.getMemoryRegion(index);
       if (memoryRegionPtr == NULL) {
@@ -503,8 +503,11 @@ USBDM_ErrorCode FlashProgrammer::initialiseTarget() {
       itoa(memoryRegionPtr->getDummyAddress()&0xFFFF, argPtr, 16);
       argPtr += strlen(argPtr);
    }
+   *argPtr++ = '\"';
+   *argPtr++ = '\0';
 #elif (TARGET == HCS12)
-   // Add address of each flash region
+   char args[200] = "initTarget \"";
+   char *argPtr = args+strlen(args);   // Add address of each flash region
    for (int index=0; ; index++) {
       MemoryRegionPtr memoryRegionPtr = parameters.getMemoryRegion(index);
       if (memoryRegionPtr == NULL) {
@@ -518,17 +521,18 @@ USBDM_ErrorCode FlashProgrammer::initialiseTarget() {
             memoryRegionPtr->getDummyAddress()&0xFFFF);
       argPtr += strlen(argPtr);
    }
+   *argPtr++ = '\"';
+   *argPtr++ = '\0';
 #elif (TARGET == RS08)
-   sprintf(argPtr, "0x%04X 0x%04X 0x%04X",
+   char args[200] = "initTarget ";
+   char *argPtr = args+strlen(args);sprintf(argPtr, "0x%04X 0x%04X 0x%04X",
          parameters.getSOPTAddress(),
          flashMemoryRegionPtr->getFOPTAddress(),
          flashMemoryRegionPtr->getFLCRAddress()
          );
    argPtr += strlen(argPtr);
-#endif
-
-   *argPtr++ = '\"';
    *argPtr++ = '\0';
+#endif
 
    USBDM_ErrorCode rc = runTCLCommand(args);
    if (rc != PROGRAMMING_RC_OK) {

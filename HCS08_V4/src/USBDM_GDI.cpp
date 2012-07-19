@@ -387,7 +387,7 @@ static USBDM_ErrorCode initialiseBDMInterface(void) {
    if (bdmRC != BDM_RC_OK) {
       return bdmRC;
    }
-#if ((TARGET == RS08)||(TARGET == HCS08)||(TARGET == HC12))
+#if (TARGET == RS08)
    DeviceData::EraseOptions eraseOptions = deviceOptions.getEraseOption();
    if ((eraseOptions == DeviceData::eraseSelective) || (eraseOptions == DeviceData::eraseAll)) {
       // These targets only support mass erase
@@ -2539,7 +2539,7 @@ BOOL DllMain(HINSTANCE _hDLLInst,
          print("DLL_PROCESS_DETACH - usbdm_gdi_dll_close()\n");
          usbdm_gdi_dll_close();
          print("DLL_PROCESS_DETACH - done\n");
-         //         dll_uninitialize();
+//         dll_uninitialize();
          break;
       case DLL_THREAD_ATTACH:
 //         print("DLL_THREAD_ATTACH\n");

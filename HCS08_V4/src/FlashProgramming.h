@@ -82,7 +82,8 @@ struct TargetProgramInfo {
    bool             usePagedAddresses;       // Set up paged addressing information
 };
 
-enum FlashOperation {OpNone, OpProgram, OpSelectiveErase, OpMassErase, OpVerify, OpBlankCheck, OpWriteRam};
+enum FlashOperation {OpNone, OpProgram, OpSelectiveErase, OpMassErase, OpVerify,
+                     OpBlankCheck, OpWriteRam, OpPartitionFlexNVM, OpProgramWithVerify};
 //! Describes the flash operation to be done
 struct FlashOperationInfo {
    uint8_t          operation;               // Controls actions of routine
@@ -93,6 +94,7 @@ struct FlashOperationInfo {
    uint16_t         sectorSize;              // Sector size
    uint32_t         targetBusFrequency;      // Measured target bus frequency (kHz)
    uint32_t         alignment;               // Flash programming alignment (1,2,4,8,16,32 bytes)
+   uint16_t         flexNVMPartiition;       // Value for partitioning FlexNVM
 };
 
 class FlashProgrammer {
@@ -231,6 +233,7 @@ private:
    USBDM_ErrorCode setPageRegisters(uint32_t physicalAddress);
 
 public:
+   USBDM_ErrorCode partitionFlexNVM(void);
    USBDM_ErrorCode initTCL(void);
    USBDM_ErrorCode releaseTCL(void);
    USBDM_ErrorCode setDeviceData(const DeviceData  &theParameters);
