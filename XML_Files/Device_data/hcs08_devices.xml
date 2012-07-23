@@ -54,6 +54,9 @@
             <securityInfoRef ref="HCS08-default-security-on" />
             <memoryRange start="0x004000" end="0x00FFFF" />
          </memory>
+         <memory registerAddress="0x1820" type="eeprom" sectorSize="8" alignment="1">
+            <memoryRange start="0x100" end="0x200" />
+         </memory>
          <soptAddress value="0x1802" />
          <sdidAddress value="0x1806" />
          <sdidMask value="0xFFF" />
@@ -1249,7 +1252,7 @@
          <memory type="ram">
             <memoryRange start="0x0040" end="0x083F" />
          </memory>
-         <memory registerAddress="0x3020" type="eeprom" sectorSize="2">
+         <memory registerAddress="0x3020" type="eeprom" sectorSize="2" alignment="1">
             <memoryRange start="0x003100" end="0x0031FF" />
          </memory>
          <memory registerAddress="0x3020" type="flash" securityAddress="0xFF70" sectorSize="512" alignment="4">
@@ -1271,7 +1274,7 @@
          <memory type="ram">
             <memoryRange start="0x0040" end="0x083F" />
          </memory>
-         <memory registerAddress="0x3020" type="eeprom" sectorSize="2">
+         <memory registerAddress="0x3020" type="eeprom" sectorSize="2" alignment="1">
             <memoryRange start="0x003100" end="0x0031FF" />
          </memory>
          <memory registerAddress="0x3020" type="flash" securityAddress="0xFF70" sectorSize="512" alignment="4">
@@ -1293,7 +1296,7 @@
          <memory type="ram">
             <memoryRange start="0x0040" end="0x103F" />
          </memory>
-         <memory registerAddress="0x3020" type="eeprom" sectorSize="2">
+         <memory registerAddress="0x3020" type="eeprom" sectorSize="2" alignment="1">
             <memoryRange start="0x003100" end="0x0031FF" />
          </memory>
          <memory registerAddress="0x3020" type="flash" securityAddress="0xFF70" sectorSize="512" alignment="4">
@@ -1315,7 +1318,7 @@
          <memory type="ram">
             <memoryRange start="0x0040" end="0x103F" />
          </memory>
-         <memory registerAddress="0x3020" type="eeprom" sectorSize="2" >
+         <memory registerAddress="0x3020" type="eeprom" sectorSize="2" alignment="1">
             <memoryRange start="0x003100" end="0x0031FF" />
          </memory>
          <memory registerAddress="0x3020" type="flash" securityAddress="0xFF70" sectorSize="512" alignment="4">

@@ -270,7 +270,7 @@ public:
    uint32_t        pageAddress;            //!< Paging register address
    uint32_t        securityAddress;        //!< Non-volatile option address
    uint32_t        sectorSize;             //!< Size of sectors i.e. minimum erasable unit
-   uint8_t         alignment;              //!< Memory programming alignment requirement (power of 2)
+   uint8_t         alignment;              //!< Memory programming alignment requirement (1,2,4 etc)
    uint32_t        lastIndexUsed;          //!< Last used memoryRanges index
    FlashProgramPtr flashProgram;           //!< Region-specific flash algorithm
    SecurityInfoPtr unsecureInfo;           //!< Region-specific unsecure data
@@ -307,11 +307,11 @@ private:
 
 public:
    MemoryRegion (MemType_t type = MemInvalid,
-                 uint32_t registerAddress = 0,
-                 uint32_t pageAddress = 0,
-                 uint32_t securityAddress = 0,
-                 uint32_t sectorSize = 0,
-                 uint8_t  alignment = 1) :
+                 uint32_t  registerAddress = 0,
+                 uint32_t  pageAddress = 0,
+                 uint32_t  securityAddress = 0,
+                 uint32_t  sectorSize = 0,
+                 uint8_t   alignment = 1) :
       type(type),
       addressType(AddrPaged),
       registerAddress(registerAddress),
@@ -437,6 +437,7 @@ public:
    uint32_t    getDummyAddress()   const { return memoryRanges[0].end & 0xFFFFFFF0; }
    uint32_t    getSectorSize()     const { return sectorSize; }
    AddressType getAddressType()    const { return addressType; }
+   // Get memory region data alignment (1,2,4 etc)
    uint8_t     getAlignment()      const { return alignment; }
 
 #if TARGET == RS08

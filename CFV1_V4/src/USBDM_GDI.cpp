@@ -47,6 +47,7 @@ Change History
 #include <string>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
 #ifdef __unix__
 #include <dlfcn.h>
 #endif
@@ -1148,46 +1149,46 @@ static uint8_t memoryReadWriteBuffer[MAX_BLOCK_SIZE];
 //! @param dnBufferItems   Number of units to write
 //!
 USBDM_GDI_API
-DiReturnT DiMemoryWrite ( DiAddrT      daTarget,
+DiReturnT DiMemoryWrite ( DiAddrT       daTarget,
                           DiMemValueT  *pdmvBuffer,
-                          DiUInt32T    dnBufferItems ) {
-uint32_t        address = (U32c)daTarget;
-MemorySpace_t   memorySpace;     // Memory space & size
-#if TARGET == MC56F80xx
-const unsigned int addressFactor = 2; // Word addresses
-#else
-const unsigned int addressFactor = 1; // Byte addresses
-#endif
+                          DiUInt32T     dnBufferItems ) {
+uint32_t        address      = (U32c)daTarget;   // Load address
+MemorySpace_t   memorySpace;                     // Memory space & size
+uint32_t        endAddress;                      // End address
+int             organization;
 
    CHECK_ERROR_STATE();
 
-   int organization;
    switch(daTarget.dmsMemSpace) {
       case 1 :
          memorySpace  = MS_Byte;
          organization = BYTE_DISPLAY|BYTE_ADDRESS;
+         endAddress   = address + dnBufferItems - 1;
          break;
       case 2 :
          memorySpace  = MS_Word;
          organization = WORD_DISPLAY|BYTE_ADDRESS;
+         endAddress   = address + 2*dnBufferItems - 1;
          break;
       case 4 :
          memorySpace  = MS_Long;
          organization = LONG_DISPLAY|BYTE_ADDRESS;
+         endAddress   = address + 4*dnBufferItems - 1;
          break;
       default :
          print("DiMemoryWrite(daTarget.dmsMemSpace=0x%X, address=0x%4.4X, dnBufferItems=%d)\n"
                "Error - Unexpected daTarget.dmsMemSpace value\n",
                daTarget.dmsMemSpace,
                (uint32_t)address,
-			   dnBufferItems);
+			      dnBufferItems);
          return setErrorState(DI_ERR_NOTSUPPORTED, "Unknown memory space");
    }
    print("DiMemoryWrite(daTarget.dmsMemSpace=%X, dnBufferItems=%d, [0x%06X...0x%06X])\n",
          daTarget.dmsMemSpace,
          dnBufferItems,
-         (uint32_t)address,
-         (uint32_t)address+(dnBufferItems*(memorySpace&MS_SIZE))-1);
+         address,
+         endAddress);
+
 #if defined(LOG) && 0
    print("DiMemoryWrite                                              0011223344556677\n"
          "daTarget.dmsMemSpace = %X, daTarget.dlaLinAddress.v.val = 0x%02X%02X%02X%02X%02X%02X%02X%02X,"
@@ -1231,19 +1232,20 @@ const unsigned int addressFactor = 1; // Byte addresses
          }
       }
 #endif	  
-      for (unsigned sub=0; sub < blockSize;) {
+      unsigned sub = 0;
+      for (sub=0; sub < blockSize;) {
          U32c value(pdmvBuffer[offset++]);
          dnBufferItems--;
          // Unpack items
          switch (memorySpace&MS_SIZE) {
-            case 1 :
+            case MS_Byte :
                memoryReadWriteBuffer[sub++] = value[3];
                break;
-            case 2 :
+            case MS_Word :
                memoryReadWriteBuffer[sub++] = value[2];
                memoryReadWriteBuffer[sub++] = value[3];
                break;
-            case 4 :
+            case MS_Long :
                memoryReadWriteBuffer[sub++] = value[0];
                memoryReadWriteBuffer[sub++] = value[1];
                memoryReadWriteBuffer[sub++] = value[2];
@@ -1288,7 +1290,7 @@ const unsigned int addressFactor = 1; // Byte addresses
             return setErrorState(DI_ERR_NONFATAL, rc);
          }
       }
-      address += blockSize/addressFactor;
+      address += blockSize;
    }
    return setErrorState(DI_OK);
 }
@@ -1305,30 +1307,27 @@ USBDM_GDI_API
 DiReturnT DiMemoryRead ( DiAddrT       daTarget,
                          DiMemValueT   *pdmvBuffer,
                          DiUInt32T     dnBufferItems ) {
-U32c       address(daTarget);
-unsigned   blockSize;
-unsigned   sub;
-int        organization;
-USBDM_ErrorCode rc = BDM_RC_OK;
-MemorySpace_t   memorySpace;
-#if TARGET == MC56F80xx
-const unsigned int addressFactor = 2; // Word addresses
-#else
-const unsigned int addressFactor = 1; // Byte addresses
-#endif
+uint32_t        address      = (U32c)daTarget;   // Load address
+MemorySpace_t   memorySpace;                     // Memory space & size
+unsigned        blockSize;
+uint32_t        endAddress;                      // End address
+int             organization;
 
    switch(daTarget.dmsMemSpace) {
       case 1 : // byte
          memorySpace  = MS_Byte;
          organization = BYTE_DISPLAY|BYTE_ADDRESS;
+         endAddress = address + 1*dnBufferItems - 1;
          break;
       case 2 : // word
          memorySpace  = MS_Word;
          organization = WORD_DISPLAY|BYTE_ADDRESS;
+         endAddress = address + 2*dnBufferItems - 1;
          break;
       case 4 : // Long
          memorySpace  = MS_Long;
          organization = LONG_DISPLAY|BYTE_ADDRESS;
+         endAddress = address + 4*dnBufferItems - 1;
          break;
       default :
          print("DiMemoryRead(daTarget.dmsMemSpace=0x%X, address=0x%4.4X, dnBufferItems=%d)\n"
@@ -1341,8 +1340,8 @@ const unsigned int addressFactor = 1; // Byte addresses
    print("DiMemoryRead(daTarget.dmsMemSpace=%X, dnBufferItems=%d, [0x%06X...0x%06X])\n",
          daTarget.dmsMemSpace,
          dnBufferItems,
-         (uint32_t)address,
-         (uint32_t)address+(dnBufferItems*(memorySpace&MS_SIZE))/addressFactor-1);
+         address,
+         endAddress);
 
    CHECK_ERROR_STATE();
 
@@ -1364,6 +1363,7 @@ const unsigned int addressFactor = 1; // Byte addresses
          }
       }
 #endif	  
+USBDM_ErrorCode rc = BDM_RC_OK;
 #if TARGET == ARM
       rc = ARM_ReadMemory(memorySpace, blockSize, address, memoryReadWriteBuffer);
 #elif TARGET == MC56F80xx
@@ -1412,6 +1412,7 @@ const unsigned int addressFactor = 1; // Byte addresses
       }
       print("DiMemoryRead(...) - Result\n");
       printDump(memoryReadWriteBuffer,blockSize,address);
+      unsigned sub = 0;
       for (sub=0; sub < blockSize;) {
          uint32_t temp=0xFFFFFFFF;
          switch (memorySpace&MS_SIZE) {
@@ -1432,7 +1433,7 @@ const unsigned int addressFactor = 1; // Byte addresses
          pdmvBuffer[offset++] = (U32c)temp;
          dnBufferItems--;
       }
-      address += blockSize/addressFactor;
+      address += blockSize;
    }
    return setErrorState(DI_OK);
 }

@@ -121,7 +121,7 @@ private:
    wxCheckBox*    usePstSignalControl;
    wxCheckBox*    guessTargetSpeedControl;
    wxRadioBox*    bdmClockSelectControl;
-   wxStaticText*  versionStaticControl;
+   wxStaticText*  firmwareStaticControl;
    wxStaticText*  bdmDescriptionStaticControl;
    wxCheckBox*    maskInterruptWhenSteppingControl;
    wxCheckBox*    dontShowAgainControl;

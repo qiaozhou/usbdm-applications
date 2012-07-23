@@ -24,6 +24,7 @@
 \verbatim
 Change History
 -============================================================================================
+|  May  7 2012 | Changed to using RESET_DEFAULT for ARM in DiExecResetChild()      - pgo V4.9.5
 |  Mar 30 2012 | Fixed block address error in DIMemoryWrite() when flashing        - pgo V4.9.4
 |  Mar 30 2012 | Changed to USBDM_SetExtendedOptions() etc.                        - pgo V4.9.4
 |  Mar 24 2012 | Added actions to PROCESS_DETACH (for DSC programmer)              - pgo V4.9.4
@@ -46,6 +47,7 @@ Change History
 #include <string>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
 #ifdef __unix__
 #include <dlfcn.h>
 #endif
@@ -90,8 +92,8 @@ Change History
 #include "MetrowerksInterface.h"
 
 // Nasty hack - records the first pc write to use as reset PC on future resets
-bool     pcWritten    = false;
-uint32_t pcResetValue = 0x000000;
+bool     pcWritten            = false;
+uint32_t pcResetValue         = 0x000000;
 
 bool usbdm_gdi_dll_open(void);
 bool usbdm_gdi_dll_close(void);
@@ -251,7 +253,7 @@ DiReturnT setErrorState(DiReturnT   errorCode,
    return currentError;
 }
 
-DiReturnT setErrorState(DiReturnT   errorCode,
+DiReturnT setErrorState(DiReturnT       errorCode,
                         USBDM_ErrorCode rc) {
 
    return setErrorState(errorCode, USBDM_GetErrorString(rc));

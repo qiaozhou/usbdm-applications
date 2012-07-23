@@ -37,28 +37,28 @@
       <memory id="coldfire64K_Ram" type="ram">
          <memoryRange start="0x20000000" size="64K" />
       </memory>
-      <memory id="coldfire64K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400"
+      <memory id="coldfire64K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400" alignment="4"
          sectorSize="2048">
          <flashProgramRef ref="default-CFV2-FlashProgram" />
          <securityInfoRef ref="CFV2-default-security-off" />
          <securityInfoRef ref="CFV2-default-security-on" />
-         <memoryRange start="0x000000" size="512K" />
+         <memoryRange start="0x000000" size="64K" />
       </memory>
-      <memory id="coldfire128K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400"
+      <memory id="coldfire128K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400" alignment="4"
          sectorSize="2048">
          <flashProgramRef ref="default-CFV2-FlashProgram" />
          <securityInfoRef ref="CFV2-default-security-off" />
          <securityInfoRef ref="CFV2-default-security-on" />
          <memoryRange start="0x000000" size="128K" />
       </memory>
-      <memory id="coldfire256K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400"
+      <memory id="coldfire256K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400" alignment="4"
          sectorSize="2048">
          <flashProgramRef ref="default-CFV2-FlashProgram" />
          <securityInfoRef ref="CFV2-default-security-off" />
          <securityInfoRef ref="CFV2-default-security-on" />
          <memoryRange start="0x000000" size="256K" />
       </memory>
-      <memory id="coldfire512K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400"
+      <memory id="coldfire512K_Flash" type="flash" registerAddress="0x401D0000" securityAddress="0x0400" alignment="4"
          sectorSize="2048">
          <flashProgramRef ref="default-CFV2-FlashProgram" />
          <securityInfoRef ref="CFV2-default-security-off" />
@@ -72,7 +72,7 @@
          <memory type="ram">
             <memoryRange start="0x20000000" size="4K" />
          </memory>
-         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" sectorSize="2048">
+         <memory type="flash" registerAddress="0x401D0000" securityAddress="0x0400" sectorSize="2048" alignment="4">
             <securityInfoRef ref="CFV2-default-security-off" />
             <securityInfoRef ref="CFV2-default-security-on" />
             <memoryRange start="0x000000" size="512K" />

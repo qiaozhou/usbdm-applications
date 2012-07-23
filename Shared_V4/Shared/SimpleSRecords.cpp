@@ -115,8 +115,8 @@ static uint32_t hex8ToDecimal(const char **ptr) {
 //!
 //! @param srec         : SRECs to load
 //! @param buffer       : Buffer for the image
-//! @param bufferSize   : Size of buffer (in dataType)
-//! @param loadedSize   : Size of loaded image (in dataType)
+//! @param bufferSize   : Size of buffer (in memoryElementType)
+//! @param loadedSize   : Size of loaded image (in memoryElementType)
 //! @param loadAddr     : Memory address for start of buffer
 //!
 //! @return error code

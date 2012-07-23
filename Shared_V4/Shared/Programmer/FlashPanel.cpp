@@ -184,7 +184,7 @@ void FlashPanel::populateDeviceDropDown() {
       print("FlashPanel::populateDeviceDropDown() - No devices\n");
       setDeviceindex(-1);
       deviceTypeChoiceControl->Append(_("[No matching device]"));
-      deviceTypeChoiceControl->SetClientData(0, (void *) -1);
+      deviceTypeChoiceControl->SetClientData(0, (void *) -22);
       deviceTypeChoiceControl->SetSelection(0);
       deviceTypeChoiceControl->Enable(false);
    }

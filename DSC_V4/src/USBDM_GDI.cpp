@@ -91,11 +91,10 @@ Change History
 
 #include "MetrowerksInterface.h"
 
-typedef uint16_t memoryElementType; // Size of target memory element
-
 // Nasty hack - records the first pc write to use as reset PC on future resets
 bool     pcWritten    = false;
 uint32_t pcResetValue = 0x000000;
+bool     programmingSupported = false;
 
 bool usbdm_gdi_dll_open(void);
 bool usbdm_gdi_dll_close(void);
@@ -399,16 +398,18 @@ static DiReturnT closeBDM(void) {
 //!     DI_OK              => OK \n
 //!     DI_ERR_FATAL       => Error see \ref currentErrorString
 //!
-static DiReturnT initialiseBDMInterface(void) {
+static USBDM_ErrorCode initialiseBDMInterface(void) {
    print("initialiseBDMInterface()\n");
 
    USBDM_ErrorCode bdmRC;
+
+   programmingSupported = false;
 
    bdmRC = USBDM_Init();
    if (bdmRC != BDM_RC_OK) {
       USBDM_Exit();
       print("initialiseBDMInterface() - failed, reason = %s\n", USBDM_GetErrorString(bdmRC));
-      return setErrorState(DI_ERR_FATAL, bdmRC);
+      return bdmRC;
    }
    // Close any existing connection
    closeBDM();
@@ -447,12 +448,6 @@ static DiReturnT initialiseBDMInterface(void) {
       softConnectOptions    = (RetryMode)(retryAlways);
    }
    bdmOptions.cycleVddOnConnect = FALSE;
-#ifdef FLASH_PROGRAMMING
-   // Load description of device
-   if (bdmRC == BDM_RC_OK) {
-      bdmRC = getDeviceData(deviceOptions);
-   }
-#endif
 
    if (bdmRC == BDM_RC_OK) {
    	bdmRC = USBDM_OpenBySerialNumberWithRetry(targetType, preferredBdm);
@@ -478,17 +473,25 @@ static DiReturnT initialiseBDMInterface(void) {
    if (bdmRC != BDM_RC_OK) {
       USBDM_Exit();
       print("initialiseBDMInterface() - failed, reason = %s\n", USBDM_GetErrorString(bdmRC));
-      return setErrorState(DI_ERR_FATAL, bdmRC);
+      return bdmRC;
    }
 #ifdef FLASH_PROGRAMMING
-#if ((TARGET == RS08)||(TARGET == HCS08)||(TARGET == HC12))
+   // Set up flash programmer for target
+   if (flashProgrammer != NULL) {
+      delete flashProgrammer;
+   }
+   // Load description of device
+   bdmRC = getDeviceData(deviceOptions);
+   if (bdmRC != BDM_RC_OK) {
+      return bdmRC;
+   }
+#if (TARGET == RS08)
    DeviceData::EraseOptions eraseOptions = deviceOptions.getEraseOption();
    if ((eraseOptions == DeviceData::eraseSelective) || (eraseOptions == DeviceData::eraseAll)) {
       // These targets only support mass erase
       deviceOptions.setEraseOption(DeviceData::eraseMass);
    }
 #endif
-
    deviceOptions.setSecurity(SEC_INTELLIGENT);
    
    // Copy required options for Flash programming.
@@ -498,15 +501,12 @@ static DiReturnT initialiseBDMInterface(void) {
    USBDM_GetDefaultExtendedOptions(&bdmProgrammingOptions);
    bdmProgrammingOptions.targetVdd           = bdmOptions.targetVdd;
    bdmProgrammingOptions.interfaceFrequency  = bdmOptions.interfaceFrequency;
-
-   // Set up flash programmer for target
-   if (flashProgrammer != NULL)
-      delete flashProgrammer;
    flashProgrammer = new FlashProgrammer;
    flashProgrammer->setDeviceData(deviceOptions);
+   programmingSupported = true;
 #endif
 
-   return setErrorState(DI_OK);
+   return bdmRC;
 }
 
 //===================================================================
@@ -781,7 +781,7 @@ USBDM_ErrorCode initialConnect(void) {
 //!
 USBDM_GDI_API
 DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
-   DiReturnT rc;
+   USBDM_ErrorCode bdmRc;
 
    mtwksDisplayLine("\n"
          "=============================================\n"
@@ -807,14 +807,14 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
 #endif
 
    // Open & Configure BDM
-   rc = initialiseBDMInterface();
-   if (rc != DI_OK) {
+   bdmRc = initialiseBDMInterface();
+   if ((bdmRc != BDM_RC_OK)&&(bdmRc != BDM_RC_UNKNOWN_DEVICE)) {
+      DiReturnT rc = setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       print("DiGdiInitIO() - Failed - %s\n", currentErrorString);
       return rc;
    }
 #ifndef USE_MEE
    // Initial connect is treated differently
-   USBDM_ErrorCode bdmRc = initialConnect();
    if (bdmRc != BDM_RC_OK) {
       DiReturnT rc = setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       print("DiGdiInitIO() - Failed - %s\n", currentErrorString);
@@ -997,16 +997,18 @@ void DiErrorGetMessage ( DiConstStringT *pszErrorMsg ) {
 
    *pszErrorMsg = getGDIErrorMessage();
 
-   if (pszErrorMsg == NULL)
+   if (pszErrorMsg == NULL) {
       print("DiErrorGetMessage() => not set\n");
-   else
+   }
+   else {
       print("DiErrorGetMessage() => %s\n", *pszErrorMsg);
-
+   }
    mtwksDisplayLine("DiErrorGetMessage() => %s\n", getGDIErrorMessage());
 
    // Clear all errors apart from fatal
-   if (currentError != DI_ERR_FATAL)
+   if (currentError != DI_ERR_FATAL) {
       setErrorState(DI_OK);
+   }
 }
 
 //! 2.2.4.1 Configure Target Memory
@@ -1167,6 +1169,9 @@ DiReturnT DiMemoryDownload ( DiBoolT            fUseAuxiliaryPath,
 
    CHECK_ERROR_STATE();
 
+   if (!programmingSupported) {
+      return setErrorState(DI_ERR_NOTSUPPORTED);
+   }
    if ((ddfDownloadFormat.dafAbsFileFormat & (DI_ABSF_FILENAME|DI_ABSF_BINARY)) == 0) {
       print("DiMemoryDownload() - unsupported format %X\n",
             ddfDownloadFormat.dafAbsFileFormat);
@@ -1247,8 +1252,8 @@ DiReturnT DiMemoryWrite ( DiAddrT       daTarget,
 uint32_t        address      = (U32c)daTarget;   // Load address
 MemorySpace_t   memorySpace;                     // Memory space & size
 uint32_t        endAddress;                      // End address
-uint32_t        numBytes;                        // Number of bytes to transfer
 int             organization;
+uint32_t        numBytes;                        // Number of bytes to transfer
 
    CHECK_ERROR_STATE();
 
@@ -1288,7 +1293,7 @@ int             organization;
 			      dnBufferItems);
          return setErrorState(DI_ERR_NOTSUPPORTED, "Unknown memory space");
    }
-   print("DiMemoryWrite(daTarget.dmsMemSpace=%2X, dnBufferItems=%3d, [0x%06X...0x%06X])\n",
+   print("DiMemoryWrite(daTarget.dmsMemSpace=%X, dnBufferItems=%d, [0x%06X...0x%06X])\n",
          daTarget.dmsMemSpace,
          dnBufferItems,
          address,
@@ -1332,7 +1337,7 @@ int             organization;
       while (sub<blockSize) {
          U32c value(pdmvBuffer[offset++]);
          dnBufferItems--;
-         // Unpack item
+         // Unpack items
          switch (memorySpace&MS_SIZE) {
             case MS_Byte :
                memoryReadWriteBuffer[sub++] = value[2];
@@ -1373,13 +1378,13 @@ int             organization;
       }
 #endif
       if (!writeDone) {
-         // Write data directly to memory
+         USBDM_ErrorCode rc = BDM_RC_OK;
 #if TARGET == ARM
-         USBDM_ErrorCode rc = ARM_WriteMemory(memorySpace, blockSize, writeAddress, memoryReadWriteBuffer);
+         rc = ARM_WriteMemory(memorySpace, blockSize, writeAddress, memoryReadWriteBuffer);
 #elif TARGET == MC56F80xx
-         USBDM_ErrorCode rc = DSC_WriteMemory(memorySpace, blockSize, writeAddress, memoryReadWriteBuffer);
+         rc = DSC_WriteMemory(memorySpace, blockSize, writeAddress, memoryReadWriteBuffer);
 #else
-         USBDM_ErrorCode rc = USBDM_WriteMemory(memorySpace, blockSize, writeAddress, memoryReadWriteBuffer);
+         rc = USBDM_WriteMemory(memorySpace, blockSize, writeAddress, memoryReadWriteBuffer);
 #endif
 //         printDump(memoryReadWriteBuffer,sub,writeAddress);
          if (rc != BDM_RC_OK) {
@@ -1475,12 +1480,13 @@ int             organization;
          }
       }
 #endif	  
+USBDM_ErrorCode rc = BDM_RC_OK;
 #if TARGET == ARM
-      USBDM_ErrorCode rc = ARM_ReadMemory(memorySpace, blockSize, address, memoryBuffer);
+      rc = ARM_ReadMemory(memorySpace, blockSize, address, memoryBuffer);
 #elif TARGET == MC56F80xx
-      USBDM_ErrorCode rc = DSC_ReadMemory(memorySpace, blockSize, address, memoryBuffer);
+      rc = DSC_ReadMemory(memorySpace, blockSize, address, memoryBuffer);
 #else
-      USBDM_ErrorCode rc = USBDM_ReadMemory(memorySpace, blockSize, address, memoryBuffer);
+      rc = USBDM_ReadMemory(memorySpace, blockSize, address, memoryBuffer);
 #endif		 
       if (rc != BDM_RC_OK) {
          print("DiMemoryRead(...) - Failed, rc= %s\n", USBDM_GetErrorString(rc));
@@ -2478,7 +2484,7 @@ BOOL DllMain(HINSTANCE _hDLLInst,
          print("DLL_PROCESS_DETACH - usbdm_gdi_dll_close()\n");
          usbdm_gdi_dll_close();
          print("DLL_PROCESS_DETACH - done\n");
-         //         dll_uninitialize();
+//         dll_uninitialize();
          break;
       case DLL_THREAD_ATTACH:
 //         print("DLL_THREAD_ATTACH\n");

@@ -490,7 +490,7 @@ void DeviceDataBase::loadDeviceData(void) {
       addDevice(aDevice);
       throw MyException("DeviceDataBase::loadDeviceData() - Unknown exception");
    }
-#ifdef LOG
+#if defined(LOG) && 0
    listDevices();
 #endif
    print("DeviceDataBase::loadDeviceData() - %d devices loaded\n", deviceData.size());

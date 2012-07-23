@@ -91,32 +91,32 @@ Coldfire+
          <memoryRange start="0x800000" size="32K" />
       </memory>
       <memory id="coldfirePlus32K_Flash" type="flash" registerAddress="0xFF84E0" securityAddress="0x0400"
-         sectorSize="1024">
+         sectorSize="1024" alignment="4" >
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
          <securityInfoRef ref="CFV1Plus-default-security-off" />
          <securityInfoRef ref="CFV1Plus-default-security-on" />
          <memoryRange start="0x000000" size="32K" />
       </memory>
       <memory id="coldfirePlus64K_Flash" type="flash" registerAddress="0xFF84E0" securityAddress="0x0400"
-         sectorSize="1024">
+         sectorSize="1024" alignment="4" >
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
          <securityInfoRef ref="CFV1Plus-default-security-off" />
          <securityInfoRef ref="CFV1Plus-default-security-on" />
          <memoryRange start="0x000000" size="64K" />
       </memory>
       <memory id="coldfirePlus128K_Flash" type="flash" registerAddress="0xFF84E0" securityAddress="0x0400"
-         sectorSize="1024">
+         sectorSize="1024" alignment="4" >
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
          <securityInfoRef ref="CFV1Plus-default-security-off" />
          <securityInfoRef ref="CFV1Plus-default-security-on" />
          <memoryRange start="0x000000" size="128K" />
       </memory>
-      <memory id="coldfire16K_FlexNVM" type="flexNVM" registerAddress="0xFF84E0" sectorSize="1024">
+      <memory id="coldfire16K_FlexNVM" type="flexNVM" registerAddress="0xFF84E0" sectorSize="1024" alignment="4" >
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
          <flexNVMInfoRef ref="coldfirePlus16kFlexPartionInfo" />
          <memoryRange start="0x200000" size="16K" />
       </memory>
-      <memory id="coldfire32K_FlexNVM" type="flexNVM" registerAddress="0xFF84E0" sectorSize="1024">
+      <memory id="coldfire32K_FlexNVM" type="flexNVM" registerAddress="0xFF84E0" sectorSize="1024" alignment="4" >
          <flashProgramRef ref="CFV1Plus-default-FlashProgram" />
          <flexNVMInfoRef ref="coldfirePlus32kFlexPartionInfo" />
          <memoryRange start="0x200000" size="32K" />
@@ -127,15 +127,15 @@ Coldfire+
          <clock type="External" />
          <memoryRef ref="coldfire16K_Ram" />
          <!-- Regular flash or pFlash memory -->
-         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400" sectorSize="1024">
+         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400" sectorSize="1024" alignment="2" >
             <memoryRange start="0x000000" size="128K" />
          </memory>
          <!-- Data flash -->
-         <memory registerAddress="0xFF9820" type="dFlash" sectorSize="1024">
+         <memory registerAddress="0xFF9820" type="dFlash" sectorSize="1024" alignment="4">
             <memoryRange start="0x010000" size="128K" />
          </memory>
          <!-- flexNVM memory that may be used as EEEPROM backing store or dFlash -->
-         <memory registerAddress="0xFF9820" type="flexNVM" sectorSize="1024">
+         <memory registerAddress="0xFF9820" type="flexNVM" sectorSize="1024" alignment="4">
             <memoryRange start="0x20000" size="32K" />
          </memory>
          <soptAddress value="0xFF9802" />

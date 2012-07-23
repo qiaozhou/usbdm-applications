@@ -4,10 +4,10 @@
 <!ENTITY DSC-56F8014-flash-scripts   SYSTEM "DSC/DSC-56F8014-flash-scripts.tcl">
 <!ENTITY DSC-56F8323-flash-scripts   SYSTEM "DSC/DSC-56F8323-flash-scripts.tcl">
 
-<!ENTITY DSC-56F8014-flash-program   SYSTEM "DSC/DSC-56F8014-flash-prog.elf.S">
-<!ENTITY DSC-56F8323-flash-program   SYSTEM "DSC/DSC-56F8323-flash-prog.elf.S">
-<!ENTITY DSC-56F8365-flash-program   SYSTEM "DSC/DSC-56F8365-flash-prog.elf.S">
-<!ENTITY DSC-56F8033-flash-program   SYSTEM "DSC/DSC-56F8033-flash-prog.elf.S">
+<!ENTITY DSC-56F8014-flash-program   SYSTEM "DSC/DSC-56F8014-flash-prog.elf.p.S">
+<!ENTITY DSC-56F8323-flash-program   SYSTEM "DSC/DSC-56F8323-flash-prog.elf.p.S">
+<!ENTITY DSC-56F8365-flash-program   SYSTEM "DSC/DSC-56F8365-flash-prog.elf.p.S">
+<!ENTITY DSC-56F8033-flash-program   SYSTEM "DSC/DSC-56F8033-flash-prog.elf.p.S">
 <!ENTITY Custom-devices              SYSTEM "Custom/custom-dsc.xml">
 ]>
 <!-- 
@@ -40,7 +40,7 @@
       </flashProgram>
       <!-- MC56F8033, MC56F8023 -->
       <flashProgram id="DSC-56F8033-flash-program">
-         &DSC-56F8365-flash-program;
+         &DSC-56F8033-flash-program;
       </flashProgram>
      <!-- DSC Unsecured value(words) = SECL,SECH,RES,FPROT,RES,backdoor[0-3] -->
       <securityInfo size="18" type="off" id="DSC-default-security-off">
@@ -59,7 +59,7 @@
             <memoryRange end="0x008BFF" start="0x008000" />
          </memory>
          <!-- Program Space -->
-         <memory registerAddress="0xF400" type="pROM" securityAddress="0x7FF7" sectorSize="2048">
+         <memory registerAddress="0xF400" type="pROM" securityAddress="0x7FF7" sectorSize="2048" alignment="1">
             <securityInfoRef ref="DSC-default-security-off" />
             <securityInfoRef ref="DSC-default-security-on" />
             <memoryRange end="0x007FFF" start="0x002000" />
@@ -132,16 +132,13 @@
          <clock type="External" />
          <!-- Data Space -->
          <memory type="xRAM">
-            <memoryRange end="0x0007FF" start="0x000000" />
+            <memoryRange start="0x000000" end="0x0007FF" />
          </memory>
          <!-- Program Space -->
          <memory registerAddress="0x00F400" type="pROM" securityAddress="0x1FF7" sectorSize="256">
             <securityInfoRef ref="DSC-default-security-off" />
             <securityInfoRef ref="DSC-default-security-on" />
-            <memoryRange end="0x001FFF" start="0x000000" />
-         </memory>
-         <memory type="pRAM">
-            <memoryRange end="0x0087FF" start="0x008000" />
+            <memoryRange start="0x000000" end="0x001FFF" />
          </memory>
          <copctlAddress value="0x00F0E0" />
          <sdidAddress value="0x11111" /> <!-- Not used (IDCODE) -->
@@ -152,13 +149,13 @@
          <clock type="External" />
          <!-- Data Space -->
          <memory type="xRAM">
-            <memoryRange end="0x0007FF" start="0x000000" />
+            <memoryRange start="0x000000" end="0x0007FF" />
          </memory>
          <!-- Program Space -->
          <memory registerAddress="0x00F400" type="pROM" securityAddress="0x1FF7" sectorSize="256">
             <securityInfoRef ref="DSC-default-security-off" />
             <securityInfoRef ref="DSC-default-security-on" />
-            <memoryRange end="0x001FFF" start="0x000000" />
+            <memoryRange start="0x000000" end="0x001FFF" />
          </memory>
          <copctlAddress value="0x00F0E0" />
          <sdidAddress value="0x11111" /> <!-- Not used (IDCODE) -->
@@ -169,7 +166,7 @@
          <clock type="External" />
          <!-- Data Space -->
          <memory type="xRAM">
-            <memoryRange end="0x0007FF" start="0x000000" />
+            <memoryRange start="0x000000" end="0x0007FF" />
          </memory>
          <!-- Program Space -->
          <memory registerAddress="0x00F400" type="pROM" securityAddress="0x7FF7" sectorSize="256">

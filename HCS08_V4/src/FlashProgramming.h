@@ -15,12 +15,12 @@ struct LargeTargetImageHeader {
    uint16_t         loadAddress;       // Address where to load this image
    uint16_t         entry;             // Ptr to entry routine (for currently loaded routine)
    uint16_t         capabilities;      // Capabilities of routine
-   uint32_t         clockFactor;       // Calibration factor for speed determination
+   uint32_t         calibFactor;       // Calibration factor for speed determination
    uint16_t         flashData;         // Ptr to information about operation
 };
 
-// Timing information
-struct LargeTimingData {
+//! Header at the start of timing data (controls program action & holds result)
+struct LargeTargetTimingDataHeader {
    uint16_t         errorCode;         // Error code from action
    uint16_t         flags;             // Controls actions of routine
    uint16_t         controller;        // Ptr to flash controller (unused)
@@ -43,11 +43,11 @@ struct LargeTargetFlashDataHeader {
 //! Header at the start of flash programming code (describes flash code)
 struct SmallTargetImageHeader {
    uint8_t          flags;
-   uint8_t          program;         // Offset of flash programming code in image
-   uint8_t          massErase;       // Offset of flash mass erase code in image
-   uint8_t          blankCheck;      // Offset of flash blank check code in image
-   uint8_t          selectiveErase;  // Offset of flash selective code in image
-   uint8_t          verify;          // Offset of flash verify code in image
+   uint8_t          program;           // Offset of flash programming code in image
+   uint8_t          massErase;         // Offset of flash mass erase code in image
+   uint8_t          blankCheck;        // Offset of flash blank check code in image
+   uint8_t          selectiveErase;    // Offset of flash selective code in image
+   uint8_t          verify;            // Offset of flash verify code in image
 };
 
 //! Header at the start of flash programming buffer (controls program action)
@@ -59,10 +59,11 @@ struct SmallTargetFlashDataHeader {
    uint16_t         pageAddress;             // Address of PPAGE or EPAGE register
    uint8_t          pageNum;                 // Page number
 };
-//!
+//! Holds program execution result
 struct ResultStruct {
    uint16_t          errorCode;              // Error code from operation
-   uint8_t           reserved[9];
+   uint16_t          flags;                  // Incomplete actions
+   uint8_t           reserved[6];
 };
 //!
 struct LoadInfoStruct {
@@ -72,19 +73,20 @@ struct LoadInfoStruct {
 
 //! Describes the flash programming code (created from loaded flash routines)
 struct TargetProgramInfo {
-   uint16_t         entry;                   //!< Address of entry routine (for currently loaded routine)
-   uint16_t         headerAddress;           //!< Address where to load data image (including header)
-   uint16_t         dataOffset;              //!< Offset to data buffer within image
-   uint16_t         maxDataSize;             //!< Maximum data buffer size
-   uint32_t         clockFactor;
-   uint16_t         capabilities;
+   uint32_t         entry;                   //!< Address of entry routine (for currently loaded routine)
+   uint32_t         headerAddress;           //!< Address where to load data image (including header)
+   uint32_t         dataOffset;              //!< Offset to data buffer within image
+   uint32_t         maxDataSize;             //!< Maximum data buffer size
+   uint32_t         capabilities;            // Capabilities of routine
+   uint16_t         calibFrequency;          // Frequency (kHz) used for calibFactor
+   uint32_t         calibFactor;             // Calibration factor for speed determination
    bool             smallProgram;            // Indicates small version of flash code being used
    bool             usePagedAddresses;       // Set up paged addressing information
+   uint32_t         programOperation;        // either DO_PROGRAM_RANGE or DO_BLANK_CHECK_RANGE|DO_PROGRAM_RANGE|DO_VERIFY_RANGE
 };
+enum FlashOperation {OpNone, OpSelectiveErase, OpBlockErase, OpBlankCheck, OpProgram, OpVerify, OpWriteRam, OpPartitionFlexNVM, OpTiming};
 
-enum FlashOperation {OpNone, OpProgram, OpSelectiveErase, OpMassErase, OpVerify,
-                     OpBlankCheck, OpWriteRam, OpPartitionFlexNVM, OpProgramWithVerify};
-//! Describes the flash operation to be done
+//! Information for the flash operation to be done
 struct FlashOperationInfo {
    uint8_t          operation;               // Controls actions of routine
    uint32_t         controller;              // Address of flash controller
@@ -94,9 +96,8 @@ struct FlashOperationInfo {
    uint16_t         sectorSize;              // Sector size
    uint32_t         targetBusFrequency;      // Measured target bus frequency (kHz)
    uint32_t         alignment;               // Flash programming alignment (1,2,4,8,16,32 bytes)
-   uint16_t         flexNVMPartiition;       // Value for partitioning FlexNVM
+   uint32_t         flexNVMPartition;        // Value for partitioning FlexNVM
 };
-
 class FlashProgrammer {
 
 private:
@@ -123,17 +124,15 @@ private:
       ADDRESS_LINEAR = 1UL<<31,
       ADDRESS_EEPROM = 1UL<<30,
    };
-
    //! Structure for MCGCG parameters
    struct MCG_ClockParameters_t {
-      uint8_t mcgC1;
-      uint8_t mcgC2;
-      uint8_t mcgC3;
-      uint8_t mcgTrim;
-      uint8_t mcgSC;
-      uint8_t mcgCT;
+      uint8_t  mcgC1;
+      uint8_t  mcgC2;
+      uint8_t  mcgC3;
+      uint8_t  mcgTrim;
+      uint8_t  mcgSC;
+      uint8_t  mcgCT;
    } ;
-
    //! Structure for ICGCG parameters
    struct ICG_ClockParameters_t {
       uint8_t  icgC1;        //!< ICSC1 value
@@ -141,21 +140,18 @@ private:
       uint16_t icgFilter;    //!< Not used
       uint8_t  icgTrim;      //!< Trim value
    } ;
-
    //! Structure for ICSCG parameters
    struct ICS_ClockParameters_t {
-      uint8_t icsC1;      //!< ICSC1 value
-      uint8_t icsC2;      //!< ICSC2 value
-      uint8_t icsTrim;    //!< ICSTRM value
-      uint8_t icsSC;      //!< ICSSC value (FTRIM)
+      uint8_t  icsC1;        //!< ICSC1 value
+      uint8_t  icsC2;        //!< ICSC2 value
+      uint8_t  icsTrim;      //!< ICSTRM value
+      uint8_t  icsSC;        //!< ICSSC value (FTRIM)
    } ;
-
    union ClockParameters {
       ICG_ClockParameters_t icg;
       MCG_ClockParameters_t mcg;
       ICS_ClockParameters_t ics;
    } ;
-
    typedef USBDM_ErrorCode (*CallBackT)(USBDM_ErrorCode status, int percent, const char *message);
 
    DeviceData              parameters;               //!< Parameters describing the target device
@@ -169,7 +165,6 @@ private:
    FlashProgramPtr         currentFlashProgram;
    FlashOperation          currentFlashOperation;
    uint32_t                currentFlashAlignment;
-   uint32_t                offset;
    ProgressTimer          *progressTimer;
    bool                    doRamWrites;
 
@@ -198,9 +193,9 @@ private:
    USBDM_ErrorCode configureExternal_Clock(unsigned long  *busFrequency);
    USBDM_ErrorCode eraseFlash(void);
    USBDM_ErrorCode convertTargetErrorCode(FlashDriverError_t rc);
-   USBDM_ErrorCode initSmallTargetBuffer(uint8_t *buffer);
-   USBDM_ErrorCode initLargeTargetBuffer(uint8_t *buffer);
-   USBDM_ErrorCode executeTargetProgram(uint8_t *buffer=0, uint32_t size=0);
+   USBDM_ErrorCode initSmallTargetBuffer(memoryElementType *buffer);
+   USBDM_ErrorCode initLargeTargetBuffer(memoryElementType *buffer);
+   USBDM_ErrorCode executeTargetProgram(memoryElementType *buffer=0, uint32_t size=0);
    USBDM_ErrorCode determineTargetSpeed(void);
    USBDM_ErrorCode doFlashBlock(FlashImage    *flashImage,
                                 unsigned int   blockSize,
@@ -231,9 +226,9 @@ private:
    USBDM_ErrorCode dummyTrimLocations(FlashImage *flashImage);
    USBDM_ErrorCode getPageAddress(MemoryRegionPtr memoryRegionPtr, uint32_t address, uint8_t *pageNo);
    USBDM_ErrorCode setPageRegisters(uint32_t physicalAddress);
+   USBDM_ErrorCode partitionFlexNVM(void);
 
 public:
-   USBDM_ErrorCode partitionFlexNVM(void);
    USBDM_ErrorCode initTCL(void);
    USBDM_ErrorCode releaseTCL(void);
    USBDM_ErrorCode setDeviceData(const DeviceData  &theParameters);
