@@ -1,85 +1,91 @@
 <!-- Kinetis devices by old names -->
    <device name="MK10N512VMD100" family="ARM">
       <memoryRef ref="kinetis128K_Ram" />
-      <memoryRef ref="kinetis512K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
+      <memoryRef ref="kinetis256K_Flash_B1" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK10X128VMD100" family="ARM">
       <memoryRef ref="kinetis32K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis128K_Flash" />
+      <memoryRef ref="kinetis128K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK10X256VMD100" family="ARM">
       <memoryRef ref="kinetis64K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis256K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK20N512VMD100" family="ARM">
       <memoryRef ref="kinetis128K_Ram" />
-      <memoryRef ref="kinetis512K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
+      <memoryRef ref="kinetis256K_Flash_B1" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK20X128VMD100" family="ARM">
       <memoryRef ref="kinetis32K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis128K_Flash" />
+      <memoryRef ref="kinetis128K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK20X256VMD100" family="ARM">
       <memoryRef ref="kinetis64K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis256K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK30N512VMD100" family="ARM">
       <memoryRef ref="kinetis128K_Ram" />
-      <memoryRef ref="kinetis512K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
+      <memoryRef ref="kinetis256K_Flash_B1" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK30X128VMD100" family="ARM">
       <memoryRef ref="kinetis32K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis128K_Flash" />
+      <memoryRef ref="kinetis128K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK30X256VMD100" family="ARM">
       <memoryRef ref="kinetis64K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis256K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK40N512VMD100" family="ARM">
       <memoryRef ref="kinetis128K_Ram" />
-      <memoryRef ref="kinetis512K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
+      <memoryRef ref="kinetis256K_Flash_B1" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK40X128VMD100" family="ARM">
       <memoryRef ref="kinetis32K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis128K_Flash" />
+      <memoryRef ref="kinetis128K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK40X256VMD100" family="ARM">
       <memoryRef ref="kinetis64K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis256K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK60N256VMD100" family="ARM">
       <memoryRef ref="kinetis64K_Ram" />
-      <memoryRef ref="kinetis256K_Flash" />
+      <memoryRef ref="kinetis128K_Flash_B0" />
+      <memoryRef ref="kinetis128K_Flash_B1" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK60N512VMD100" family="ARM">
       <memoryRef ref="kinetis128K_Ram" />
-      <memoryRef ref="kinetis512K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
+      <memoryRef ref="kinetis256K_Flash_B1" />
       <sdid value="0x00000000" />
    </device>
    <device name="MK60X256VMD100" family="ARM">
       <memoryRef ref="kinetis64K_Ram" />
       <memoryRef ref="kinetis256K_FlexNVM" />
-      <memoryRef ref="kinetis256K_Flash" />
+      <memoryRef ref="kinetis256K_Flash_B0" />
       <sdid value="0x00000000" />
    </device>

@@ -127,7 +127,7 @@ Coldfire+
          <clock type="External" />
          <memoryRef ref="coldfire16K_Ram" />
          <!-- Regular flash or pFlash memory -->
-         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400" sectorSize="1024" alignment="2" >
+         <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400" sectorSize="1024" alignment="4" >
             <memoryRange start="0x000000" size="128K" />
          </memory>
          <!-- Data flash -->

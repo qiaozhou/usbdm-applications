@@ -1647,7 +1647,8 @@ USBDM_ErrorCode FlashProgrammer::eraseFlash(void) {
       MemType_t memoryType = memoryRegionPtr->getMemoryType();
       print("FlashProgrammer::eraseFlash() - Erasing %s\n", MemoryRegion::getMemoryTypeName(memoryType));
 
-      uint32_t addressFlag = 0;
+      uint32_t addressFlag  = 0;
+      uint32_t flashAddress = memoryRegionPtr->getDummyAddress();
 
 #if (TARGET == HCS08) || (TARGET == HCS12)
       if (memoryRegionPtr->getAddressType() == AddrLinear) {
@@ -1665,12 +1666,13 @@ USBDM_ErrorCode FlashProgrammer::eraseFlash(void) {
 #endif      
 #if (TARGET == CFV1) || (TARGET == ARM)
       if ((memoryType == MemFlexNVM) || (memoryType == MemDFlash)) {
-         // Flag need for DFLASH/flexNVM access
-         addressFlag |= (1<<23);
+         // Flag needed for DFLASH/flexNVM access
+         addressFlag  |= (1<<23);
+         flashAddress  = 0;
       }
 #endif
+      flashOperationInfo.flashAddress      = flashAddress|addressFlag;
       flashOperationInfo.controller        = memoryRegionPtr->getRegisterAddress();
-      flashOperationInfo.flashAddress      = memoryRegionPtr->getDummyAddress()|addressFlag;
       flashOperationInfo.sectorSize        = memoryRegionPtr->getSectorSize();
       flashOperationInfo.alignment         = memoryRegionPtr->getAlignment();
       flashOperationInfo.pageAddress       = memoryRegionPtr->getPageAddress();
