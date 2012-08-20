@@ -45,6 +45,7 @@ enum RetryMode {
    retryByReset   = (1<<4),  // Retry silently using reset if necessary (if supported by target to entry debug mode)
    retryByPower   = (1<<5),  // Retry by cycling BDM controlled power & prompting user
    retryWithInit  = (1<<6),  // Option for ARM & DSC - do DSC/ARM_Initialise() first
+   retryWithReset = (1<<7),  // Immediately reset to special mode - useful to avoid Watchdog timeout
 };
 
 USBDM_ErrorCode USBDM_TargetConnectWithRetry(USBDMStatus_t *usbdmStatus, RetryMode retry=retryAlways);

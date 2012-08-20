@@ -220,13 +220,6 @@ const char *regName = NULL;
 }
 #endif
 
-//const char *getACKName(int ack) {
-//   if (ack == ACK_OK_FAULT)
-//      return "ACK_OK_FAULT";
-//   if (ack == ACK_WAIT)
-//      return "ACK_WAIT";
-//   return "ACK_ILLEGAL";
-//}
 #if 0
 const char *getDpRegName(int reg) {
    static const char *names[] = {"Reserved","CTRL/STAT","SELECT","RDBUFF",

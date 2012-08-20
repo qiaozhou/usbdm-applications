@@ -1,5 +1,5 @@
 /*! \file
-    \brief Some common shared defintions.
+    \brief Some common shared definitions.
 */
 #ifndef _COMMON_H_
 #define _COMMON_H_
@@ -38,5 +38,11 @@ typedef union {
 #define MC56F80xx 7     //!< - JTAG target with MC56F80xx optimised subroutines
 #define ARM       8     //!< - Kinetis - not implemented
 #define OFF       0xFF  //!< - Turn off interface (no target)
+
+#if TARGET == MC56F80xx
+typedef uint16_t memoryElementType; // Size of target memory element
+#else
+typedef uint8_t memoryElementType; // Size of target memory element
+#endif
 
 #endif /*COMMON_H_*/

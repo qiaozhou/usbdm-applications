@@ -119,13 +119,14 @@
 #define MDM_AP_Control_Status_Ack            (1<<7)
 
 // AP#0 - AHB-AP
-#define AHB_AP_CSW     (0x00000000U) // AHB-AP Control/Status Word register
-#define AHB_AP_TAR     (0x00000004U) // AHB-AP Transfer Address register
-#define AHB_AP_DRW     (0x0000000CU) // AHB-AP Data Read/Write register
-
-#define AHB_AP_CFG     (0x000000F4U) // AHB-AP Config register
-#define AHB_AP_Base    (0x000000F8U) // AHB-AP IDebug base address register
-#define AHB_AP_Id      (0x000000FCU) // AHB-AP ID Register
+// use ARM_CRegisters_t
+//#define AHB_AP_CSW     (0x00000000U) // AHB-AP Control/Status Word register
+//#define AHB_AP_TAR     (0x00000004U) // AHB-AP Transfer Address register
+//#define AHB_AP_DRW     (0x0000000CU) // AHB-AP Data Read/Write register
+//
+//#define AHB_AP_CFG     (0x000000F4U) // AHB-AP Config register
+//#define AHB_AP_Base    (0x000000F8U) // AHB-AP IDebug base address register
+//#define AHB_AP_Id      (0x000000FCU) // AHB-AP ID Register
 
 // AHB-AP (MEM-AP) CSW Register masks
 #define AHB_AP_CSW_INC_SINGLE    (1<<4)

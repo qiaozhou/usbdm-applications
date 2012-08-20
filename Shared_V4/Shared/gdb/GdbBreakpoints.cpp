@@ -9,7 +9,7 @@
 #include "Log.h"
 
 #include "USBDM_API.h"
-#if TARGET == ARM
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
 #include "USBDM_ARM_API.h"
 #include "ARM_Definitions.h"
 #endif
@@ -30,6 +30,13 @@
 #define USBDM_WriteSP(x)                     USBDM_WriteCReg(CFVx_CRegSP, x);
 #define USBDM_ReadSR(x)                      USBDM_ReadCReg(CFVx_CRegSR, x);
 #define USBDM_WriteSR(x)                     USBDM_WriteCReg(CFVx_CRegSR, x);
+#elif TARGET == ARM_SWD
+#define USBDM_ReadPC(x)                      USBDM_ReadReg(ARM_RegPC, x);
+#define USBDM_WritePC(x)                     USBDM_WriteReg(ARM_RegPC, x);
+#define USBDM_ReadSP(x)                      USBDM_ReadReg(ARM_RegSP, x);
+#define USBDM_WriteSP(x)                     USBDM_WriteReg(ARM_RegSP, x);
+#define USBDM_ReadSR(x)                      USBDM_ReadReg(ARM_RegSR, x);
+#define USBDM_WriteSR(x)                     USBDM_WriteReg(ARM_RegSR, x);
 #elif TARGET == ARM
 #define USBDM_ReadPC(x)                      ARM_ReadRegister(ARM_RegPC, x);
 #define USBDM_WritePC(x)                     ARM_WriteRegister(ARM_RegPC, x);
@@ -53,7 +60,7 @@
 #define MAX_MEMORY_BREAKPOINTS   (10)
 #define MAX_HARDWARE_BREAKPOINTS (4)
 #define MAX_DATA_WATCHES     (1)   // Not implemented
-#elif TARGET == ARM
+#elif (TARGET == ARM) || (TARGET == ARM_SWD)
 #define MAX_MEMORY_BREAKPOINTS   (10)
 #define MAX_HARDWARE_BREAKPOINTS (6)
 #define MAX_DATA_WATCHES         (4)
@@ -464,8 +471,7 @@ void checkAndAdjustBreakpointHalt(void) {
    }
 }
 
-#elif TARGET == ARM
-
+#elif (TARGET == ARM) || (TARGET == ARM_SWD)
 static const uint8_t haltOpcode[] = {0x00, 0xBE};
 
 const uint8_t *getFpCompAddress(uint32_t address) {

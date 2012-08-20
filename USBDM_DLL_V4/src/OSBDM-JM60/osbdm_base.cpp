@@ -35,7 +35,7 @@
 #include <math.h>
 #include <string.h>
 #include "../Log.h"
-#include "../Version.h"
+#include "Version.h"
 #include "../Common.h"
 #include "../USBDM_API.h"
 #include "../USBDM_API_Private.h"

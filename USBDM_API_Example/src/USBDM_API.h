@@ -38,7 +38,7 @@
     extern "C" {
 #else
 #ifndef bool
-#define bool int //! Define bool for C
+#define bool int //!< Define bool for C
 #endif
 #endif
 
@@ -73,7 +73,7 @@
 #include <stdint.h>
 
 //! USBDM Version this header describes
-#define USBDM_API_VERSION (40905)  // V4.9.5
+#define USBDM_API_VERSION (0x40905)  // V4.9.5
 
 #include "USBDM_ErrorMessages.h"
 
@@ -290,22 +290,22 @@ typedef enum { /* type of reset action required */
 //!
 //! @note CCR is accessed through USBDM_ReadDReg()
 typedef enum {
-   HCS12_RegPC = 3,        //!< PC reg
-   HCS12_RegD  = 4,        //!< D reg
-   HCS12_RegX  = 5,        //!< X reg
-   HCS12_RegY  = 6,        //!< Y reg
-   HCS12_RegSP = 7,        //!< SP reg
-   HCS12_RegCCR   = 0x80,  //!< CCR reg - redirected to USBDM_ReadDReg()
+   HCS12_RegPC    = 3,    //!< PC reg
+   HCS12_RegD     = 4,    //!< D reg
+   HCS12_RegX     = 5,    //!< X reg
+   HCS12_RegY     = 6,    //!< Y reg
+   HCS12_RegSP    = 7,    //!< SP reg
+   HCS12_RegCCR   = 0x80, //!< CCR reg - redirected to USBDM_ReadDReg()
 } HCS12_Registers_t;
 
 //! regNo Parameter for USBDM_ReadReg() with HCS08 target
 //!
 typedef enum {
-   HCS08_RegPC  = 0xB, //!< PC  reg
-   HCS08_RegSP  = 0xF, //!< SP  reg
-   HCS08_RegHX  = 0xC, //!< HX  reg
-   HCS08_RegA   = 8,   //!< A   reg
-   HCS08_RegCCR = 9,   //!< CCR reg
+   HCS08_RegPC  = 0xB,  //!< PC  reg
+   HCS08_RegSP  = 0xF,  //!< SP  reg
+   HCS08_RegHX  = 0xC,  //!< HX  reg
+   HCS08_RegA   = 8,    //!< A   reg
+   HCS08_RegCCR = 9,    //!< CCR reg
 } HCS08_Registers_t;
 
 //! regNo Parameter for USBDM_ReadReg() with RS08 target

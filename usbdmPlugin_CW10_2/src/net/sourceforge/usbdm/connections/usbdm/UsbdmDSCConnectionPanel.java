@@ -182,6 +182,7 @@ public class UsbdmDSCConnectionPanel extends UsbdmConnectionPanel {
    /**
     * @param comp
     */
+   @Override
    protected void createContents(Composite comp) {
       super.createContents(comp);
 

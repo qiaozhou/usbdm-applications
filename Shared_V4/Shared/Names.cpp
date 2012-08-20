@@ -44,13 +44,14 @@ const char *getHardwareDescription(unsigned int hardwareVersion) {
   /* 13 */  "USBDM-JS16            - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ)",
   /* 14 */  "USBDM-AXIOM-M56F8006  - Axiom MC56F8006 Demo board",
   /* 15 */  "Custom                - Reserved for User created custom hardware",
-  /* 16 */  "USBDM-CF-SER-JS16     - Minimal BDM for DSC/CFVx/ARM (JS16CWJ) with serial",
-  /* 17 */  "USBDM-SER-JS16        - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ) wiuth serial",
-  /* 18 */  "USBDM-CF-SER-JMxx     - Deluxe BDM for RS08/HCS08/HCS12/DSC/CFVx/ARM (JMxxCLD)",
+  /* 16 */  "USBDM-CF-SER-JS16     - Minimal BDM for DSC,CFVx,ARM-JTAG (JS16CWJ) with serial",
+  /* 17 */  "USBDM-SER-JS16        - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ) with serial",
+  /* 18 */  "USBDM-CF-SER-JMxx     - Deluxe BDM for RS08,HCS08,HCS12,DSC,CFVx,ARM-JTAG (JMxxCLD)",
   /* 19 */  "USBDM_TWR_KINETIS     - Tower Kinetis boards",
   /* 20 */  "USBDM_TWR_CFV1        - Tower Coldfire V1 boards",
   /* 21 */  "USBDM_TWR_HCS08       - Tower HCS08 boards",
   /* 22 */  "USBDM_TWR_CFVx        - Tower CFVx boards",
+  /* 23 */  "USBDM-SWD-SER-JS16    - Minimal BDM for HCS08,HCS12,CFV1,ARM-SWD (JS16CWJ) with serial",
          };
    const char *hardwareName = "Unknown";
    hardwareVersion &= 0x3F; // mask out BDM processor type
@@ -88,6 +89,7 @@ const char *getBriefHardwareDescription(unsigned int hardwareVersion) {
     /* 20  */  "USBDM_TWR_CFV1",
     /* 21  */  "USBDM_TWR_HCS08",
     /* 22  */  "USBDM_TWR_CFVx",
+    /* 23  */  "USBDM-SWD-SER -(JS16CWJ-V2)",
          };
 
    const char *hardwareName = "unknown hardware";
@@ -129,7 +131,7 @@ const char *getICPErrorName(unsigned char error) {
 //!
 char const *getTargetTypeName( unsigned int type ) {
    static const char *names[] = {
-      "HCS12","HCS08","RS08","CFV1","CFVx","JTAG","EZFlash","MC56F80xx","ARM-JTAG",
+      "HCS12","HCS08","RS08","CFV1","CFVx","JTAG","EZFlash","MC56F80xx","ARM-JTAG","ARM-SWD"
       };
    const char *typeName = NULL;
    static char unknownBuffer[10];
@@ -272,24 +274,25 @@ const char *getCommandName(unsigned char command) {
 
 //! Debug command string from code
 static const char *const debugCommands[] = {
-   "ACKN",              // 0
-   "SYNC",              // 1
-   "Test Port",         // 2
-   "USB Disconnect",    // 3
-   "Find Stack size",   // 4
-   "Vpp Off",           // 5
-   "Vpp On",            // 6
-   "Flash 12V Off",     // 7
-   "Flash 12V On",      // 8
-   "Vdd Off",           // 9
-   "Vdd 3.3V On",       // 10
-   "Vdd 5V On",         // 11
-   "Cycle Vdd",         // 12
-   "Measure Vdd",       // 13
-   "Measure RS08 Trim - deleted", //
-   "Test WAITS",                  // 15, //!< - Tests the software counting delays used for BDM communication. (locks up BDM!)
-   "Test ALT Speed",              // 16,
-   "Test BDM Tx Routine",         // 17,
+   "ACKN",                        // 0
+   "SYNC",                        // 1
+   "Test Port",                   // 2
+   "USB Disconnect",              // 3
+   "Find Stack size",             // 4
+   "Vpp Off",                     // 5
+   "Vpp On",                      // 6
+   "Flash 12V Off",               // 7
+   "Flash 12V On",                // 8
+   "Vdd Off",                     // 9
+   "Vdd 3.3V On",                 // 10
+   "Vdd 5V On",                   // 11
+   "Cycle Vdd",                   // 12
+   "Measure Vdd",                 // 13
+   "Measure RS08 Trim - deleted", // 14
+   "Test WAITS",                  // 15 //!< - Tests the software counting delays used for BDM communication. (locks up BDM!)
+   "Test ALT Speed",              // 16
+   "Test BDM Tx Routine",         // 17
+   "SWD test",                    // 18
 };
 
 //! \brief Maps a Debug Command # to a string
@@ -396,6 +399,42 @@ const char *regName = NULL;
    return regName;
 }
 
+//! \brief Maps a ARM-SWD Debug register # to a string
+//!
+//! @param regAddr = register address
+//!
+//! @return pointer to static string describing the command
+//!
+char const *getARMControlRegName( unsigned int regAddr ) {
+   //! The regAddr is actually a AP bus address as follows:
+   //!    A[31:24]  => DP-AP-SELECT[31:24] (AP # Select) \n
+   //!    A[23:8]   => unused (0)
+   //!    A[7:4]    => DP-AP-SELECT[7:4]   (Bank select within AP) \n
+   //!    A[3:2]    => APACC[3:2]          (Register select within AP bank)
+   //!    A[1:0]    => unused (0)
+   //!
+   switch(regAddr) {
+      // AP#0 - Common ARM AHB-AP
+      case ARM_CRegAHB_AP_CSW     : return "AHB_AP.CSW";  // AHB-AP Control/Status Word register
+      case ARM_CRegAHB_AP_TAR     : return "AHB_AP.TAR";  // AHB-AP Transfer Address register
+      case ARM_CRegAHB_AP_DRW     : return "AHB_AP.DRW";  // AHB-AP Data Read/Write register
+
+      case ARM_CRegAHB_AP_CFG     : return "AHB_AP.CFG";  // AHB-AP Config register
+      case ARM_CRegAHB_AP_Base    : return "AHB_AP.Base"; // AHB-AP IDebug base address register
+      case ARM_CRegAHB_AP_Id      : return "AHB_AP.Id";   // AHB-AP ID Register
+
+      // AP#1 - Kinetis MDM-AP registers
+      case ARM_CRegMDM_AP_Status  : return "MDM_AP.Status";  //!< Status register
+      case ARM_CRegMDM_AP_Control : return "MDM_AP.Control"; //!< Control register
+      case ARM_CRegMDM_AP_Ident   : return "MDM_AP.Ident";   //!< Identifier register (should read 0x001C_0000)
+      default: break;
+   };
+   static char buff[100];
+   snprintf(buff, sizeof(buff), "0x%08X (AP#0x%02X:B#0x%1X:R#%d)",
+         regAddr, (regAddr>>24)&0xFF, (regAddr>>4)&0x0F, (regAddr>>2)&0x2);
+   return buff;
+}
+
 //! \brief Maps a Coldfire V1 Debug register # to a string
 //! (As used by WRITE_DREG/READ_DREG)
 //!
@@ -459,6 +498,30 @@ char const *getCFVxDebugRegName( unsigned int regAddr ){
       regName = "unknown";
 
    return regName;
+}
+
+//! \brief Maps a ARM-SWD Debug register # to a string
+//!
+//! @param regAddr = register address
+//!
+//! @return pointer to static string describing the command
+//!
+char const *getSWDDebugRegName( unsigned int regAddr ) {
+   static const char *names[] = {
+   "DP_IDCODE",    //!< IDCODE reg - read only
+   "DP_STATUS",    //!< STATUS reg - read only
+   "DP_RESEND",    //!< RESEND reg - read only
+   "DP_RDBUFF",    //!< RDBUFF reg - read only
+   "DP_ABORT",     //!< IDCODE reg - write only
+   "DP_CONTROL",   //!< IDCODE reg - write only
+   "DP_SELECT",    //!< IDCODE reg - write only
+   };
+   if (regAddr>=(sizeof(names)/sizeof(names[0]))) {
+      return "DP_Illegal register";
+   }
+   else {
+      return names[regAddr];
+   }
 }
 
 //! \brief Maps a Coldfire V2,3,4 Debug register # to a string
@@ -594,8 +657,79 @@ char const *getCFVxRegName( unsigned int regAddr ){
    return regName;
 }
 
+char const *getDSCRegName( unsigned int regNum) {
+   static const char *const regNames[] =  {
+      // Core registers
+      "DSC_RegX0",
+      "DSC_RegY0",
+      "DSC_RegY1",
+      "DSC_RegA0",
+      "DSC_RegA1",
+      "DSC_RegA2",
+      "DSC_RegB0",
+      "DSC_RegB1",
+      "DSC_RegB2",
+      "DSC_RegC0",
+      "DSC_RegC1",                                  // 10
+      "DSC_RegC2",
+      "DSC_RegD0",
+      "DSC_RegD1",
+      "DSC_RegD2",
+      "DSC_RegOMR",
+      "DSC_RegSR",
+      "DSC_RegLA",
+      "DSC_RegLA2", /* read only */
+      "DSC_RegLC",
+      "DSC_RegLC2", /* read only */                 //  20
+      "DSC_RegHWS0",
+      "DSC_RegHWS1",
+      "DSC_RegSP",
+      "DSC_RegN3",
+      "DSC_RegM01",
+      "DSC_RegN",
+      "DSC_RegR0",
+      "DSC_RegR1",
+      "DSC_RegR2",
+      "DSC_RegR3",                                  // 30
+      "DSC_RegR4",
+      "DSC_RegR5",
+      "DSC_RegsHM01",
+      "DSC_RegsHN",
+      "DSC_RegsHR0",
+      "DSC_RegsHR1",
+      "DSC_RegPC",
+      // JTAG registers
+      "DSC_RegIDCODE",                              // JTAG Core IDCODE
+      // ONCE registers
+      "DSC_RegOCR",                                 // OnCE Control register
+      "DSC_RegOSCNTR",                              // Once Instruction Step Counter
+      "DSC_RegOSR",                                 // OnCE Status register
+      "DSC_RegOPDBR",                               // OnCE Program Data Bus Register
+      "DSC_RegOBASE",                               // OnCE Peripheral Base Address regitsre
+      "DSC_RegOTXRXSR",                             // OnCE Tx & Rx Status & Control register
+      "DSC_RegOTX",                                 // Once Transmit register
+      "DSC_RegOTX1",                                // Once Transmit register
+      "DSC_RegORX",                                 // Once Receive register
+      "DSC_RegORX1",                                // Once Receive register
+      "DSC_RegOTBCR",                               // OnCE Trace buffer control register
+      "DSC_RegOTBPR",                               // OnCE Trace Buffer Pointer register
+      "DSC_RegOTB",                                 // Trace Buffer Register Stages
+      "DSC_RegOB0CR",                               // Breakpoint Unit 0 Control register
+      "DSC_RegOB0AR1",                              // Breakpoint Unit 0 Address register 1
+      "DSC_RegOB0AR2",                              // Breakpoint Unit 0 Address register 2
+      "DSC_RegOB0MSK",                              // Breakpoint Unit 0 Mask register
+      "DSC_RegOB0CNTR",                             // Breakpoint Unit 0 Counter
+   } ;
+   const char *regName = NULL;
+
+   if (regNum < sizeof(regNames)/sizeof(regNames[0]))
+       regName = regNames[regNum];
+   if (regName == NULL)
+      regName = "unknown";
+   return regName;
+}
+
 //! \brief Maps a register # to a string
-//! (As used by WAREG/RAREG,WDREG/RDREG)
 //!
 //! @param targetType = target type (T_HC12 etc)
 //! @param regNo      = register address
@@ -618,6 +752,10 @@ char const *getRegName( unsigned int targetType,
          return getCFVxRegName(regNo);
       case T_ARM_JTAG :
          return getARMRegName(regNo);
+      case T_ARM_SWD :
+         return getARMRegName(regNo);
+      case T_MC56F80xx:
+         return getDSCRegName(regNo);
    };
    return "Invalid target!";
 }
@@ -843,19 +981,13 @@ static char buff[100];
 
    buff[0] = '\0';
 
-   if (level == -1)
+   if (level == -1) {
       return "Release";
-
+   }
    switch (level & PIN_BKGD) {
       case PIN_BKGD_3STATE : strcat(buff, "PIN_BKGD_3STATE|"); break;
       case PIN_BKGD_HIGH   : strcat(buff, "PIN_BKGD_HIGH|");   break;
       case PIN_BKGD_LOW    : strcat(buff, "PIN_BKGD_LOW|");    break;
-   }
-   switch (level & PIN_TRST) {
-      case PIN_TRST_3STATE : strcat(buff, "PIN_TRST_3STATE|"); break;
-      case PIN_TRST_LOW    : strcat(buff, "PIN_TRST_LOW|");   break;
-      case PIN_TRST_NC     : break;
-      default              : strcat(buff, "PIN_TRST_??|");    break;
    }
    switch (level & PIN_RESET) {
       case PIN_RESET_3STATE : strcat(buff, "PIN_RESET_3STATE|"); break;
@@ -869,11 +1001,22 @@ static char buff[100];
       case PIN_TA_NC     : break;
       default            : strcat(buff, "PIN_TA_??|");    break;
    }
+   switch (level & PIN_TRST) {
+      case PIN_TRST_3STATE : strcat(buff, "PIN_TRST_3STATE|"); break;
+      case PIN_TRST_LOW    : strcat(buff, "PIN_TRST_LOW|");   break;
+      case PIN_TRST_NC     : break;
+      default              : strcat(buff, "PIN_TRST_??|");    break;
+   }
    switch (level & PIN_BKPT) {
       case PIN_BKPT_3STATE : strcat(buff, "PIN_BKPT_3STATE|"); break;
       case PIN_BKPT_LOW    : strcat(buff, "PIN_BKPT_LOW|");    break;
       case PIN_BKPT_NC     : break;
       default              : strcat(buff, "PIN_BKPT_??|");    break;
+   }
+   switch (level & PIN_SWD) {
+      case PIN_SWD_3STATE : strcat(buff, "PIN_SWD_3STATE|"); break;
+      case PIN_SWD_HIGH   : strcat(buff, "PIN_SWD_HIGH|");   break;
+      case PIN_SWD_LOW    : strcat(buff, "PIN_SWD_LOW|");    break;
    }
    return buff;
 }
@@ -1032,7 +1175,7 @@ char const *getARMRegName( unsigned int regAddr ) {
 static const char *regs[] = {"R0","R1","R2","R3","R4","R5","R6","R7",
                              "R8","R9","R10","R11","R12","SP","LR","PC",
                              "PSR","MSP","PSP",
-                             NULL, "MISC" };
+                             "MISC/PRIMASK", "FAULTMASK", "BASEPRI", "CONTROL"};
 const char *regName = NULL;
 
    if (regAddr < sizeof(regs)/sizeof(regs[0]))
@@ -1106,6 +1249,10 @@ bitInfo bitNames[] = {
 bitInfo *bitPtr = bitNames;
 static char buffer[200];
    buffer[0] = '\0';
+   if ((demcrValue & DEMCR_VC_ALL_ERRORS) == DEMCR_VC_ALL_ERRORS) {
+      strcat(buffer, "ALL_ERRORS|");
+      demcrValue &= ~DEMCR_VC_ALL_ERRORS;
+   }
    while (bitPtr->bitMask != 0) {
       if ((demcrValue & bitPtr->bitMask) != 0) {
          strcat(buffer, bitPtr->bitName);

@@ -64,9 +64,7 @@ AdvancedPanel::AdvancedPanel(TargetType_t targetType, HardwareCapabilities_t bdm
 }
 
 bool AdvancedPanel::Create(wxWindow* parent) {
-
    print("AdvancedPanel::Create()\n");
-
    if (!wxPanel::Create(parent) || !CreateControls()) {
       return false;
    }
@@ -77,9 +75,7 @@ bool AdvancedPanel::Create(wxWindow* parent) {
 //! Set the panel internal state to the default
 //!
 void AdvancedPanel::Init() {
-
    print("AdvancedPanel::Init()\n");
-
    bdmOptions.size                = sizeof(USBDM_ExtendedOptions_t);
    bdmOptions.targetType          = T_OFF;
    currentDevice                  = NULL;
@@ -99,9 +95,7 @@ enum {
 //! Control creation for USBDM Flash programming settings
 //!
 bool AdvancedPanel::CreateControls() {
-
    print("AdvancedPanel::CreateControls()\n");
-
    wxPanel* panel = this;
    wxBoxSizer* panelBoxSizerV = new wxBoxSizer(wxVERTICAL);
    panel->SetSizer(panelBoxSizerV);
@@ -188,7 +182,7 @@ bool AdvancedPanel::CreateControls() {
 
    row++;
 
-#if (TARGET==CFV1) || (TARGET==ARM)
+#if (TARGET==CFV1) || (TARGET==ARM) || (TARGET==ARM_SWD)
    //================================================================================
    itemStaticBox = new wxStaticBox(panel, wxID_ANY, _("FlexNVM Parameters"));
    itemStaticBoxSizer = new wxStaticBoxSizer(itemStaticBox, wxHORIZONTAL);
@@ -238,7 +232,7 @@ bool AdvancedPanel::CreateControls() {
    return true;
 }
 
-#if (TARGET==CFV1) || (TARGET==ARM)
+#if (TARGET==CFV1) || (TARGET==ARM) || (TARGET==ARM_SWD)
 //! Populates eeepromSizeChoiceControl with EEEPROM sizes
 //! Selects 1st entry if reload is necessary (devcie changed)
 //!
@@ -433,7 +427,7 @@ void AdvancedPanel::OnFlexNvmPartionChoiceSelected( wxCommandEvent& event ) {
 //! @note values are validated
 //!
 void AdvancedPanel::updateFlashNVM() {
-#if (TARGET==CFV1) || (TARGET==ARM)
+#if (TARGET==CFV1) || (TARGET==ARM) || (TARGET==ARM_SWD)
 
    static const double writeEfficiency = 0.5;     // Assume 16/32-bit writes
    static const double endurance       = 10000.0; // From JU128 specification sheet
@@ -474,7 +468,7 @@ IMPLEMENT_CLASS( AdvancedPanel, wxPanel )
  * FlashPanel event table definition
  */
 BEGIN_EVENT_TABLE( AdvancedPanel, wxPanel )
-#if (TARGET==CFV1) || (TARGET==ARM)
+#if (TARGET==CFV1) || (TARGET==ARM) || (TARGET==ARM_SWD)
 EVT_CHOICE( ID_EEPROM_SIZE_CHOICE,         AdvancedPanel::OnEeepromSizeChoiceSelected )
 EVT_CHOICE( ID_FLEXNVM_PARTITION_CHOICE,   AdvancedPanel::OnFlexNvmPartionChoiceSelected )
 #endif
@@ -504,7 +498,7 @@ void AdvancedPanel::loadSettings(const AppSettings &settings) {
    bdmOptions.resetReleaseInterval     = settings.getValue(resetReleaseIntervalKey,    bdmOptions.resetReleaseInterval);
    bdmOptions.resetRecoveryInterval    = settings.getValue(resetRecoveryIntervalKey,   bdmOptions.resetRecoveryInterval);
 
-#if (TARGET==CFV1) || (TARGET==ARM)
+#if (TARGET==CFV1) || (TARGET==ARM) || (TARGET==ARM_SWD)
    int eepromSize = settings.getValue(eeepromSizeKey,             0);
    eeepromSizeChoice = findEeepromSizeIndex(eepromSize);
    if (eeepromSizeChoice == 0) {
@@ -532,7 +526,7 @@ void AdvancedPanel::saveSettings(AppSettings &settings) {
    settings.addValue(resetReleaseIntervalKey,      bdmOptions.resetReleaseInterval);
    settings.addValue(resetRecoveryIntervalKey,     bdmOptions.resetRecoveryInterval);
 
-#if (TARGET==CFV1) || (TARGET==ARM)
+#if (TARGET==CFV1) || (TARGET==ARM) || (TARGET==ARM_SWD)
    FlexNVMInfoPtr flexNVMInfo = currentDevice->getflexNVMInfo();
    if (flexNVMInfo == NULL) {
       return;

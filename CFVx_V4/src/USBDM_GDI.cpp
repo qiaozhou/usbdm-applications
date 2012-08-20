@@ -688,7 +688,7 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
          "=============================================\n"
          "  USBDM GDI Version %s\n"
          "=============================================\n",
-         VERSION_STRING);
+         USBDM_VERSION_STRING);
 
    print("DiGdiInitIO(pdcCommSetup = %p)\n", pdcCommSetup);
    if (pdcCommSetup != NULL) {

@@ -194,6 +194,8 @@ extern BDMState_t bdmState;
 
 extern USBDM_bdmInformation_t bdmInfo;
 
+extern USBDM_ExtendedOptions_t bdmOptions;
+
 #if defined __cplusplus
     }
 #endif

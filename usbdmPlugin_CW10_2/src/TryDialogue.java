@@ -26,6 +26,7 @@ public class TryDialogue extends ApplicationWindow {
     * Create contents of the application window.
     * @param parent
     */
+   @Override
    protected Control createContents(Composite parent) {
       Composite container = USBDMConnectionPanelTestFactory.createComposite(parent, SWT.NONE);
       return container;
@@ -97,7 +98,7 @@ public class TryDialogue extends ApplicationWindow {
     * Return the initial size of the window.
     */
    @Override
-   protected org.eclipse.swt.graphics.Point getInitialSize() {
+   protected Point getInitialSize() {
       return new Point(600, 400);
    }
 

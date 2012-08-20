@@ -73,7 +73,7 @@
 #include <stdint.h>
 
 //! USBDM Version this header describes
-#define USBDM_API_VERSION (40905)  // V4.9.5
+#define USBDM_API_VERSION (0x40905)  // V4.9.5
 
 #include "USBDM_ErrorMessages.h"
 
@@ -95,7 +95,7 @@ typedef enum  {
    BDM_CAP_RST          = (1<<10),  //!< Control & sensing of RESET
    BDM_CAP_PST          = (1<<11),  //!< Supports PST signal sensing
    BDM_CAP_CDC          = (1<<12),  //!< Supports CDC Serial over USB interface
-   BDM_CAP_ARM_SWD      = (1<<9),   //!< Supports ARM targets via SWD
+   BDM_CAP_ARM_SWD      = (1<<13),  //!< Supports ARM targets via SWD
 } HardwareCapabilities_t;
 
 //==========================================================================================
@@ -139,7 +139,8 @@ typedef enum {
    T_EZFLASH   = 6,       //!< EzPort Flash interface (SPI?)
    T_MC56F80xx = 7,       //!< JTAG target with MC56F80xx optimised subroutines
    T_ARM_JTAG  = 8,       //!< ARM target using JTAG
-   T_LAST      = T_ARM_JTAG,
+   T_ARM_SWD   = 9,       //!< ARM target using SWD
+   T_LAST      = T_ARM_SWD,
    T_OFF       = 0xFF,    //!< Turn off interface (no target)
 } TargetType_t;
 
@@ -290,22 +291,22 @@ typedef enum { /* type of reset action required */
 //!
 //! @note CCR is accessed through USBDM_ReadDReg()
 typedef enum {
-   HCS12_RegPC = 3,        //!< PC reg
-   HCS12_RegD  = 4,        //!< D reg
-   HCS12_RegX  = 5,        //!< X reg
-   HCS12_RegY  = 6,        //!< Y reg
-   HCS12_RegSP = 7,        //!< SP reg
-   HCS12_RegCCR   = 0x80,  //!< CCR reg - redirected to USBDM_ReadDReg()
+   HCS12_RegPC    = 3,    //!< PC reg
+   HCS12_RegD     = 4,    //!< D reg
+   HCS12_RegX     = 5,    //!< X reg
+   HCS12_RegY     = 6,    //!< Y reg
+   HCS12_RegSP    = 7,    //!< SP reg
+   HCS12_RegCCR   = 0x80, //!< CCR reg - redirected to USBDM_ReadDReg()
 } HCS12_Registers_t;
 
 //! regNo Parameter for USBDM_ReadReg() with HCS08 target
 //!
 typedef enum {
-   HCS08_RegPC  = 0xB, //!< PC  reg
-   HCS08_RegSP  = 0xF, //!< SP  reg
-   HCS08_RegHX  = 0xC, //!< HX  reg
-   HCS08_RegA   = 8,   //!< A   reg
-   HCS08_RegCCR = 9,   //!< CCR reg
+   HCS08_RegPC  = 0xB,  //!< PC  reg
+   HCS08_RegSP  = 0xF,  //!< SP  reg
+   HCS08_RegHX  = 0xC,  //!< HX  reg
+   HCS08_RegA   = 8,    //!< A   reg
+   HCS08_RegCCR = 9,    //!< CCR reg
 } HCS08_Registers_t;
 
 //! regNo Parameter for USBDM_ReadReg() with RS08 target
@@ -500,17 +501,33 @@ typedef enum {
    CFVx_CRegVBR       = 0x801, //!< Vector Base register
    CFVx_CRegSR        = 0x80E, //!< Status Register
    CFVx_CRegPC        = 0x80F, //!< Program Counter
-   CFV1_CRegFLASHBAR  = 0xC04, //!< Dlash Base register
+   CFV1_CRegFLASHBAR  = 0xC04, //!< Flash Base register
    CFV1_CRegRAMBAR    = 0xC05, //!< RAM Base register
    // May be others
 } CFVx_CRegisters_t;
 
-//! regNo Parameter for ARM_ReadCReg() with ARM target
+//! regNo Parameter for USBDM_ReadCReg() with SWD-ARM target
+//! The regNo is actually a AP bus address as follows:
+//!    A[31:24]  => DP-AP-SELECT[31:24] (AP # Select) \n
+//!    A[23:8]   => unused (0)
+//!    A[7:4]    => DP-AP-SELECT[7:4]   (Bank select within AP) \n
+//!    A[3:2]    => APACC[3:2]          (Register select within AP bank)
+//!    A[1:0]    => unused (0)
 //!
 typedef enum {
-   ARM_MDM_AP_Status  = 0x01000000,  //!<
-   ARM_MDM_AP_Control = 0x01000004,  //!<
-   ARM_MDM_AP_Id      = 0x010000FC,  //!<
+   // AP#0 - Common ARM AHB-AP
+   ARM_CRegAHB_AP_CSW      = 0x00000000U, // AHB-AP Control/Status Word register
+   ARM_CRegAHB_AP_TAR      = 0x00000004U, // AHB-AP Transfer Address register
+   ARM_CRegAHB_AP_DRW      = 0x0000000CU, // AHB-AP Data Read/Write register
+
+   ARM_CRegAHB_AP_CFG      = 0x000000F4U, // AHB-AP Config register
+   ARM_CRegAHB_AP_Base     = 0x000000F8U, // AHB-AP IDebug base address register
+   ARM_CRegAHB_AP_Id       = 0x000000FCU, // AHB-AP ID Register
+
+   // AP#1 - Kinetis MDM-AP registers
+   ARM_CRegMDM_AP_Status   = 0x01000000U,   //!< Status register
+   ARM_CRegMDM_AP_Control  = 0x01000004U,   //!< Control register
+   ARM_CRegMDM_AP_Ident    = 0x010000FCU,   //!< Identifier register (should read 0x001C_0000)
 } ARM_CRegisters_t;
 
 //=======================================================================
@@ -518,7 +535,6 @@ typedef enum {
 // regNo Parameter values for USBDM_ReadDReg()
 //
 //=======================================================================
-
 
 //! regNo Parameter for USBDM_ReadDReg() with HCS12 target [BD Space]
 //!
@@ -588,6 +604,18 @@ typedef enum {
    CFVx_DRegPBR2   = 0x1A, //!< PBR2
    CFVx_DRegPBR3   = 0x1B, //!< PBR3
 } CFVx_DRegisters_t;
+
+//! regNo Parameter for USBDM_ReadDReg() with SWD-ARM target
+//!
+typedef enum {
+   SWD_DRegIDCODE  = 0,    //!< IDCODE reg - read only
+   SWD_DRegSTATUS  = 1,    //!< STATUS reg - read only
+   SWD_DRegRESEND  = 2,    //!< RESEND reg - read only
+   SWD_DRegRDBUFF  = 3,    //!< RDBUFF reg - read only
+   SWD_DRegABORT   = 4,    //!< IDCODE reg - write only
+   SWD_DRegCONTROL = 5,    //!< IDCODE reg - write only
+   SWD_DRegSELECT  = 6,    //!< IDCODE reg - write only
+} SWD_DRegisters_t;
 
 //=======================================================================
 //
@@ -720,6 +748,13 @@ typedef enum {
    PIN_BKPT_NC        = (0<<PIN_BKPT_OFFS),  //!< No change
    PIN_BKPT_3STATE    = (1<<PIN_BKPT_OFFS),  //!< Set BKPT 3-state
    PIN_BKPT_LOW       = (2<<PIN_BKPT_OFFS),  //!< Set BKPT low
+
+   PIN_SWD_OFFS       = (10),
+   PIN_SWD            = (3<<PIN_SWD_OFFS),   //!< Mask for SWD values (PIN_SWD_LOW, PIN_SWD_HIGH & PIN_SWD_3STATE)
+   PIN_SWD_NC         = (0<<PIN_SWD_OFFS),   //!< No change
+   PIN_SWD_3STATE     = (1<<PIN_SWD_OFFS),   //!< Set SWD 3-state
+   PIN_SWD_LOW        = (2<<PIN_SWD_OFFS),   //!< Set SWD low
+   PIN_SWD_HIGH       = (3<<PIN_SWD_OFFS),   //!< Set SWD high
 
    PIN_NOCHANGE       = 0,    //!< No change to pins (used to get pin status)
    PIN_RELEASE        = -1,   //!< Release all pins (go to default for current target)

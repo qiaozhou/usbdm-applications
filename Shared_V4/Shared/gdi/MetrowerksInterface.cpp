@@ -69,7 +69,7 @@ const string processorKey(("com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.S12Z Deb
 const string processorKey(("com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.CF Debugger.processor"));
 #elif TARGET == CFVx
 const string processorKey(("com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.CF Debugger.processor"));
-#elif TARGET == ARM
+#elif (TARGET == ARM) || (TARGET == ARM_SWD)
 const string processorKey(("com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Debugger.processor"));
 #elif TARGET == MC56F80xx
 const string processorKey(("com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.DSC Debugger.processor"));

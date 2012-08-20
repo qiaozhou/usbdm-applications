@@ -1101,6 +1101,7 @@ USBDM_ErrorCode bdm_usb_transaction( unsigned int   txSize,
       // Expect exact data size
       print("bdm_usb_transaction() - cmd = %s, Expected %d; received %d\n",
             getCommandName(command), rxSize, tempRxSize);
+      rc = BDM_RC_UNEXPECTED_RESPONSE;
    }
    if (rc != BDM_RC_OK) {
       print("bdm_usb_transaction() - Failed, cmd = %s, rc = %s\n",

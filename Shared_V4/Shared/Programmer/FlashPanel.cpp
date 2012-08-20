@@ -64,7 +64,7 @@ Change History
 #include "Log.h"
 #include "FlashImage.h"
 #include "FlashImage.h"
-#if TARGET == ARM
+#if (TARGET==ARM) || (TARGET==ARM_SWD)
 #include "USBDM_ARM_API.h"
 #elif TARGET == MC56F80xx
 #include "USBDM_DSC_API.h"
@@ -76,7 +76,7 @@ Change History
 
 #if (TARGET == CFVx) || (TARGET == MC56F80xx)
 #define MASS_ERASE (MASS_ERASE_NEVER)
-#elif (TARGET == ARM) || (TARGET == CFV1) || (TARGET == HC12) || (TARGET == HCS08)
+#elif (TARGET==ARM) || (TARGET==ARM_SWD) || (TARGET == CFV1) || (TARGET == HC12) || (TARGET == HCS08)
 #define MASS_ERASE (MASS_ERASE_OPTIONAL)
 #else
 #define MASS_ERASE (MASS_ERASE_ALWAYS)
@@ -383,7 +383,7 @@ USBDM_ErrorCode lastRc = PROGRAMMING_RC_OK;
    }
 //   print("FlashPanel::autoDetectTargetDevice()\n");
 #else
-   if (USBDM_TargetConnectWithRetry() != BDM_RC_OK) {
+   if (USBDM_TargetConnectWithRetry((RetryMode)(retryAlways|retryWithReset)) != BDM_RC_OK) {
       USBDM_SetTargetType(T_OFF);
       return PROGRAMMING_RC_ERROR_BDM_CONNECT;
    }
@@ -450,7 +450,7 @@ USBDM_ErrorCode lastRc = PROGRAMMING_RC_OK;
          // Add new entry - if successfully probed
          flashRc = flashprogrammer->setDeviceData(**deviceIterator);
          if (flashRc == PROGRAMMING_RC_OK) {
-#if (TARGET == ARM)
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
             flashRc = flashprogrammer->readTargetChipId(&targetChipId, true);
 #else
             flashRc = flashprogrammer->readTargetChipId(&targetChipId, false);
@@ -775,7 +775,7 @@ bool FlashPanel::CreateControls() {
    trimValueStaticControl->SetToolTip(_("Calculated Trim value (8/9 bit)"));
    gridBagSizer->Add(trimValueStaticControl, wxGBPosition(1,2), wxGBSpan(1,1), wxALIGN_CENTER|wxLEFT|wxRIGHT, 5);
 
-#if (TARGET == HCS12) || (TARGET == CFVx) || (TARGET == ARM) || (TARGET == MC56F80xx)
+#if (TARGET == HCS12) || (TARGET == CFVx) || (TARGET == ARM) || (TARGET == ARM_SWD) || (TARGET == MC56F80xx)
    trimValueStaticControl->Enable(false);
 #endif
 
@@ -959,8 +959,11 @@ USBDM_ErrorCode FlashPanel::loadHexFile( wxString hexFilename, bool clearBuffer 
 //! If so then prompt to reload.
 //!
 USBDM_ErrorCode FlashPanel::checkFileChange(void) {
+   if (!fileLoaded) {
+      return PROGRAMMING_RC_OK;
+   }
    time_t currentFileTime = wxFileModificationTime(lastFileLoaded);
-   if (!fileLoaded || (currentFileTime == fileLoadTime)) {
+   if (currentFileTime == fileLoadTime) {
       return PROGRAMMING_RC_OK;
    }
    if (!autoFileLoad) {
@@ -1248,7 +1251,7 @@ USBDM_ErrorCode FlashPanel::programFlash(bool loadAndGo) {
       if (rc != BDM_RC_OK) {
          continue;
       }
-#if TARGET == ARM
+#if (TARGET == ARM)
       rc = ARM_Initialise();
       if (rc != BDM_RC_OK) {
          continue;
@@ -1380,12 +1383,12 @@ USBDM_ErrorCode FlashPanel::verifyFlash(void) {
       if (rc != BDM_RC_OK) {
          continue;
       }
-#if TARGET == ARM
+#if (TARGET == ARM)
       rc = ARM_Initialise();
       if (rc != BDM_RC_OK) {
          continue;
       }
-#elif TARGET == MC56F80xx
+#elif (TARGET == MC56F80xx)
       rc = DSC_Initialise();
       if (rc != BDM_RC_OK) {
          continue;

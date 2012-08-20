@@ -86,6 +86,8 @@ typedef enum  {
  BDM_JTAG_TOO_MANY_DEVICES                     = 49,    //!< JTAG chain is too long (or greater than 1!)
 
  BDM_RC_SECURED                                = 50,    //!< ARM Device is secured (& operation failed?)
+ BDM_RC_ARM_PARITY_ERROR                       = 51,    //!< ARM PARITY error
+ BDM_RC_ARM_FAULT_ERROR                        = 52,    //!< ARM FAULT response error
 
  // Used by programmer
  PROGRAMMING_RC_OK                             = 0,     //!<  0 Success

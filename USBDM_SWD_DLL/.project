@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Bootloader</name>
+	<name>USBDM_SWD_DLL_notused</name>
 	<comment></comment>
 	<projects>
 		<project>Shared_V4</project>
@@ -28,7 +28,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/wxWidgets/Release}</value>
+					<value>${workspace_loc:/wxWidgets/Debug}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.contents</key>

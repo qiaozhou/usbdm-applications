@@ -862,7 +862,7 @@ void bootloaderDialogue::CreateControls() {
    loadSourceButtonControl = new wxButton( itemDialog1, ID_FILE_LOAD_BUTTON, _("&Load Source File"), wxDefaultPosition, wxDefaultSize, 0 );
    itemBoxSizer3a->Add(loadSourceButtonControl, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-   autoSelectFileControl = new wxCheckBox( itemDialog1, ID_AUTO_SELECT_FILE_CHECKBOX, _("Auto update BDM firmware"), wxDefaultPosition, wxDefaultSize, 0 );
+   autoSelectFileControl = new wxCheckBox( itemDialog1, ID_AUTO_SELECT_FILE_CHECKBOX, _("Auto select BDM firmware"), wxDefaultPosition, wxDefaultSize, 0 );
    autoSelectFileControl->SetValue(autoUpdateBdm);
    itemBoxSizer3a->Add(autoSelectFileControl, 0, wxALIGN_LEFT|wxALL|wxALIGN_CENTER_VERTICAL, 5);
 
@@ -1093,6 +1093,7 @@ const char *firmwareFilepaths[] = {
      "FlashImages/Tower/USBDM_TWR_CFV1_V4.sx",            // "USBDM_TWR_CFV1",           // 20
      "FlashImages/Tower/USBDM_TWR_HCS08_V4.sx",           // "USBDM_TWR_HCS08",          // 21
      "FlashImages/Tower/USBDM_TWR_CFVx_V4.sx",            // "USBDM_TWR_CFVx",           // 22
+     "FlashImages/JS16/USBDM_SWD_SER_JS16CWJ_V4.sx",      // "USBDM_SWD_SER (S16CWJ)",   // 22
 };
 
 int bootloaderDialogue::doAutoUpdate() {

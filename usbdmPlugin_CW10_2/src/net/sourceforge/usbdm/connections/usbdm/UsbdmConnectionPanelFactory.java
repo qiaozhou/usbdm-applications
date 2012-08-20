@@ -7,7 +7,6 @@ import com.freescale.cdt.debug.cw.core.ui.publicintf.IPhysicalConnectionPanelFac
 import com.freescale.cdt.debug.cw.core.ui.publicintf.ISettingsListener;
 
 public class UsbdmConnectionPanelFactory 
-
 implements IPhysicalConnectionPanelFactory {
 
    public AbstractPhysicalConnectionPanel createComposite( ISettingsListener  listener,

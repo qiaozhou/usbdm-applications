@@ -35,11 +35,13 @@
 #define TARGET_TYPE T_CFVx
 #elif TARGET==ARM
 #define TARGET_TYPE T_ARM_JTAG
+#elif TARGET==ARM_SWD
+#define TARGET_TYPE T_ARM_SWD
 #else
 #error "Unhandled case"
 #endif
 
-#if (TARGET==CFV1) || (TARGET==CFVx)
+#if (TARGET==CFV1) || (TARGET==CFVx) || (TARGET==ARM_SWD)
 #define targetConnect() USBDM_Connect()
 #elif TARGET==ARM
 #define targetConnect() ARM_Connect()

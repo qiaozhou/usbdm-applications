@@ -13,42 +13,6 @@
 #define ARM_Cortex_M3_IDCODE (0x3BA00477)
 #define ARM_Cortex_M4_IDCODE (0x4BA00477)
 
-// ARM JTAG Commands
-#define ARM_JTAG_MASTER_IR_LENGTH   (4)     // IR length for commands below
-
-#define JTAG_IDCODE_LENGTH          (32)
-#define JTAG_IDCODE_COMMAND         (0x00)  // Device ID Code Register (IDCODE) reg
-#define JTAG_EZPORT_IDCODE_LENGTH   (32)
-#define JTAG_EZPORT_IDCODE_COMMAND  (0x01)  // EZPORT reg
-#define JTAG_DP_ABORT_SEL_LENGTH    (35)
-#define JTAG_DP_ABORT_SEL_COMMAND   (0x08)  // JTAG-DP Abort Register (ABORT)
-#define JTAG_DP_DPACC_SEL_LENGTH    (35)
-#define JTAG_DP_DPACC_SEL_COMMAND   (0x0A)  // JTAG-DP DP Access Register (DPACC)
-#define JTAG_DP_APACC_SEL_LENGTH    (35)
-#define JTAG_DP_APACC_SEL_COMMAND   (0x0B)  // JTAG-DP AP Access Register (APACC)
-#define JTAG_ARM_IDCODE_LENGTH      (32)
-#define JTAG_ARM_IDCODE_COMMAND     (0x0E)  // ARM Device ID Code Register (IDCODE)
-#define JTAG_BYPASS_LENGTH          (1)
-#define JTAG_BYPASS_COMMAND         (~0x00) // BYPASS reg
-
-// Responses from DP/AP access
-#define ACK_OK_FAULT       (0x02) //!< Access completed (either OK or FAULT)
-#define ACK_WAIT           (0x01) //!< Access incomplete - try again
-
-// Mask for DPACC
-// Note: As used in access i.e. A[3:2] as x[1:0]
-#define DP_IDR_REG         (0x0) //!< R access DP ID registers
-#define DP_CTRL_STAT_REG   (0x2) //!< R/W access DP STATUS/CONTROL registers
-#define DP_SELECT_REG      (0x4) //!< R/W access AP SELECT register (controls AP access address)
-#define DP_RDBUFF_REG      (0x6) //!< RAX/WI access to RDBUFF register
-
-#define DP_WRITE           (0x0)
-#define DP_READ            (0x1)
-
-#define DP_AP_DP_MASK      (0x8) //!< Mask used to select b/w DP & AP registers
-#define DP_DP_SELECT       (0x0)           //!< Select DP registers
-#define DP_AP_SELECT       (DP_AP_DP_MASK) //!< Select AP registers
-
 // DP CTRL/STAT register masks
 #define CSYSPWRUPACK       (1<<31)
 #define CSYSPWRUPREQ       (1<<30)
@@ -84,17 +48,6 @@
 // Access port select - There are two APs defined in the Kinetis chips
 #define MDM_AP (1) // Access MDM-AP    - Freescale specific AP
 #define AHB_AP (0) // Access AHB-AP    - Memory access (generic MEM-AP)
-
-// The following define addresses in the AP 'address space'
-// The address is divided between:
-// A[31:24] => DP-AP-SELECT[31:24] (AP Select)
-// A[7:4]   => DP-AP-SELECT[7:4]   (Bank select within AP)
-// A[3:2]   => APACC[3:2]          (Register select within bank)
-
-// AP#1 - MDM-AP
-#define MDM_AP_Status  (0x01000000UL) // MDM-AP Status Register address
-#define MDM_AP_Control (0x01000004UL) // MDM-AP Control Register address
-#define MDM_AP_Id      (0x010000FCUL) // MDM-AP ID Register address
 
 #define MDM_AP_Flash_Mass_Erase_Ack          (1<<0)
 #define MDM_AP_Flash_Ready                   (1<<1)
@@ -142,8 +95,8 @@
 
 // The following are addresses in the target memory space (Accessed through AHB-AP
 #define DHCSR (0xE000EDF0) // RW Debug Halting Control and Status Register
-#define DCRSR (0xE000EDF4) // WO Debug Core Register Selector Register
-#define DCRDR (0xE000EDF8) // RW Debug Core Register Data Register
+#define DCSR  (0xE000EDF4) // WO Debug Core Selector Register
+#define DCDR  (0xE000EDF8) // RW Debug Core Data Register
 #define DEMCR (0xE000EDFC) // RW Debug Exception and Monitor Control Register
 #define DFSR  (0xE000ED30) // Debug Fault Status Register
 #define AIRCR (0xE000ED0C) // Application Interrupt and Reset Control Register
@@ -161,9 +114,9 @@
 #define DHCSR_C_HALT       (1<<1)
 #define DHCSR_C_DEBUGEN    (1<<0)
 
-#define DCRSR_WRITE    (1<<16)
-#define DCRSR_READ     (0<<16)
-#define DCRSR_REGMASK  (0x7F)
+#define DCSR_WRITE         (1<<16)
+#define DCSR_READ          (0<<16)
+#define DCSR_REGMASK       (0x7F)
 
 #define DEMCR_TRCENA        (1<<24)
 #define DEMCR_VC_HARDERR    (1<<10)
@@ -192,6 +145,5 @@
 #define DBGMCU_CR          (0xE0042004)
 #define DBGMCU_IWDG_STOP   (0x00000100)
 #define DBGMCU_WWDG_STOP   (0x00000200)
-
 
 #endif /* ARM_DEFINITIONS_H_ */

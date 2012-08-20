@@ -93,6 +93,9 @@ static const char *const errorMessages[] = {
    /* 48 */ "ARM memory access error (illegal/readonly etc)",
    /* 49 */ "JTAG Chain contains too many devices (or open)",
    /* 50 */ "Device appears secured",
+   /* 51 */ "ARM Data Parity error",
+   /* 52 */ "ARM transaction Fault",
+   /* 53 */ "Unexpected/invalid response from BDM",
 };
 
 //! Error code returned by the various routines

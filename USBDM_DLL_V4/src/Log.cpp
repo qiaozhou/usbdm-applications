@@ -297,7 +297,7 @@
 
       print("%s - %s, Compiled on %s, %s.\n",
             description,
-            VERSION_STRING, __DATE__,__TIME__);
+            USBDM_VERSION_STRING, __DATE__,__TIME__);
 
       time(&time_now);
       print("Log file created on: %s"

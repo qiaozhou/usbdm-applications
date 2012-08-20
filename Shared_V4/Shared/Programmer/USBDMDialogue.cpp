@@ -48,11 +48,10 @@
 #include "ApplicationFiles.h"
 #include "Log.h"
 #include "AppSettings.h"
-#include "Version.h"
 #if TARGET == MC56F80xx
 #include "USBDM_DSC_API.h"
 #endif
-#if TARGET == ARM
+#if (TARGET==ARM) || (TARGET==ARM_SWD)
 #include "USBDM_ARM_API.h"
 #endif
 
@@ -257,7 +256,7 @@ bool USBDMDialogue::loadSettingsFileFromAppDir(string const &fileName) {
 
    if (!appSettings.loadFromAppDirFile(settingsFilename)) {
       print("USBDMDialogue::loadSettingsFileFromAppDir() - no settings file found\n");
-      return false;
+//      return false;
    }
    appSettings.printToLog();
 
@@ -301,7 +300,7 @@ bool USBDMDialogue::saveSettingsFile(string const &fileName) {
 
    saveSettings(appSettings);
 
-   if (!appSettings.writeToFile(settingsFilename, VERSION_STRING)) {
+   if (!appSettings.writeToFile(settingsFilename, USBDM_VERSION_STRING)) {
       return false;
    }
    return true;
@@ -320,7 +319,7 @@ bool USBDMDialogue::saveSettingsFileToAppDir(string const &fileName) {
 
    saveSettings(appSettings);
 
-   if (!appSettings.writeToAppDirFile(settingsFilename, VERSION_STRING)) {
+   if (!appSettings.writeToAppDirFile(settingsFilename, USBDM_VERSION_STRING)) {
       return false;
    }
    return true;
@@ -418,9 +417,11 @@ bool USBDMDialogue::Create( wxWindow* parent, long style) {
          completeCaption  += _(" - MC56F80xx ");
          break;
       case T_ARM_JTAG :
+      case T_ARM_SWD :
          completeCaption  += _(" - ARM ");
          break;
       default :
+         completeCaption += _(" - OPPS");
          errorSet = BDM_RC_ILLEGAL_PARAMS;
          return false;
          break;

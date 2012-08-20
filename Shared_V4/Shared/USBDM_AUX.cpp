@@ -52,7 +52,7 @@ using namespace std;
 #include "USBDM_API.h"
 #include "USBDM_AUX.h"
 #include "Names.h"
-#if TARGET == ARM
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
 #include "USBDM_ARM_API.h"
 #endif
 #include "Utils.h"
@@ -159,9 +159,14 @@ USBDM_ErrorCode USBDM_TargetConnectWithRetry(USBDMStatus_t *usbdmStatus, RetryMo
       return rc; // Fatal error
    }
 
+#if (TARGET == HCS08) || (TARGET == CFV1) || (TARGET == RS08)
+   if (retryMode & retryWithReset) {
+      USBDM_TargetReset((TargetMode_t)(RESET_DEFAULT|RESET_SPECIAL));
+      USBDM_TargetReset((TargetMode_t)(RESET_DEFAULT|RESET_SPECIAL));
+   }
+#endif
    //=========================================================
    //  Basic connect
-
    rc = USBDM_Connect();
    if (rc == BDM_RC_OK) {
       if (!extendedRetry)
@@ -503,6 +508,7 @@ USBDM_ErrorCode USBDM_FindBDMs(TargetType_t targetType, vector<BdmInformation> &
       case T_CFVx      : targetCapabilityMask =  BDM_CAP_CFVx;      break;
       case T_JTAG      : targetCapabilityMask =  BDM_CAP_JTAG;      break;
       case T_ARM_JTAG  : targetCapabilityMask =  BDM_CAP_ARM_JTAG;  break;
+      case T_ARM_SWD   : targetCapabilityMask =  BDM_CAP_ARM_SWD;   break;
       default :
          break;
    }
@@ -579,8 +585,8 @@ USBDM_ErrorCode USBDM_FindBDMs(TargetType_t targetType, vector<BdmInformation> &
  *
  */
 USBDM_ErrorCode USBDM_OpenBySerialNumber(TargetType_t targetType, const string &serialnumber) {
-	print("USBDM_OpenBySerialNumber(%d, %s)\n",
-	      targetType, serialnumber.c_str());
+	print("USBDM_OpenBySerialNumber(%s, %s)\n",
+	      getTargetTypeName(targetType), serialnumber.c_str());
 
 	// Enumerate all attached BDMs
 	vector<BdmInformation> bdmInformation;
@@ -623,6 +629,7 @@ USBDM_ErrorCode USBDM_OpenBySerialNumber(TargetType_t targetType, const string &
 
 USBDM_ErrorCode USBDM_OpenBySerialNumberWithRetry(TargetType_t targetType, const string &serialnumber) {
    USBDM_ErrorCode rc;
+   print("USBDM_OpenBySerialNumberWithRetry()\n");
    int getYesNo = wxNO;
    do {
       rc = USBDM_OpenBySerialNumber(targetType, serialnumber);
@@ -636,6 +643,7 @@ USBDM_ErrorCode USBDM_OpenBySerialNumberWithRetry(TargetType_t targetType, const
 USBDM_ErrorCode  USBDM_SetOptionsWithRetry(USBDM_ExtendedOptions_t *bdmOptions) {
    USBDM_ErrorCode rc;
 
+   print("USBDM_SetOptionsWithRetry()\n");
    ::bdmOptions = *bdmOptions;
    // Power cycle is done by GDI not BDM
    bdmOptions->cycleVddOnConnect = FALSE;

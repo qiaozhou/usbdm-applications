@@ -203,7 +203,7 @@ Coldfire+
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51AG96">
-         <clock registerAddress="0xFF8048" type="S08MCGV3" />
+         <clock registerAddress="0xFF8024" type="S08ICSV3" />
          <memoryRef ref="coldfire16K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
@@ -217,7 +217,7 @@ Coldfire+
          <flashProgramRef ref="CFV1-default-FlashProgram" />
       </device>
       <device family="CFV1" name="MCF51AG128">
-         <clock registerAddress="0xFF8048" type="S08MCGV3" />
+         <clock registerAddress="0xFF8048" type="S08ICSV3" />
          <memoryRef ref="coldfire16K_Ram" />
          <memory registerAddress="0xFF9820" type="flash" securityAddress="0x0400">
             <securityInfoRef ref="CFV1-default-security-off" />
@@ -531,7 +531,7 @@ Coldfire+
          <memoryRef ref="coldfire16K_FlexNVM" />
          <memoryRef ref="coldfirePlus32K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D05" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -542,7 +542,7 @@ Coldfire+
          <memoryRef ref="coldfire32K_FlexNVM" />
          <memoryRef ref="coldfirePlus64K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D05" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -553,7 +553,7 @@ Coldfire+
          <memoryRef ref="coldfire32K_FlexNVM" />
          <memoryRef ref="coldfirePlus128K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D05" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -564,7 +564,7 @@ Coldfire+
          <memoryRef ref="coldfire16K_FlexNVM" />
          <memoryRef ref="coldfirePlus32K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D04" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -575,7 +575,7 @@ Coldfire+
          <memoryRef ref="coldfire32K_FlexNVM" />
          <memoryRef ref="coldfirePlus64K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D04" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -586,7 +586,7 @@ Coldfire+
          <memoryRef ref="coldfire32K_FlexNVM" />
          <memoryRef ref="coldfirePlus128K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D04" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -597,7 +597,7 @@ Coldfire+
          <memoryRef ref="coldfire16K_FlexNVM" />
          <memoryRef ref="coldfirePlus32K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D03" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -608,7 +608,7 @@ Coldfire+
          <memoryRef ref="coldfire32K_FlexNVM" />
          <memoryRef ref="coldfirePlus64K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D03" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -619,7 +619,7 @@ Coldfire+
          <memoryRef ref="coldfire32K_FlexNVM" />
          <memoryRef ref="coldfirePlus128K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D03" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -630,7 +630,7 @@ Coldfire+
          <memoryRef ref="coldfire16K_FlexNVM" />
          <memoryRef ref="coldfirePlus32K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D06" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -641,7 +641,7 @@ Coldfire+
          <memoryRef ref="coldfire32K_FlexNVM" />
          <memoryRef ref="coldfirePlus64K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D06" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />
@@ -652,7 +652,7 @@ Coldfire+
          <memoryRef ref="coldfire32K_FlexNVM" />
          <memoryRef ref="coldfirePlus128K_Flash" />
          <soptAddress value="0xFF80C0" />
-         <sdidAddress value="0xFF9806" />
+         <sdidAddress value="0xFF80D0" />
          <sdid value="0x0D3F" />  <!-- Unprogrammed IFR ? -->
          <sdid value="0x0D06" />
          <tclScriptRef ref="CFV1Plus-default-Scripts" />

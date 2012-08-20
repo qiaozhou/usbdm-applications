@@ -690,7 +690,7 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
          "=============================================\n"
          "  USBDM GDI Version %s\n"
          "=============================================\n",
-         VERSION_STRING);
+         USBDM_VERSION_STRING);
 
    print("DiGdiInitIO(pdcCommSetup = %p)\n", pdcCommSetup);
    if (pdcCommSetup != NULL) {
@@ -708,7 +708,6 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
 #elif TARGET == MC56F80xx
    DSC_SetLogFile(getLogFileHandle());
 #endif
-
    // Open & Configure BDM
    bdmRc = initialiseBDMInterface();
    if ((bdmRc != BDM_RC_OK)&&(bdmRc != BDM_RC_UNKNOWN_DEVICE)) {
@@ -718,6 +717,7 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
    }
 #ifndef USE_MEE
    // Initial connect is treated differently
+   bdmRc = initialConnect();
    if (bdmRc != BDM_RC_OK) {
       DiReturnT rc = setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       print("DiGdiInitIO() - Failed - %s\n", currentErrorString);
@@ -1183,7 +1183,7 @@ int             organization;
 			      dnBufferItems);
          return setErrorState(DI_ERR_NOTSUPPORTED, "Unknown memory space");
    }
-   print("DiMemoryWrite(daTarget.dmsMemSpace=%X, dnBufferItems=%d, [0x%06X...0x%06X])\n",
+   print("DiMemoryWrite(daTarget.dmsMemSpace=%2X, dnBufferItems=%3d, [0x%06X...0x%06X])\n",
          daTarget.dmsMemSpace,
          dnBufferItems,
          address,
@@ -1416,14 +1416,14 @@ USBDM_ErrorCode rc = BDM_RC_OK;
       for (sub=0; sub < blockSize;) {
          uint32_t temp=0xFFFFFFFF;
          switch (memorySpace&MS_SIZE) {
-         case 1 :
+         case MS_Byte :
             temp = memoryReadWriteBuffer[sub++];
             break;
-         case 2 :
+         case MS_Word :
             temp  = memoryReadWriteBuffer[sub++]<<8;
             temp += memoryReadWriteBuffer[sub++];
             break;
-         case 4 :
+         case MS_Long :
             temp  = memoryReadWriteBuffer[sub++]<<24;
             temp += memoryReadWriteBuffer[sub++]<<16;
             temp += memoryReadWriteBuffer[sub++]<<8;
@@ -1898,9 +1898,9 @@ DiReturnT DiExecGetStatus ( pDiExitStatusT pdesExitStatus ) {
          return setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       }
    }
-   else
+   else {
       USBDM_GetBDMStatus(&USBDMStatus);
-
+   }
 //   pdesExitStatus->szReason = (DiStringT)getBDMStatusName(&USBDMStatus);
 
    if (USBDMStatus.connection_state == SPEED_NO_INFO) {
@@ -2492,7 +2492,12 @@ BOOL DllMain(HINSTANCE _hDLLInst,
 //         dll_initialize();
          break;
       case DLL_PROCESS_DETACH:
-//         dll_uninitialize();
+         print("DLL_PROCESS_DETACH - closeBDM()\n");
+         closeBDM();
+         print("DLL_PROCESS_DETACH - usbdm_gdi_dll_close()\n");
+         usbdm_gdi_dll_close();
+         print("DLL_PROCESS_DETACH - done\n");
+         //         dll_uninitialize();
          break;
       case DLL_THREAD_ATTACH:
 //         print("DLL_THREAD_ATTACH\n");

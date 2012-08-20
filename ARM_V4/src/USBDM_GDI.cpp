@@ -47,6 +47,7 @@ Change History
 #include <string>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
 #ifdef __unix__
 #include <dlfcn.h>
 #endif
@@ -91,8 +92,9 @@ Change History
 #include "MetrowerksInterface.h"
 
 // Nasty hack - records the first pc write to use as reset PC on future resets
-bool     pcWritten    = false;
-uint32_t pcResetValue = 0x000000;
+bool     pcWritten            = false;
+uint32_t pcResetValue         = 0x000000;
+bool     programmingSupported = false;
 
 bool usbdm_gdi_dll_open(void);
 bool usbdm_gdi_dll_close(void);
@@ -299,16 +301,18 @@ static DiReturnT closeBDM(void) {
 //!     DI_OK              => OK \n
 //!     DI_ERR_FATAL       => Error see \ref currentErrorString
 //!
-static DiReturnT initialiseBDMInterface(void) {
+static USBDM_ErrorCode initialiseBDMInterface(void) {
    print("initialiseBDMInterface()\n");
 
    USBDM_ErrorCode bdmRC;
+
+   programmingSupported = false;
 
    bdmRC = USBDM_Init();
    if (bdmRC != BDM_RC_OK) {
       USBDM_Exit();
       print("initialiseBDMInterface() - failed, reason = %s\n", USBDM_GetErrorString(bdmRC));
-      return setErrorState(DI_ERR_FATAL, bdmRC);
+      return bdmRC;
    }
    // Close any existing connection
    closeBDM();
@@ -347,12 +351,6 @@ static DiReturnT initialiseBDMInterface(void) {
       softConnectOptions    = (RetryMode)(retryAlways);
    }
    bdmOptions.cycleVddOnConnect = FALSE;
-#ifdef FLASH_PROGRAMMING
-   // Load description of device
-   if (bdmRC == BDM_RC_OK) {
-      bdmRC = getDeviceData(deviceOptions);
-   }
-#endif
 
    if (bdmRC == BDM_RC_OK) {
    	bdmRC = USBDM_OpenBySerialNumberWithRetry(targetType, preferredBdm);
@@ -378,17 +376,25 @@ static DiReturnT initialiseBDMInterface(void) {
    if (bdmRC != BDM_RC_OK) {
       USBDM_Exit();
       print("initialiseBDMInterface() - failed, reason = %s\n", USBDM_GetErrorString(bdmRC));
-      return setErrorState(DI_ERR_FATAL, bdmRC);
+      return bdmRC;
    }
 #ifdef FLASH_PROGRAMMING
-#if ((TARGET == RS08)||(TARGET == HCS08)||(TARGET == HC12))
+   // Set up flash programmer for target
+   if (flashProgrammer != NULL) {
+      delete flashProgrammer;
+   }
+   // Load description of device
+   bdmRC = getDeviceData(deviceOptions);
+   if (bdmRC != BDM_RC_OK) {
+      return bdmRC;
+   }
+#if (TARGET == RS08)
    DeviceData::EraseOptions eraseOptions = deviceOptions.getEraseOption();
    if ((eraseOptions == DeviceData::eraseSelective) || (eraseOptions == DeviceData::eraseAll)) {
       // These targets only support mass erase
       deviceOptions.setEraseOption(DeviceData::eraseMass);
    }
 #endif
-
    deviceOptions.setSecurity(SEC_INTELLIGENT);
    
    // Copy required options for Flash programming.
@@ -398,15 +404,12 @@ static DiReturnT initialiseBDMInterface(void) {
    USBDM_GetDefaultExtendedOptions(&bdmProgrammingOptions);
    bdmProgrammingOptions.targetVdd           = bdmOptions.targetVdd;
    bdmProgrammingOptions.interfaceFrequency  = bdmOptions.interfaceFrequency;
-
-   // Set up flash programmer for target
-   if (flashProgrammer != NULL)
-      delete flashProgrammer;
    flashProgrammer = new FlashProgrammer;
    flashProgrammer->setDeviceData(deviceOptions);
+   programmingSupported = true;
 #endif
 
-   return setErrorState(DI_OK);
+   return bdmRC;
 }
 
 //===================================================================
@@ -681,13 +684,13 @@ USBDM_ErrorCode initialConnect(void) {
 //!
 USBDM_GDI_API
 DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
-   DiReturnT rc;
+   USBDM_ErrorCode bdmRc;
 
    mtwksDisplayLine("\n"
          "=============================================\n"
          "  USBDM GDI Version %s\n"
          "=============================================\n",
-         VERSION_STRING);
+         USBDM_VERSION_STRING);
 
    print("DiGdiInitIO(pdcCommSetup = %p)\n", pdcCommSetup);
    if (pdcCommSetup != NULL) {
@@ -705,16 +708,16 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
 #elif TARGET == MC56F80xx
    DSC_SetLogFile(getLogFileHandle());
 #endif
-
    // Open & Configure BDM
-   rc = initialiseBDMInterface();
-   if (rc != DI_OK) {
+   bdmRc = initialiseBDMInterface();
+   if ((bdmRc != BDM_RC_OK)&&(bdmRc != BDM_RC_UNKNOWN_DEVICE)) {
+      DiReturnT rc = setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       print("DiGdiInitIO() - Failed - %s\n", currentErrorString);
       return rc;
    }
 #ifndef USE_MEE
    // Initial connect is treated differently
-   USBDM_ErrorCode bdmRc = initialConnect();
+   bdmRc = initialConnect();
    if (bdmRc != BDM_RC_OK) {
       DiReturnT rc = setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       print("DiGdiInitIO() - Failed - %s\n", currentErrorString);
@@ -897,16 +900,18 @@ void DiErrorGetMessage ( DiConstStringT *pszErrorMsg ) {
 
    *pszErrorMsg = getGDIErrorMessage();
 
-   if (pszErrorMsg == NULL)
+   if (pszErrorMsg == NULL) {
       print("DiErrorGetMessage() => not set\n");
-   else
+   }
+   else {
       print("DiErrorGetMessage() => %s\n", *pszErrorMsg);
-
+   }
    mtwksDisplayLine("DiErrorGetMessage() => %s\n", getGDIErrorMessage());
 
    // Clear all errors apart from fatal
-   if (currentError != DI_ERR_FATAL)
+   if (currentError != DI_ERR_FATAL) {
       setErrorState(DI_OK);
+   }
 }
 
 //! 2.2.4.1 Configure Target Memory
@@ -1067,6 +1072,9 @@ DiReturnT DiMemoryDownload ( DiBoolT            fUseAuxiliaryPath,
 
    CHECK_ERROR_STATE();
 
+   if (!programmingSupported) {
+      return setErrorState(DI_ERR_NOTSUPPORTED);
+   }
    if ((ddfDownloadFormat.dafAbsFileFormat & (DI_ABSF_FILENAME|DI_ABSF_BINARY)) == 0) {
       print("DiMemoryDownload() - unsupported format %X\n",
             ddfDownloadFormat.dafAbsFileFormat);
@@ -1147,24 +1155,24 @@ DiReturnT DiMemoryWrite ( DiAddrT       daTarget,
 uint32_t        address      = (U32c)daTarget;   // Load address
 MemorySpace_t   memorySpace;                     // Memory space & size
 uint32_t        endAddress;                      // End address
+int             organization;
 
    CHECK_ERROR_STATE();
 
-   int organization;
    switch(daTarget.dmsMemSpace) {
       case 1 :
          memorySpace  = MS_Byte;
-         organization = BYTE_ADDRESS|BYTE_DISPLAY;
+         organization = BYTE_DISPLAY|BYTE_ADDRESS;
          endAddress   = address + dnBufferItems - 1;
          break;
       case 2 :
          memorySpace  = MS_Word;
-         organization = BYTE_ADDRESS|WORD_DISPLAY;
+         organization = WORD_DISPLAY|BYTE_ADDRESS;
          endAddress   = address + 2*dnBufferItems - 1;
          break;
       case 4 :
          memorySpace  = MS_Long;
-         organization = BYTE_ADDRESS|LONG_DISPLAY;
+         organization = LONG_DISPLAY|BYTE_ADDRESS;
          endAddress   = address + 4*dnBufferItems - 1;
          break;
       default :
@@ -1289,17 +1297,17 @@ uint32_t        numBytes;
    switch(daTarget.dmsMemSpace) {
       case 1 : // byte
          memorySpace  = MS_Byte;
-         organization = BYTE_ADDRESS|BYTE_DISPLAY;
+         organization = BYTE_DISPLAY|BYTE_ADDRESS;
          numBytes     = dnBufferItems;
          break;
       case 2 : // word
          memorySpace  = MS_Word;
-         organization = BYTE_ADDRESS|WORD_DISPLAY;
+         organization = WORD_DISPLAY|BYTE_ADDRESS;
          numBytes     = 2*dnBufferItems;
          break;
       case 4 : // Long
          memorySpace  = MS_Long;
-         organization = BYTE_ADDRESS|LONG_DISPLAY;
+         organization = LONG_DISPLAY|BYTE_ADDRESS;
          numBytes     = 4*dnBufferItems;
          break;
       default :

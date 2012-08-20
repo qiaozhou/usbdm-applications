@@ -119,7 +119,9 @@ typedef enum  {
   BDM_DBG_MEASURE_VDD      = 13, //!< - Measure Target Vdd supply
   BDM_DBG_RS08TRIM         = 14, //!< - Calculate RS08 clock trim value
   BDM_DBG_TESTWAITS        = 15, //!< - Tests the software counting delays used for BDM communication. (locks up BDM!)
-  BDM_DBG_TESTALTSPEED     = 16, //!< - Test bdmHC12_alt_speed_detect()
+  BDM_DBG_TESTALTSPEED     = 16, //!< - Test bdmHC12_alt_speed_detect{}
+  BDM_DBG_TESTBDMTX        = 17, //!< - Test various BDM tx routines with dummy data
+  BDM_DBG_SWD              = 18, //!< - SWD tests
 } DebugSubCommands;
 
 //! Commands for BDM when in ICP mode

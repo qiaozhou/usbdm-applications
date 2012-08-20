@@ -385,6 +385,7 @@ USBDM_ErrorCode FlashProgrammer::resetAndConnectTarget(void) {
    if (bdmRc != BDM_RC_OK)
       bdmRc = USBDM_TargetReset((TargetMode_t)(RESET_SPECIAL|RESET_HARDWARE));
 #else
+   USBDM_TargetReset((TargetMode_t)(RESET_SPECIAL|RESET_DEFAULT));
    bdmRc = USBDM_TargetReset((TargetMode_t)(RESET_SPECIAL|RESET_DEFAULT));
    if (bdmRc != BDM_RC_OK)
       bdmRc = USBDM_TargetReset((TargetMode_t)(RESET_SPECIAL|RESET_HARDWARE));

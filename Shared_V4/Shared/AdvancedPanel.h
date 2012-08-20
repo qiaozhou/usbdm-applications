@@ -109,7 +109,7 @@ private:
    NumberTextEditCtrl*           resetDurationTextControl;
    NumberTextEditCtrl*           resetReleaseIntervalTextControl;
    NumberTextEditCtrl*           resetRecoveryIntervalTextControl;
-#if (TARGET==CFV1) || (TARGET==ARM)
+#if (TARGET==CFV1) || (TARGET==ARM) || (TARGET==ARM_SWD)
    wxChoice*                     eeepromSizeChoiceControl;
    wxChoice*                     flexNvmPartitionChoiceControl;
    wxStaticText*                 flexNvmDescriptionStaticControl;

@@ -456,28 +456,32 @@ USBDM_ErrorCode FlashProgrammer::resetAndConnectTarget(void) {
 USBDM_ErrorCode FlashProgrammer::readTargetChipId(uint32_t *targetSDID, bool doInit) {
    uint8_t SDIDValue[4];
 
-   print("FlashProgrammer::readTargetSDID()\n");
-
    if (parameters.getTargetName().empty()) {
-      print("FlashProgrammer::readTargetSDID() - target name not set\n");
+      print("FlashProgrammer::readTargetSDID(0x%06X) - target name not set\n", parameters.getSDIDAddress());
       return PROGRAMMING_RC_ERROR_INTERNAL_CHECK_FAILED;
    }
    *targetSDID = 0x0000;
 
    if (doInit) {
       USBDM_ErrorCode rc = resetAndConnectTarget();
-      if (rc != PROGRAMMING_RC_OK)
+      if (rc != PROGRAMMING_RC_OK) {
+         print("FlashProgrammer::readTargetSDID(0x%06X) - failed resetAndConnectTarget()\n", parameters.getSDIDAddress());
          return rc;
+      }
    }
    if (ReadMemory(2, 2, parameters.getSDIDAddress(), SDIDValue) !=  BDM_RC_OK) {
+      print("FlashProgrammer::readTargetSDID(0x%06X) - failed ReadMemory()\n", parameters.getSDIDAddress());
       return PROGRAMMING_RC_ERROR_BDM_READ;
    }
    *targetSDID = getData16Target(SDIDValue);
 
    // Do a sanity check on SDID (may get these values if secured w/o any error being signalled)
    if ((*targetSDID == 0xFFFF) || (*targetSDID == 0x0000)) {
+      print("FlashProgrammer::readTargetSDID(0x%06X) - value invalid (0x%04X)\n", parameters.getSDIDAddress(), *targetSDID);
       return PROGRAMMING_RC_ERROR_BDM_READ;
    }
+   print("FlashProgrammer::readTargetSDID(0x%06X) => 0x%04X\n", parameters.getSDIDAddress(), *targetSDID);
+
    return PROGRAMMING_RC_OK;
 }
 

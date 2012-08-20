@@ -4,18 +4,18 @@
 <cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.exe.debug.645403431.56910681">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.exe.debug.645403431.56910681" moduleId="org.eclipse.cdt.core.settings" name="ARM_DLL - Debug">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.exe.debug.645403431.56910681" moduleId="org.eclipse.cdt.core.settings" name="SWD_DLL - Debug">
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/HCS08_V4"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/CFVx_V4"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Kinetis_V4"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/USBDM_ARM_DLL"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/USBDM_SWD_DLL"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/HCS08_V4/GDI - Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/CFVx_V4/GDI - Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Kinetis_V4/GDI - Debug"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/USBDM_ARM_DLL/ARM_DLL - Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="usbdm-arm-debug.4"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/USBDM_SWD_DLL/ARM_DLL - Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="usbdm-swd-debug.4"/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -26,7 +26,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="dll" artifactName="usbdm-arm-debug.4" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.config.gnu.mingw.exe.debug.645403431.56910681" name="ARM_DLL - Debug" parent="cdt.managedbuild.config.gnu.mingw.exe.debug" postannouncebuildStep="" postbuildStep="" preannouncebuildStep="" prebuildStep="">
+				<configuration artifactExtension="dll" artifactName="usbdm-swd-debug.4" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.config.gnu.mingw.exe.debug.645403431.56910681" name="SWD_DLL - Debug" parent="cdt.managedbuild.config.gnu.mingw.exe.debug" postannouncebuildStep="" postbuildStep="" preannouncebuildStep="" prebuildStep="">
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.645403431.56910681." name="/" resourcePath="">
 						<toolChain errorParsers="" id="cdt.managedbuild.toolchain.gnu.mingw.exe.debug.498495097" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.debug">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.1206354846" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
@@ -110,17 +110,17 @@
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.exe.release.87854040.788763768">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.exe.release.87854040.788763768" moduleId="org.eclipse.cdt.core.settings" name="ARM_DLL - Release">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.exe.release.87854040.788763768" moduleId="org.eclipse.cdt.core.settings" name="SWD_DLL - Release">
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/CFVx_V4"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Kinetis_V4"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/USBDM_ARM_DLL"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/USBDM_SWD_DLL"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/CFVx_V4/GDI - Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Kinetis_V4/GDI - Release"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/USBDM_ARM_DLL/ARM_DLL - Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/USBDM_SWD_DLL/ARM_DLL - Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="ARM_Programmer"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="usbdm-arm.4"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="usbdm-swd.4"/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -131,7 +131,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="dll" artifactName="usbdm-arm.4" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.config.gnu.mingw.exe.release.87854040.788763768" name="ARM_DLL - Release" parent="cdt.managedbuild.config.gnu.mingw.exe.release" postannouncebuildStep="" postbuildStep="" preannouncebuildStep="" prebuildStep="">
+				<configuration artifactExtension="dll" artifactName="usbdm-swd.4" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.config.gnu.mingw.exe.release.87854040.788763768" name="SWD_DLL - Release" parent="cdt.managedbuild.config.gnu.mingw.exe.release" postannouncebuildStep="" postbuildStep="" preannouncebuildStep="" prebuildStep="">
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.release.87854040.788763768." name="/" resourcePath="">
 						<toolChain errorParsers="" id="cdt.managedbuild.toolchain.gnu.mingw.exe.release.2100789354" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.release">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.release.33590663" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.release"/>

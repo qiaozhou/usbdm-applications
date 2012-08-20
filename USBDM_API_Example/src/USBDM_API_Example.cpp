@@ -19,7 +19,7 @@
 #include "USBDM_API.h"
 
 // Required API
-#define USBDM_API_VERSION_REQUIRED (40905) // Need V4.9.5
+#define USBDM_API_VERSION_REQUIRED (0x40905) // Need V4.9.5
 
 // Static check that correct API (header file) is being used
 #if (USBDM_API_VERSION < USBDM_API_VERSION_REQUIRED)
@@ -143,15 +143,21 @@ void dump(uint8_t *buffer, uint32_t address, unsigned size) {
 }
 
 int main(void) {
-   unsigned deviceCount;
+const int deviceNumber = 0; // USBDM device to open, devices enumerated from 0...
 
    CHECK(USBDM_Init());
+   unsigned deviceCount;
    CHECK(USBDM_FindDevices(&deviceCount));
-   CHECK(USBDM_Open(0));
+   // May check deviceCount here if desired or let USBDM_Open() fail
+   CHECK(USBDM_Open(deviceNumber));
+
+   USBDM_bdmInformation_t bdmInformation = {sizeof(bdmInformation)};
+   USBDM_GetBdmInformation(&bdmInformation);
+   CHECK((bdmInformation.BDMsoftwareVersion < 40905)?BDM_RC_WRONG_BDM_REVISION:BDM_RC_OK);
 
 #if 1
    // Change any options here (>V4.9.4)
-   USBDM_ExtendedOptions_t options = {sizeof(USBDM_ExtendedOptions_t), T_CFVx};
+   USBDM_ExtendedOptions_t options = {sizeof(USBDM_ExtendedOptions_t), T_CFV1};
    CHECK(USBDM_GetDefaultExtendedOptions(&options));
    options.resetDuration         = 1000;
    options.resetReleaseInterval  = 500;
@@ -163,8 +169,8 @@ int main(void) {
 #else
    CHECK(USBDM_SetTargetVdd(BDM_TARGET_VDD_3V3));
 #endif
-   CHECK(USBDM_SetTargetType(T_CFVx));
-   CHECK(USBDM_TargetReset((TargetMode_t)(RESET_HARDWARE|RESET_SPECIAL)));
+   CHECK(USBDM_SetTargetType(T_CFV1));
+   CHECK(USBDM_TargetReset((TargetMode_t)(RESET_DEFAULT|RESET_SPECIAL)));
    CHECK(USBDM_Connect());
    memset(buffer, 0xFF, sizeof(buffer));
    for (unsigned sub=0; sub<sizeof(memRanges)/sizeof(memRanges[0]); sub++) {

@@ -4,7 +4,7 @@
 //#define VendorID  (0x16D0)
 //#define ProductID (0x0567)
 
-//! Vendor ID for USBDML
+//! Vendor ID for USBDM
 #define USBDM_VID    (0x16D0)
 //! Product ID for TBDML
 #define USBDM_PID    (0x0567)

@@ -36,7 +36,8 @@ typedef union {
 #define JTAG      5     //!< - JTAG target - TAP is set to \b RUN-TEST/IDLE
 #define EZFLASH   6     //!< - EzPort Flash interface (SPI?)
 #define MC56F80xx 7     //!< - JTAG target with MC56F80xx optimised subroutines
-#define ARM       8     //!< - Kinetis - not implemented
+#define ARM       8     //!< - Kinetis - JTAG
+#define ARM_SWD   9     //!< - Kinetis - SWD
 #define OFF       0xFF  //!< - Turn off interface (no target)
 
 #if TARGET == MC56F80xx

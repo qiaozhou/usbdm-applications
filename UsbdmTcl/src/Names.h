@@ -30,6 +30,8 @@ char const *getHCS12RegName( unsigned int regAddr );
 char const *getHCS08RegName( unsigned int regAddr );
 char const *getRS08RegName( unsigned int regAddr );
 char const *getRegName( unsigned int targetType, unsigned int regAddr );
+char const *getSWDDebugRegName( unsigned int regAddr );
+char const *getARMControlRegName( unsigned int regAddr );
 
 char const *getHCS12_BDMSTS_Name( unsigned int BDMSTS);
 char const *getHCS08_BDCSCR_Name( unsigned int BDCSCR);

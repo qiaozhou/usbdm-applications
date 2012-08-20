@@ -456,7 +456,7 @@ void DeviceDataBase::loadDeviceData(void) {
    #define configFilename "hcs12_devices.xml"
 #elif TARGET == CFVx
    #define configFilename "cfvx_devices.xml"
-#elif TARGET == ARM
+#elif (TARGET == ARM) || (TARGET == ARM_SWD)
    #define configFilename "arm_devices.xml"
 #elif TARGET == MC56F80xx
    #define configFilename "dsc_devices.xml"
@@ -515,7 +515,7 @@ void DeviceDataBase::listDevices() {
                continue;
             }
          }
-#if (TARGET == ARM) || (TARGET == CFVx)
+#if (TARGET == ARM) || (TARGET == CFVx) || (TARGET==ARM_SWD)
          if (lineCount == 0) {
             print("\n"
                   "#                     SDID                                                \n"

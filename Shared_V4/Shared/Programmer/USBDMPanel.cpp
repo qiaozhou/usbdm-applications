@@ -53,7 +53,7 @@
 #include "USBDM_AUX.h"
 #include "ApplicationFiles.h"
 #include "Log.h"
-#if TARGET == ARM
+#if (TARGET == ARM) || (TARGET==ARM_SWD)
 #include "USBDM_ARM_API.h"
 #endif
 
@@ -258,8 +258,10 @@ USBDM_ErrorCode USBDMPanel::CreateControls(void) {
 //   print("USBDMPanel::CreateControls()\n");
 
    // Determine dialogue features
+   targetProperties = HAS_NONE;
    switch(targetType) {
       case T_ARM_JTAG :
+      case T_ARM_SWD :
          targetProperties = HAS_SELECT_SPEED;
          break;
       case T_HC12 :
@@ -391,17 +393,27 @@ USBDM_ErrorCode USBDMPanel::CreateControls(void) {
       wxStaticText* itemStaticText22 = new wxStaticText( panel, wxID_STATIC, _("Connection &Speed"), wxDefaultPosition, wxDefaultSize, 0 );
       itemBoxSizer->Add(itemStaticText22, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
+      int maxSpeed;
+      switch(targetType) {
+      case T_ARM_JTAG : maxSpeed =  6000; break;
+      case T_ARM_SWD  : maxSpeed = 12000; break;
+      case T_CFVx     : maxSpeed = 12000; break;
+      default         : maxSpeed = 12000; break;
+      }
       wxArrayString connectionSpeedControlStrings;
       for (int sub=0; CFVx_Speeds[sub].value != 0; sub++) {
-         if ((targetType != T_CFVx) && (CFVx_Speeds[sub].value >= 12000))
-            break;
+         if (CFVx_Speeds[sub].value > maxSpeed) {
+            continue;
+         }
          connectionSpeedControlStrings.Add(CFVx_Speeds[sub].name);
       }
       connectionSpeedControl = new wxChoice( panel, ID_SPEED_SELECT_CHOICE, wxDefaultPosition, wxSize(100, -1), connectionSpeedControlStrings, 0 );
       itemBoxSizer->Add(connectionSpeedControl, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-      wxStaticText* itemStaticText24 = new wxStaticText( panel, ID_SPEED_REMINDER_STATIC, _("Speed < Target Clock Frequency/5"), wxDefaultPosition, wxDefaultSize, 0 );
-      staticBoxSizer->Add(itemStaticText24, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+      if (targetType == T_CFVx) {
+         wxStaticText* staticText = new wxStaticText( panel, ID_SPEED_REMINDER_STATIC, _("Speed < Target Clock Frequency/5"), wxDefaultPosition, wxDefaultSize, 0 );
+         staticBoxSizer->Add(staticText, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+      }
    }
 #ifdef GDI
    if (targetProperties & HAS_MASK_INTERRUPTS) {

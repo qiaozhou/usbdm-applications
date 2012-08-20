@@ -690,7 +690,7 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
          "=============================================\n"
          "  USBDM GDI Version %s\n"
          "=============================================\n",
-         VERSION_STRING);
+         USBDM_VERSION_STRING);
 
    print("DiGdiInitIO(pdcCommSetup = %p)\n", pdcCommSetup);
    if (pdcCommSetup != NULL) {
@@ -708,7 +708,6 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
 #elif TARGET == MC56F80xx
    DSC_SetLogFile(getLogFileHandle());
 #endif
-
    // Open & Configure BDM
    bdmRc = initialiseBDMInterface();
    if ((bdmRc != BDM_RC_OK)&&(bdmRc != BDM_RC_UNKNOWN_DEVICE)) {
@@ -718,6 +717,7 @@ DiReturnT DiGdiInitIO( pDiCommSetupT pdcCommSetup ) {
    }
 #ifndef USE_MEE
    // Initial connect is treated differently
+   bdmRc = initialConnect();
    if (bdmRc != BDM_RC_OK) {
       DiReturnT rc = setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       print("DiGdiInitIO() - Failed - %s\n", currentErrorString);
@@ -1943,9 +1943,9 @@ DiReturnT DiExecGetStatus ( pDiExitStatusT pdesExitStatus ) {
          return setErrorState(DI_ERR_COMMUNICATION, bdmRc);
       }
    }
-   else
+   else {
       USBDM_GetBDMStatus(&USBDMStatus);
-
+   }
 //   pdesExitStatus->szReason = (DiStringT)getBDMStatusName(&USBDMStatus);
 
    if (USBDMStatus.connection_state == SPEED_NO_INFO) {

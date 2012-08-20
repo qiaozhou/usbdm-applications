@@ -64,6 +64,42 @@ typedef enum {TARGET_UNKNOWN, TARGET_KINETIS, TARGET_STM32F10x} TargetSubTypesT;
 #define DATA32(x) (((x)>>24U)&0xFFUL),(((x)>>16)&0xFFUL),(((x)>>8)&0xFFUL),((x)&0xFFUL)
 #define JTAG16(x) (((x)>>8)&0xFF),((x)&0xFF)
 
+// ARM JTAG Commands
+#define ARM_JTAG_MASTER_IR_LENGTH   (4)     // IR length for commands below
+
+#define JTAG_IDCODE_LENGTH          (32)
+#define JTAG_IDCODE_COMMAND         (0x00)  // Device ID Code Register (IDCODE) reg
+#define JTAG_EZPORT_IDCODE_LENGTH   (32)
+#define JTAG_EZPORT_IDCODE_COMMAND  (0x01)  // EZPORT reg
+#define JTAG_DP_ABORT_SEL_LENGTH    (35)
+#define JTAG_DP_ABORT_SEL_COMMAND   (0x08)  // JTAG-DP Abort Register (ABORT)
+#define JTAG_DP_DPACC_SEL_LENGTH    (35)
+#define JTAG_DP_DPACC_SEL_COMMAND   (0x0A)  // JTAG-DP DP Access Register (DPACC)
+#define JTAG_DP_APACC_SEL_LENGTH    (35)
+#define JTAG_DP_APACC_SEL_COMMAND   (0x0B)  // JTAG-DP AP Access Register (APACC)
+#define JTAG_ARM_IDCODE_LENGTH      (32)
+#define JTAG_ARM_IDCODE_COMMAND     (0x0E)  // ARM Device ID Code Register (IDCODE)
+#define JTAG_BYPASS_LENGTH          (1)
+#define JTAG_BYPASS_COMMAND         (~0x00) // BYPASS reg
+
+// Responses from DP/AP access
+#define ACK_OK_FAULT       (0x02) //!< Access completed (either OK or FAULT)
+#define ACK_WAIT           (0x01) //!< Access incomplete - try again
+
+// Mask for DPACC
+// Note: As used in access i.e. A[3:2] as x[1:0]
+#define DP_IDR_REG         (0x0) //!< R access DP ID registers
+#define DP_CTRL_STAT_REG   (0x2) //!< R/W access DP STATUS/CONTROL registers
+#define DP_SELECT_REG      (0x4) //!< R/W access AP SELECT register (controls AP access address)
+#define DP_RDBUFF_REG      (0x6) //!< RAX/WI access to RDBUFF register
+
+#define DP_WRITE           (0x0)
+#define DP_READ            (0x1)
+
+#define DP_AP_DP_MASK      (0x8) //!< Mask used to select b/w DP & AP registers
+#define DP_DP_SELECT       (0x0)           //!< Select DP registers
+#define DP_AP_SELECT       (DP_AP_DP_MASK) //!< Select AP registers
+
 static bool debugJTAG = false;
 
 #define JTAG_READ_MEMORY_HEADER_SIZE  (10) // Overhead used by readMemory()
@@ -482,16 +518,16 @@ static USBDM_ErrorCode readAP(uint32_t dapAddress, uint32_t *dataIn) {
 //! Information describing the debug Interface
 static struct DebugInformation {
    // Details from AHB-AP
-   uint8_t               componentClass;              //!< Component class
-   uint32_t              debugBaseaddr;               //!< Base address of Debug ROM
+   uint8_t          componentClass;              //!< Component class
+   uint32_t         debugBaseaddr;               //!< Base address of Debug ROM
    unsigned         size4Kb;                     //!< Size of Debug ROM
    TargetSubTypesT  subType;                     //!< Identifies sub-type
    // Memory interface capabilities
    bool             memAccessLimitsChecked;      //!< Have they been checked?
    bool             byteAccessSupported;         //!< Byte/Halfword access supported?
    bool             bigEndian;                   //!< Memory is bigEndian?
-   uint32_t              memAPControlStatusDefault;   //!< Default value to use when writing to APControlStatus Register
-   uint32_t              memAPConfig;                 //!< Memory CFG register contents
+   uint32_t         memAPControlStatusDefault;   //!< Default value to use when writing to APControlStatus Register
+   uint32_t         memAPConfig;                 //!< Memory CFG register contents
 } debugInformation = {
       0x0,
       0x0,
@@ -543,7 +579,6 @@ static bool byteAccessSupported(void) {
 //! @return error code
 //!
 static USBDM_ErrorCode readMemoryByte(uint32_t address, uint8_t *data) {
-
    USBDM_ErrorCode rc;
    uint8_t   inBuffer[8];
 
@@ -614,7 +649,6 @@ static USBDM_ErrorCode readMemoryByte(uint32_t address, uint8_t *data) {
 //!
 static USBDM_ErrorCode readMemoryHalfword(uint32_t address, uint16_t *data) {
    USBDM_ErrorCode rc;
-
    uint8_t   inBuffer[8];
 
 //   print("     readMemoryHalfword(a=0x%08X)\n", address);
@@ -651,16 +685,20 @@ static USBDM_ErrorCode readMemoryHalfword(uint32_t address, uint16_t *data) {
          return rc;
       }
       if (debugInformation.bigEndian) {
-         if (address&0x02)
+         if (address&0x02) {
             *data = (inBuffer[2]<<8)+inBuffer[3];
-         else
+         }
+         else {
             *data = (inBuffer[0]<<8)+inBuffer[1];
+         }
       }
       else { // LittleEndian
-         if (address&0x02)
+         if (address&0x02) {
             *data = (inBuffer[0]<<8)+inBuffer[1];
-         else
+         }
+         else {
             *data = (inBuffer[2]<<8)+inBuffer[3];
+         }
       }
 //      print("     readMemoryHalfword-HW(): 0x%04X\n", *data);
    }
@@ -671,22 +709,26 @@ static USBDM_ErrorCode readMemoryHalfword(uint32_t address, uint16_t *data) {
 //!
 //! @note Breaks transfers on 2**10 boundary as TAR may not increment across this boundary
 //!
-//! @param address - 32-bit starting address
-//! @param data    - ptr to buffer for bytes
+//! @param address  - 32-bit starting address (aligned)
+//! @param numWords - number of words to transfer
+//! @param data     - pointer to buffer for bytes
 //!
 //! @return error code
 //!
 static USBDM_ErrorCode readMemoryWord(uint32_t address, unsigned numWords, uint32_t *data) {
    USBDM_ErrorCode rc;
-//   if (address != 0xE000EDF0)
+//   if (address != 0xE000EDF0) {
 //      print("     readMemoryWord(a=0x%08X-0x%08X,nW=0x%X,nB=0x%X)\n", address, address+(4*numWords)-1, numWords, 4*numWords);
-
+//   }
    const uint32_t cswValue = debugInformation.memAPControlStatusDefault|AHB_AP_CSW_SIZE_WORD|AHB_AP_CSW_INC_SINGLE;
-   bool initialTransfer   = true;
-   bool writeAddressToTAR = true;
+   bool initialTransfer    = true;
+   bool writeAddressToTAR  = true;
    uint8_t   inBuffer[armInfo.maxMemoryReadSize];
    uint8_t   outBuffer[armInfo.maxMemoryWriteSize];
 
+   if ((address & 0x3) != 0) {
+      return BDM_RC_ILLEGAL_PARAMS;
+   }
    while (numWords > 0) {
       const int tSize = 5;
       bool crossedBoundary = false;
@@ -1269,7 +1311,7 @@ static USBDM_ErrorCode readDebugInformation(void) {
    return BDM_RC_OK;
 }
 
-bool ARM_InitialiseDone = false;
+static bool ARM_InitialiseDone = false;
 
 //! Initialise ARM interface
 //!
@@ -1278,6 +1320,8 @@ USBDM_ErrorCode ARM_Initialise() {
    uint32_t dataIn;
 
    print("   ARM_Initialise()\n");
+
+   ARM_InitialiseDone = false;
 
    rc = GetBdmInfo();
    if (rc != BDM_RC_OK) {
@@ -1289,10 +1333,6 @@ USBDM_ErrorCode ARM_Initialise() {
    if (rc != BDM_RC_OK) {
       return rc;
    }
-   USBDM_SetSpeed(500 /* kHz */);
-
-   debugJTAG = false;
-
    // Check for target power
    USBDMStatus_t status;
    rc = USBDM_GetBDMStatus(&status);
@@ -1304,6 +1344,10 @@ USBDM_ErrorCode ARM_Initialise() {
    }
    // Some manufacturer's recommend doing setup with RESET active
 //   USBDM_ControlPins(PIN_RESET_LOW);
+
+   debugJTAG = false;
+
+   USBDM_SetSpeed(500 /* kHz */);
 
    // Read IDCODE by JTAG_RESET
    uint32_t hardwareIdcode;
@@ -1431,13 +1475,19 @@ USBDM_ErrorCode ARM_Initialise() {
 
 //   USBDM_ControlPins(PIN_RELEASE);
 
-   readDebugInformation();
+   rc = readDebugInformation();
+
+   if (rc != BDM_RC_OK) {
+      return rc;
+   }
+   ARM_InitialiseDone = true;
 
 //   ARM_Connect();
 //
 //   uint32_t status;
 //   ARM_GetStatus(&status);
 //   print("   ARM_Initialise() - complete\n");
+
    return rc;
 }
 
@@ -1448,6 +1498,12 @@ USBDM_ErrorCode ARM_Initialise() {
 USBDM_ErrorCode ARM_TargetReset(TargetMode_t targetMode) {
    USBDM_ErrorCode rc = BDM_RC_FAIL;
 
+   if (!ARM_InitialiseDone) {
+      rc = ARM_Initialise();
+      if (rc != BDM_RC_OK) {
+         return  rc;
+      }
+   }
    print("   ARM_TargetReset(%s)\n", getTargetModeName(targetMode));
 
    TargetMode_t resetMethod = (TargetMode_t)(targetMode&RESET_METHOD_MASK);
@@ -1659,9 +1715,17 @@ USBDM_ErrorCode ARM_TargetReset(TargetMode_t targetMode) {
 //! Connect to ARM Target
 //!
 USBDM_ErrorCode ARM_Connect() {
-   print("   ARM_Connect()\n");
 
    USBDM_ErrorCode rc;
+
+   if (!ARM_InitialiseDone) {
+      rc = ARM_Initialise();
+      if (rc != BDM_RC_OK) {
+         return  rc;
+      }
+   }
+   print("   ARM_Connect()\n");
+
    int retry = 10;
    do {
       uint32_t debugOnValue = DHCSR_DBGKEY|DHCSR_C_DEBUGEN|DHCSR_C_HALT;
@@ -1839,11 +1903,11 @@ USBDM_ErrorCode  ARM_ReadMemory( unsigned int  elementSize,
 //!
 USBDM_ErrorCode ARM_ReadRegister(ARM_Registers_t regNo, unsigned long *regValue) {
    USBDM_ErrorCode rc = BDM_RC_OK;
-   uint32_t regWriteValue[] = {DCRSR_READ|(regNo&DCRSR_REGMASK)};
+   uint32_t regWriteValue[] = {DCSR_READ|(regNo&DCSR_REGMASK)};
    uint32_t dataIn;
    uint32_t value;
    unsigned retryCount = 40;
-   rc = writeMemoryWord(DCRSR,1,regWriteValue);
+   rc = writeMemoryWord(DCSR,1,regWriteValue);
    if (rc != BDM_RC_OK)
       return rc;
    do {
@@ -1853,7 +1917,7 @@ USBDM_ErrorCode ARM_ReadRegister(ARM_Registers_t regNo, unsigned long *regValue)
    } while (((dataIn & DHCSR_S_REGRDY) == 0) && (retryCount-- > 0));
    if (retryCount == 0)
       return BDM_RC_ARM_ACCESS_ERROR;
-   rc = readMemoryWord(DCRDR,1,&value);
+   rc = readMemoryWord(DCDR,1,&value);
    *regValue = value;
    if (rc != BDM_RC_OK)
       return rc;
@@ -1868,13 +1932,13 @@ USBDM_ErrorCode ARM_ReadRegister(ARM_Registers_t regNo, unsigned long *regValue)
 //!
 USBDM_ErrorCode ARM_WriteRegister(ARM_Registers_t regNo, unsigned long regValue) {
    USBDM_ErrorCode rc = BDM_RC_OK;
-   uint32_t regWriteValue[] = {DCRSR_WRITE|(regNo&DCRSR_REGMASK)};
+   uint32_t regWriteValue[] = {DCSR_WRITE|(regNo&DCSR_REGMASK)};
    uint32_t value = regValue;
    print("   ARM_WriteRegister(%s) <= 0x%X\n", getARMRegName(regNo), regValue);
-   rc = writeMemoryWord(DCRDR,1,&value);
+   rc = writeMemoryWord(DCDR,1,&value);
    if (rc != BDM_RC_OK)
       return rc;
-   return writeMemoryWord(DCRSR,1,regWriteValue);
+   return writeMemoryWord(DCSR,1,regWriteValue);
 }
 
 //! Read Control Register (

@@ -16,6 +16,7 @@ typedef int bool;
 #include "USBDM_API.h"
 #include "USBDM_DSC_API.h"
 #include "USBDM_ARM_API.h"
+#include "USBDM_SWD_API.h"
 #include "USBDM_API_Private.h"
 #include "DSC_Utilities.h"
 
@@ -80,6 +81,8 @@ static API_FUNC USBDM_ErrorCode  (*pUSBDM_WriteMemory)( unsigned int  elementSiz
                                                   unsigned const char *data) = errorHandler;
 static API_FUNC USBDM_ErrorCode  (*pUSBDM_ReadCReg)( unsigned int regNo, unsigned long *value) = errorHandler;
 static API_FUNC USBDM_ErrorCode  (*pUSBDM_WriteCReg)( unsigned int regNo, unsigned long value) = errorHandler;
+static API_FUNC USBDM_ErrorCode  (*pUSBDM_ReadDReg)( unsigned int regNo, unsigned long *value) = errorHandler;
+static API_FUNC USBDM_ErrorCode  (*pUSBDM_WriteDReg)( unsigned int regNo, unsigned long value) = errorHandler;
 static API_FUNC USBDM_ErrorCode  (*pUSBDM_ReadReg)( unsigned int regNo, unsigned long *value) = errorHandler;
 static API_FUNC USBDM_ErrorCode  (*pUSBDM_WriteReg)( unsigned int regNo, unsigned long value) = errorHandler;
 
@@ -385,6 +388,9 @@ static int setTargetCommand(ClientData notneededhere, Tcl_Interp *interp, int ar
    else if (strnicmp(arg, "ARM", 3) == 0) {
       value = T_ARM_JTAG;
    }
+   else if (strnicmp(arg, "SWD", 3) == 0) {
+      value = T_ARM_SWD;
+   }
    else if (strnicmp(arg, "KIN", 3) == 0) {
       value = T_ARM_JTAG;
    }
@@ -456,8 +462,26 @@ int setTargetType(TargetType_t target) {
       pUSBDM_WriteMemory   = ARM_WriteMemory;
       pUSBDM_ReadCReg      = ARM_ReadCReg;
       pUSBDM_WriteCReg     = ARM_WriteCReg;
+      pUSBDM_ReadDReg      = errorHandler;
+      pUSBDM_WriteDReg     = errorHandler;
       pUSBDM_ReadReg       = ARM_ReadRegister;
       pUSBDM_WriteReg      = ARM_WriteRegister;
+   }
+   else if (targetType == T_ARM_SWD) {
+      bigEndian = FALSE;
+      pUSBDM_Connect       = USBDM_Connect;
+      pUSBDM_TargetGo      = USBDM_TargetGo;
+      pUSBDM_TargetHalt    = USBDM_TargetHalt;
+      pUSBDM_TargetReset   = USBDM_TargetReset;
+      pUSBDM_TargetStep    = USBDM_TargetStep;
+      pUSBDM_ReadMemory    = USBDM_ReadMemory;
+      pUSBDM_WriteMemory   = USBDM_WriteMemory;
+      pUSBDM_ReadCReg      = USBDM_ReadCReg;
+      pUSBDM_WriteCReg     = USBDM_WriteCReg;
+      pUSBDM_ReadDReg      = USBDM_ReadDReg;
+      pUSBDM_WriteDReg     = USBDM_WriteDReg;
+      pUSBDM_ReadReg       = USBDM_ReadReg;
+      pUSBDM_WriteReg      = USBDM_WriteReg;
    }
    else if (targetType == T_MC56F80xx) {
       bigEndian = FALSE;
@@ -470,6 +494,8 @@ int setTargetType(TargetType_t target) {
       pUSBDM_WriteMemory   = DSC_WriteMemory;
       pUSBDM_ReadCReg      = errorHandler;
       pUSBDM_WriteCReg     = errorHandler;
+      pUSBDM_ReadDReg      = errorHandler;
+      pUSBDM_WriteDReg     = errorHandler;
       pUSBDM_ReadReg       = DSC_ReadRegister;
       pUSBDM_WriteReg      = DSC_WriteRegister;
    }
@@ -484,6 +510,8 @@ int setTargetType(TargetType_t target) {
       pUSBDM_WriteMemory   = USBDM_WriteMemory;
       pUSBDM_ReadCReg      = USBDM_ReadCReg;
       pUSBDM_WriteCReg     = USBDM_WriteCReg;
+      pUSBDM_ReadDReg      = USBDM_ReadDReg;
+      pUSBDM_WriteDReg     = USBDM_WriteDReg;
       pUSBDM_ReadReg       = USBDM_ReadReg;
       pUSBDM_WriteReg      = USBDM_WriteReg;
    }
@@ -601,9 +629,11 @@ static int connectCommand(ClientData notneededhere, Tcl_Interp *interp, int argc
       return TCL_ERROR;
    }
    printf(":connect\n");
-   if ((targetType != T_CFVx) && (targetType != T_JTAG) && (targetType != T_ARM_JTAG) && (targetType != T_MC56F80xx))
+   if ((targetType != T_CFVx) && (targetType != T_JTAG) &&
+       (targetType != T_ARM_JTAG) && (targetType != T_MC56F80xx) &&
+       (targetType != T_ARM_SWD)) {
       reportState(interp);
-
+   }
    return TCL_OK;
 }
 //! Arm Initialise
@@ -717,6 +747,9 @@ static int pinSetCommand(ClientData notneededhere, Tcl_Interp *interp, int argc,
       else if (strnicmp(arg, "BKPT=", 5) == 0) {
          value |= getPinControlValue(arg+5)<<PIN_BKPT_OFFS;
       }
+      else if (strnicmp(arg, "SWD=", 4) == 0) {
+         value |= getPinControlValue(arg+4)<<PIN_SWD_OFFS;
+      }
       else {
          Tcl_SetResult(interp, "Unrecognized parameter", TCL_STATIC);
       }
@@ -769,7 +802,8 @@ static int goCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, Tcl
          USBDM_ReadCReg(0x80F, &oldPC);
          break;
       case T_ARM_JTAG :
-         ARM_ReadRegister(ARM_RegPC, &oldPC);
+      case T_ARM_SWD :
+         pUSBDM_ReadReg(ARM_RegPC, &oldPC);
          break;
       default:
          break;
@@ -857,15 +891,16 @@ static int stepCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, T
       break;
 
    case T_ARM_JTAG :
+   case T_ARM_SWD :
       while (count-->0) {
-         ARM_ReadRegister(ARM_RegPC, &oldPC);
+         pUSBDM_ReadReg(ARM_RegPC, &oldPC);
          pUSBDM_ReadMemory(1,4,oldPC,(uint8_t*)&oldInstruction);
          swapEndian32(&oldInstruction);
          if (checkUsbdmRC(interp,  pUSBDM_TargetStep()) != 0) {
             printf(":step - Failed\n");
             return TCL_ERROR;
          }
-         ARM_ReadRegister(ARM_RegPC, &nextPC);
+         pUSBDM_ReadReg(ARM_RegPC, &nextPC);
          pUSBDM_ReadMemory(1,4,nextPC,(uint8_t*)&nextInstruction);
          swapEndian32(&nextInstruction);
          printf(":step, from PC = 0x%8.8X : 0x%4.4X 0x%4.4X, to PC = 0x%8.8X : 0x%4.4X 0x%4.4X, \n",
@@ -907,62 +942,63 @@ unsigned long BDMStatus = 0x00;
       Tcl_WrongNumArgs(interp, 1, argv, "");
       return TCL_ERROR;
    }
-   if (targetType == T_ARM_JTAG) {
+   if ((targetType == T_ARM_JTAG)||(targetType == T_ARM_SWD)) {
       uint8_t  value[4];
       uint32_t data;
       unsigned long lValue;
 
       ARM_SetLogFile(NULL);
 
-      if (checkUsbdmRC(interp,  ARM_ReadCReg(ARM_MDM_AP_Status, &lValue)) != BDM_RC_OK) {
+      if (checkUsbdmRC(interp,  pUSBDM_ReadCReg(ARM_CRegMDM_AP_Status, &lValue)) != BDM_RC_OK) {
          printf("MDM-AP.Status  => Failed\n");
       }
       else {
          printf("MDM-AP.Status  => 0x%08lX %s\n", lValue, getMDM_APStatusName(lValue));
       }
-      if (checkUsbdmRC(interp,  ARM_ReadCReg(ARM_MDM_AP_Control, &lValue)) != BDM_RC_OK) {
+      if (checkUsbdmRC(interp,  pUSBDM_ReadCReg(ARM_CRegMDM_AP_Control, &lValue)) != BDM_RC_OK) {
          printf("MDM-AP.Control => Failed\n");
       }
       else {
          printf("MDM-AP.Control => 0x%08lX %s\n", lValue, getMDM_APControlName(lValue));
       }
-      if (checkUsbdmRC(interp,  ARM_ReadMemory(1,4,DHCSR,value)) != BDM_RC_OK) {
+      if (checkUsbdmRC(interp,  pUSBDM_ReadMemory(1,4,DHCSR,value)) != BDM_RC_OK) {
          printf("DHCSR          => Failed\n");
       }
       else {
          data = getData32(value);
          printf("DHCSR          => 0x%08X %s\n", data, getDHCSRName(data));
       }
-      if (checkUsbdmRC(interp,  ARM_ReadMemory(1,4,DEMCR,value)) != BDM_RC_OK) {
+      if (checkUsbdmRC(interp,  pUSBDM_ReadMemory(1,4,DEMCR,value)) != BDM_RC_OK) {
          printf("DEMCR          => Failed\n");
       }
       else {
          data = getData32(value);
          printf("DEMCR          => 0x%08X %s\n", data, getDEMCRName(data));
       }
-      if (checkUsbdmRC(interp,  ARM_ReadMemory(1,1,MC_SRSH,value)) != BDM_RC_OK) {
+      if (checkUsbdmRC(interp,  pUSBDM_ReadMemory(1,1,MC_SRSH,value)) != BDM_RC_OK) {
          printf("MC_SRSH        => Failed\n");
       }
       else {
          data = value[0];
-         printf("MC_SRSH        => 0x%08X %s\n", data, getSRSHName(data));
+         printf("MC_SRSH        => 0x%8.2X %s\n", data, getSRSHName(data));
       }
-      if (checkUsbdmRC(interp,  ARM_ReadMemory(1,1,MC_SRSL,value)) != BDM_RC_OK) {
+      if (checkUsbdmRC(interp,  pUSBDM_ReadMemory(1,1,MC_SRSL,value)) != BDM_RC_OK) {
          printf("MC_SRSL        => Failed\n");
       }
       else {
          data = value[0];
-         printf("MC_SRSL        => 0x%08X %s\n", data, getSRSLName(data));
+         printf("MC_SRSL        => 0x%8.2X %s\n", data, getSRSLName(data));
       }
-      if (checkUsbdmRC(interp,  ARM_ReadMemory(2,2,WDOG_RSTCNT,value)) != BDM_RC_OK) {
+      if (checkUsbdmRC(interp,  pUSBDM_ReadMemory(2,2,WDOG_RSTCNT,value)) != BDM_RC_OK) {
          printf("WDOG_RSTCNT    => Failed\n");
       }
       else {
          data = getData16(value);
-         printf("WDOG_RSTCNT    => 0x%08X\n", data);
+         printf("WDOG_RSTCNT    => 0x%8.4X\n", data);
       }
-      if (logging)
+      if (logging) {
          ARM_SetLogFile(stderr);
+      }
       return TCL_OK;
    }
    else if (targetType == T_MC56F80xx) {
@@ -992,7 +1028,8 @@ unsigned long regValue;
    }
    switch (targetType) {
    case  T_ARM_JTAG:
-      if (checkUsbdmRC(interp,  ARM_ReadMemory(1,4,DHCSR,value)) != BDM_RC_OK) {
+   case  T_ARM_SWD:
+      if (checkUsbdmRC(interp,  pUSBDM_ReadMemory(1,4,DHCSR,value)) != BDM_RC_OK) {
          return TCL_ERROR;
       }
       uint32_t data = getData32(value);
@@ -1000,7 +1037,7 @@ unsigned long regValue;
       Tcl_SetObjResult(interp, Tcl_NewIntObj(data));
       return TCL_OK;
    case T_CFV1:
-      if (checkUsbdmRC(interp,  USBDM_ReadDReg(CFV1_DRegXCSRbyte,&regValue)) != BDM_RC_OK) {
+      if (checkUsbdmRC(interp,  pUSBDM_ReadDReg(CFV1_DRegXCSRbyte,&regValue)) != BDM_RC_OK) {
          return TCL_ERROR;
       }
       printf("XCSR.byte reg => %s(0x%02X)\n", getCFV1_XCSR_Name(regValue), (unsigned int)regValue);
@@ -1182,19 +1219,21 @@ USBDM_ErrorCode rc = BDM_RC_OK;
                 (int)oldPC, oldInstruction>>16, oldInstruction&0xFFFF);
          break;
       case T_ARM_JTAG :
+      case T_ARM_SWD :
          ARM_SetLogFile(NULL);
          for( regNo = 0; (regNo<=15) && (rc == BDM_RC_OK); regNo++) { // D0-15
-            rc = ARM_ReadRegister(regNo, &regVal);
+            rc = pUSBDM_ReadReg(regNo, &regVal);
             printf("%4s => %8.8X, ", getARMRegName(regNo), (int)regVal);
             if ((regNo&0x03)== 0x03)
                printf("\n");
          }
          if (rc != BDM_RC_OK) {
-            if (logging)
+            if (logging) {
                ARM_SetLogFile(stderr);
+            }
             break;
          }
-         ARM_ReadRegister(ARM_RegPC, &oldPC);
+         pUSBDM_ReadReg(ARM_RegPC, &oldPC);
          pUSBDM_ReadMemory(1,4,oldPC,(uint8_t*)&oldInstruction);
          swapEndian32(&oldInstruction);
          printf(":PC = 0x%8.8X : 0x%4.4X 0x%4.4X\n",
@@ -1471,7 +1510,8 @@ static int wpcCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, Tc
          rc = checkUsbdmRC(interp,  USBDM_WriteReg(HCS12_RegPC, data));
          break;
       case T_ARM_JTAG:
-         rc = checkUsbdmRC(interp,  ARM_WriteRegister(ARM_RegPC, data));
+      case T_ARM_SWD:
+         rc = checkUsbdmRC(interp,  pUSBDM_WriteReg(ARM_RegPC, data));
          break;
       case T_MC56F80xx:
          rc = checkUsbdmRC(interp,  DSC_WriteRegister(DSC_RegPC, data));
@@ -1541,7 +1581,7 @@ static int wDRegCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
       Tcl_WrongNumArgs(interp, 1, argv, "<address> <value>");
       return TCL_ERROR;
    }
-   if (checkUsbdmRC(interp,  USBDM_WriteDReg(regNo, data)) != 0) {
+   if (checkUsbdmRC(interp,  pUSBDM_WriteDReg(regNo, data)) != 0) {
       printf(":wDReg Failed\n");
       return TCL_ERROR;
    }
@@ -1555,8 +1595,11 @@ static int wDRegCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
       case T_HC12 :
          printf(":wDreg addr=0x%X(%s)<-0x%8.8X\n", regNo, getHCS12DebugRegName(regNo), data);
          break;
+      case T_ARM_SWD :
+         printf(":wDreg r=0x%X(%s)<-0x%8.8X\n", regNo, getSWDDebugRegName(regNo), data);
+         break;
       default :
-         printf("Wrong target\n");
+         printf(":wDreg r=0x%X<-0x%8.8X\n", regNo, data);
          break;
    }
    return TCL_OK;
@@ -1589,14 +1632,23 @@ static int wCRegCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
       printf(":wCReg Failed\n");
       return TCL_ERROR;
    }
-   if (targetType == T_CFV1)
+   switch(targetType) {
+   case T_CFV1 :
       printf(":wCreg r=0x%X(%s)<-0x%8.8X\n", regNo, getCFV1ControlRegName(regNo), data);
-   else if (targetType == T_CFVx)
+      break;
+   case T_CFVx :
       printf(":wCreg r=0x%X(%s)<-0x%8.8X\n", regNo, getCFVxControlRegName(regNo), data);
-   else if (targetType == T_ARM_JTAG)
+      break;
+   case T_ARM_JTAG :
       printf(":wCreg r=0x%X<-0x%8.8X\n", regNo, data);
-   else
-      printf("Wrong target\n");
+      break;
+   case T_ARM_SWD :
+      printf(":wCreg r=0x%X(%s)<-0x%8.8X\n", regNo, getARMControlRegName(regNo), data);
+      break;
+   default :
+      printf(":wCreg r=0x%X<-0x%8.8X\n", regNo, data);
+      break;
+   }
    return TCL_OK;
 }
 
@@ -1642,7 +1694,7 @@ static int rDRegCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
       Tcl_WrongNumArgs(interp, 1, argv, "<address>");
       return TCL_ERROR;
    }
-   if (checkUsbdmRC(interp,  USBDM_ReadDReg(regNo, &data)) != 0) {
+   if (checkUsbdmRC(interp,  pUSBDM_ReadDReg(regNo, &data)) != 0) {
       printf(":rReg Failed\n");
       return TCL_ERROR;
    }
@@ -1657,8 +1709,11 @@ static int rDRegCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
       case T_HC12 :
          printf(":rDreg addr=0x%X(%s)->0x%8.8X\n", regNo, getHCS12DebugRegName(regNo), (int)data);
          break;
+      case T_ARM_SWD :
+         printf(":rDreg r=0x%X(%s)->0x%8.8X\n", regNo, getSWDDebugRegName(regNo), (int)data);
+         break;
       default :
-         printf("Wrong target\n");
+         printf(":rDreg r=0x%X->0x%08X\n", regNo, (int)data);
          break;
    }
    return TCL_OK;
@@ -1686,14 +1741,23 @@ static int rCRegCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
       return TCL_ERROR;
    }
    Tcl_SetObjResult(interp, Tcl_NewIntObj(data));
-   if (targetType == T_CFV1)
+   switch (targetType) {
+   case T_CFV1 :
       printf(":rCreg r=0x%X(%s)->0x%08X\n", regNo, getCFV1ControlRegName(regNo), (int)data);
-   else if (targetType == T_CFVx)
+      break;
+   case T_CFVx :
       printf(":rCreg r=0x%X(%s)->0x%08X\n", regNo, getCFVxControlRegName(regNo), (int)data);
-   else if (targetType == T_ARM_JTAG)
+      break;
+   case T_ARM_JTAG :
       printf(":rCreg r=0x%X->0x%08X\n", regNo, (int)data);
-   else
-      printf("Wrong target\n");
+      break;
+   case T_ARM_SWD :
+      printf(":rCreg r=0x%X(%s)->0x%8.8X\n", regNo, getARMControlRegName(regNo), (int)data);
+      break;
+   default :
+      printf(":rCreg r=0x%X->0x%08X\n", regNo, (int)data);
+      break;
+   }
    return TCL_OK;
 }
 
@@ -2456,13 +2520,13 @@ static int debugCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
    unsigned temp;
 
    if (argc < 2) {
-      Tcl_WrongNumArgs(interp, 1, argv, "<delay_time>");
+      Tcl_WrongNumArgs(interp, 1, argv, "<control_value>");
       return TCL_ERROR;
    }
    // Control value
    currentToken = Tcl_GetString(argv[1]);
    if (sscanf(currentToken,"%i",&command) != 1) {
-      Tcl_WrongNumArgs(interp, 1, argv, "<delay_time>");
+      Tcl_WrongNumArgs(interp, 1, argv, "<control_value>");
       return TCL_ERROR;
    }
 
@@ -2470,7 +2534,7 @@ static int debugCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
       // Arg #1
       currentToken = Tcl_GetString(argv[2]);
       if (sscanf(currentToken,"%i",&arg1) != 1) {
-         Tcl_WrongNumArgs(interp, 1, argv, "<delay_time>");
+         Tcl_WrongNumArgs(interp, 1, argv, "<control_value>");
          return TCL_ERROR;
       }
    }
@@ -2490,11 +2554,31 @@ static int debugCommand(ClientData notneededhere, Tcl_Interp *interp, int argc, 
       case BDM_DBG_MEASURE_VDD :
          printf(":debug %10s => Vdd = %2.1f V\n", getDebugCommandName(command), 5.0*usb_data[1]/255);
          break;
+      case BDM_DBG_SWD:
+         printf(":debug %10s => "
+               "0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
+               "0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
+               "0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
+               "0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
+               "\n",
+                getDebugCommandName(command),
+                usb_data[1], usb_data[1], usb_data[2], usb_data[2],
+                usb_data[3], usb_data[3], usb_data[4], usb_data[4],
+                usb_data[5], usb_data[5], usb_data[6], usb_data[6],
+                usb_data[7], usb_data[7], usb_data[8], usb_data[8]);
+         return BDM_RC_OK;
       default :
-         printf(":debug %10s => 0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
-                "%2.2X(%2.2d), 0x%2.2X(%2.2d) \n", getDebugCommandName(command),
-                usb_data[0], usb_data[0], usb_data[1], usb_data[1],
-                usb_data[2], usb_data[2], usb_data[3], usb_data[3] );
+         printf(":debug %10s => "
+               "0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
+               "0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
+               "0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
+               "0x%2.2X(%2.2d), 0x%2.2X(%2.2d), "
+               "\n",
+                getDebugCommandName(command),
+                usb_data[1], usb_data[1], usb_data[2], usb_data[2],
+                usb_data[3], usb_data[3], usb_data[4], usb_data[4],
+                usb_data[5], usb_data[5], usb_data[6], usb_data[6],
+                usb_data[7], usb_data[7], usb_data[8], usb_data[8]);
          break;
    }
    return reportState(interp);
@@ -2827,7 +2911,7 @@ static const char usageText[] =
    "log 0|1                      - setting ARM loggin OFF/ON\n"
    "memorySpace [<N|X|P>]        - set memory space (DSC)\n"
    "openbdm [<bdmNumber>]        - Open given BDM\n"
-   "pinSet <pin=level>           - Control pins, pin=RST|BKGD|TRST|BKPT|TA,\n"
+   "pinSet <pin=level>           - Control pins, pin=RST|BKGD|TRST|BKPT|TA|SWD,\n"
    "                                level=H|L|3|-\n"
    "regs                         - Print out registers\n"
    "reset <N|S><H|S|P|A>         - Reset to bdm mode\n"
@@ -2973,7 +3057,7 @@ void registerUSBDMCommands(Tcl_Interp *interp) {
    printf("Found %d devices\n", numDevices);
    printf("Press ? for help\n");
 
-   ARM_SetLogFile(0);
+   ARM_SetLogFile(NULL);
 #else
    printf("UsbdmTCL incorporating TCL - Copyright(c) 2011\n");
 #endif

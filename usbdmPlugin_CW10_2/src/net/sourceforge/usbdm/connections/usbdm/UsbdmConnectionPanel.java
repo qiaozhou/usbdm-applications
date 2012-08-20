@@ -561,6 +561,7 @@ implements ICWGdiInitializationData {
 
    protected void createContents(Composite comp) {
       
+//      toolkit.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
       toolkit.setBackground(comp.getBackground());
       toolkit.adapt(comp);
       toolkit.paintBordersFor(comp);
@@ -696,7 +697,6 @@ implements ICWGdiInitializationData {
 
    protected void addSettingsChangedListeners() {
       if (fListener != null) {
-         
          comboSelectBDM.addModifyListener(fListener.getModifyListener());
          btnDefault.addSelectionListener(fListener.getSelectionListener());
 

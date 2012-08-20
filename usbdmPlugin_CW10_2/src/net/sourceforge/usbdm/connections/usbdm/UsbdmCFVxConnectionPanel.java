@@ -57,7 +57,7 @@ public class UsbdmCFVxConnectionPanel extends UsbdmConnectionPanel {
    }
 
    public void create() {
-      System.err.println("USBDMConnectionPanel::create");
+      System.err.println("UsbdmCFVxConnectionPanel::create");
       createContents(this);
       addSettingsChangedListeners();
    }

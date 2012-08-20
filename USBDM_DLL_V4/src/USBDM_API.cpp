@@ -1,4 +1,4 @@
-/*! \filecapa
+/*! \file
    \brief Entry points for USBDM library
 
    \verbatim
@@ -30,6 +30,7 @@
 \verbatim
  Change History
 +==================================================================================================
+|  7 Aug 2012 | USBDM_ControlInterface() now uses USBDM_ControlPins()               - pgo - V4.10.0
 | 20 May 2012 | Extended firmware version information                                       V4.9.5
 | 16 May 2012 | Corrected possible buffer overrun in USBDM_JTAG_ExecuteSequence()   - pgo - V4.9.5
 |  4 May 2012 | Unified error code handling                                         - pgo - V4.9.5
@@ -63,6 +64,8 @@
 #include "low_level_usb.h"
 #include "Names.h"
 #include "TargetDefines.h"
+#include "ARM_Definitions.h"
+#include "armInterface.h"
 
 #ifdef WIN32
 #include "ICP.h"
@@ -107,7 +110,7 @@ static const USBDM_ExtendedOptions_t defaultBdmOptions = {
       500,                 // resetReleaseInterval    - How long to wait after reset release to release other signals
       500,                 // resetRecoveryInterval   - How long to wait after reset sequence complete
 };
-static USBDM_ExtendedOptions_t bdmOptions = defaultBdmOptions;
+USBDM_ExtendedOptions_t bdmOptions = defaultBdmOptions;
 
 // The following option reduces the rate of polling of the BDM by the codewarrior
 // software.  On the HCS12 version this was interfering with my USB mouse!
@@ -175,7 +178,7 @@ USBDM_ErrorCode USBDM_Exit(void) {
 
 //! Get version of the DLL
 //!
-//! @return version number (e.g. V4.9.5 => 40905)
+//! @return version number (e.g. V4.9.5 => 0x40905)
 //!
 //! @note Prior to V4.9.5 an 8-bit version number (2 BCD digits, major-minor) was returned\n
 //!       This shouldn't be a problem as still monotonic
@@ -183,12 +186,12 @@ USBDM_ErrorCode USBDM_Exit(void) {
 USBDM_API
 unsigned int USBDM_DLLVersion(void) {
    print("USBDM_DLLVersion() => V%d.%d.%d\n",
-         USBDM_DLL_VERSION_MAJOR,
-         USBDM_DLL_VERSION_MINOR,
-         USBDM_DLL_VERSION_MICRO);
-   return ((USBDM_DLL_VERSION_MAJOR*10000)+
-           (USBDM_DLL_VERSION_MINOR*100)+
-           (USBDM_DLL_VERSION_MICRO));
+         USBDM_VERSION_MAJOR,
+         USBDM_VERSION_MINOR,
+         USBDM_VERSION_MICRO);
+   return ((USBDM_VERSION_MAJOR<<16)+
+           (USBDM_VERSION_MINOR<<8)+
+           (USBDM_VERSION_MICRO));
 }
 
 //! Get version string for DLL
@@ -197,7 +200,7 @@ unsigned int USBDM_DLLVersion(void) {
 //!
 USBDM_API
 const char *USBDM_DLLVersionString(void) {
-   return (USBDM_DLL_VERSION_STRING);
+   return (USBDM_VERSION_STRING);
 }
 
 //! Gets string describing a USBDM error code
@@ -325,6 +328,7 @@ USBDM_ErrorCode USBDM_Open(unsigned char deviceNo) {
 
    // Set conservative transfer size
    bdmInfo.commandBufferSize = DEFAULT_PACKET_SIZE;
+   armInitialiseDone = false;
 
    USBDM_ErrorCode rc = BDM_RC_OK;
 
@@ -464,7 +468,7 @@ static USBDM_ErrorCode updateBdmInfo(void) {
    if (rc != BDM_RC_OK) {
       return rc;
    }
-   bdmInfo.BDMsoftwareVersion = ((USBDMVersion.bdmSoftwareVersion&0xF0)<<12)+((USBDMVersion.bdmSoftwareVersion&0x0F)<<8);
+   bdmInfo.BDMsoftwareVersion = ((USBDMVersion.bdmSoftwareVersion&0xF0)<<16)+((USBDMVersion.bdmSoftwareVersion&0x0F)<<8);
    bdmInfo.BDMhardwareVersion = USBDMVersion.bdmHardwareVersion;
    bdmInfo.ICPsoftwareVersion = USBDMVersion.icpSoftwareVersion;
    bdmInfo.ICPhardwareVersion = USBDMVersion.icpHardwareVersion;
@@ -584,15 +588,19 @@ static USBDM_ErrorCode sendBdmOptions(void) {
    return bdm_usb_transaction(index, 1, usb_data);
 }
 
-//! Adapts the current bdm options to the specified target
+//! Adapts the bdm options to the specified target
 //!
-//! @param targetType - Target to adapt to
+//! @param bdmOptions - The options to modify
 //!
 static void adaptBdmOptions(USBDM_ExtendedOptions_t *bdmOptions) {
 
    switch (bdmOptions->targetType) {
    case T_HC12:
       bdmOptions->useResetSignal = true;
+      break;
+   case T_ARM_SWD:
+      bdmOptions->guessSpeed         = false;
+      bdmOptions->useResetSignal     = true;
       break;
    case T_ARM_JTAG:
    case T_CFVx:
@@ -697,6 +705,10 @@ USBDM_ErrorCode USBDM_GetDefaultExtendedOptions(USBDM_ExtendedOptions_t *bdmOpti
 //!
 USBDM_API
 USBDM_ErrorCode USBDM_SetExtendedOptions(const USBDM_ExtendedOptions_t *newBdmOptions) {
+#ifdef LOG
+   print("USBDM_SetExtendedOptions() => proposed\n");
+   printBdmOptions(newBdmOptions);
+#endif
    // Validate some options
    if (newBdmOptions->size > sizeof(USBDM_ExtendedOptions_t)) {
       return BDM_RC_ILLEGAL_PARAMS;
@@ -729,7 +741,7 @@ USBDM_ErrorCode USBDM_SetExtendedOptions(const USBDM_ExtendedOptions_t *newBdmOp
    memcpy(&bdmOptions, newBdmOptions, newBdmOptions->size);
    adaptBdmOptions(&bdmOptions);
 
-   print("USBDM_SetExtendedOptions() =>\n");
+   print("USBDM_SetExtendedOptions() => accepted\n");
    printBdmOptions(&bdmOptions);
 
    return sendBdmOptions();
@@ -772,10 +784,11 @@ USBDM_ErrorCode USBDM_GetExtendedOptions(USBDM_ExtendedOptions_t *currentBdmOpti
 //!     BDM_RC_OK     => OK \n
 //!     else          => Various errors
 //!
-//! @note BDM_TARGET_VDD_ENABLE & BDM_TARGET_VDD_DISABLE should be used to enable and disable Vdd
-//!       BDM_TARGET_VDD_OFF, BDM_TARGET_VDD_3V3 & BDM_TARGET_VDD_5V should be used to set the required Vdd
-//! It is expected that the USBDM_SetTargetVdd() will be used to set the initial Vdd before calling
-//! USBDM_SetTarget() so that the appropriate power on sequence may be used.
+//! @note
+//! - BDM_TARGET_VDD_ENABLE & BDM_TARGET_VDD_DISABLE should be used to enable and disable Vdd
+//! - BDM_TARGET_VDD_OFF, BDM_TARGET_VDD_3V3 & BDM_TARGET_VDD_5V should be used to set the required Vdd.
+//! - It is expected that the USBDM_SetTargetVdd() will be used to set the initial Vdd before calling
+//!   USBDM_SetTarget() so that the appropriate power on sequence may be used.
 //!
 USBDM_API
 USBDM_ErrorCode  USBDM_SetTargetVdd(TargetVddSelect_t targetVdd) {
@@ -851,22 +864,43 @@ USBDM_ErrorCode rc;
 //!     other        => Error code - see \ref USBDM_ErrorCode
 //!
 //! @note - Only partially implemented in BDM firmware
-//! @deprecated
+//! @deprecated - use \ref USBDM_ControlPins()
 //!
 USBDM_API
 USBDM_ErrorCode USBDM_ControlInterface(unsigned char duration_10us,
                                        unsigned int  control) {
-
-   bdmState.activityFlag = BDM_ACTIVE;
+   unsigned int controlValue = 0;
 
    print("USBDM_ControlInterface(0x%X(%s), %d us)\n", control, getControlLevelName((InterfaceLevelMasks_t)control), duration_10us);
-   usb_data[0] = 0;
-   usb_data[1] = CMD_USBDM_CONTROL_INTERFACE;
-   usb_data[2] = duration_10us;
-   usb_data[3] = (uint8_t)(control>>8);
-   usb_data[4] = (uint8_t)control;
 
-   return bdm_usb_transaction(5, 3, usb_data);
+   if (control == (unsigned int )SI_DISABLE) {
+      return USBDM_ControlPins(PIN_RELEASE);
+   }
+   else {
+      switch(control & SI_BKGD) {
+      case SI_BKGD_LOW:    controlValue |= PIN_BKGD_LOW;    break;
+      case SI_BKGD_HIGH:   controlValue |= PIN_BKGD_HIGH;   break;
+      case SI_BKGD_3STATE: controlValue |= PIN_BKGD_3STATE; break;
+      }
+      switch(control & SI_RESET) {
+      case SI_RESET_LOW:    controlValue |= PIN_RESET_LOW;    break;
+      case SI_RESET_3STATE: controlValue |= PIN_RESET_3STATE; break;
+      }
+      switch(control & SI_TA) {
+      case SI_TA_LOW:    controlValue |= PIN_TA_LOW;    break;
+      case SI_TA_3STATE: controlValue |= PIN_TA_3STATE; break;
+      }
+      switch(control & SI_TRST) {
+      case SI_TRST_LOW:    controlValue |= PIN_TRST_LOW;    break;
+      case SI_TRST_3STATE: controlValue |= PIN_TRST_3STATE; break;
+      }
+      USBDM_ErrorCode rc = USBDM_ControlPins(controlValue);
+      if ((rc != BDM_RC_OK) || (duration_10us == 0)) {
+         return rc;
+      }
+      milliSleep(1); // use 1 ms
+      return USBDM_ControlPins(PIN_RELEASE);
+   }
 }
 
 //! Directly manipulate interface levels
@@ -994,9 +1028,6 @@ USBDM_ErrorCode USBDM_SetTargetType(TargetType_t targetType) {
          USBDM_ControlPins(PIN_RELEASE);
          milliSleep(bdmOptions.resetRecoveryInterval);
          break;
-      case T_ARM_JTAG:
-         USBDM_ControlPins(PIN_RESET_LOW);
-         goto setVddLabel;
       case T_CFVx:
          // These ones require specific power/pin sequence to enter BKGD mode
          USBDM_ControlPins(PIN_RESET_LOW|PIN_BKPT_LOW);
@@ -1007,10 +1038,16 @@ USBDM_ErrorCode USBDM_SetTargetType(TargetType_t targetType) {
          USBDM_ControlPins(PIN_RELEASE);
          milliSleep(bdmOptions.resetRecoveryInterval);
          break;
+      case T_ARM_JTAG:
+      case T_ARM_SWD:
+         // To prevent watch-dog problems?
+         USBDM_ControlPins(PIN_RESET_LOW);
+         rc = USBDM_SetTargetVdd(BDM_TARGET_VDD_ENABLE);
+         milliSleep(bdmOptions.powerOnRecoveryInterval);
+         break;
       case T_MC56F80xx:
       case T_EZFLASH:
       case T_JTAG:
-      setVddLabel:
          rc = USBDM_SetTargetVdd(BDM_TARGET_VDD_ENABLE);
          milliSleep(bdmOptions.powerOnRecoveryInterval);
          break;
@@ -1190,6 +1227,10 @@ USBDM_ErrorCode rc;
    rc = bdm_usb_transaction(2, 1, usb_data, 100);
    if (rc != BDM_RC_OK) {
       print("USBDM_Connect() => rc = %d\n", rc);
+      return rc;
+   }
+   if (bdmOptions.targetType == T_ARM_SWD) {
+      rc = swdConnect();
    }
    return rc;
 }
@@ -1234,6 +1275,7 @@ USBDM_ErrorCode USBDM_SetSpeed( unsigned long frequency) {
       case T_JTAG :
       case T_MC56F80xx:
       case T_ARM_JTAG:
+      case T_ARM_SWD:
          // BDM command value is frequency in kHz. Should be less than 1/5 target clk
          bdmOptions.interfaceFrequency = frequency;
          value = frequency;
@@ -1282,6 +1324,7 @@ USBDM_ErrorCode USBDM_GetSpeed(unsigned long *frequency /* kHz */) {
       case T_JTAG :
       case T_MC56F80xx:
       case T_ARM_JTAG:
+      case T_ARM_SWD:
          // BDM command value is frequency in kHz. Should be less than 1/5 target clk
          *frequency = value;
          break;
@@ -1327,18 +1370,18 @@ USBDM_ErrorCode USBDM_GetSpeedHz(unsigned long *frequency /* Hz */) {
 //!
 //! @param BDMStatusReg => status register value read. \n
 //! The register read depends on target:
-//!  - HCS12 = BDMSTS, BDM Status register \n
-//!  - HCS08 = BDCSCR, BDM Status & Control register \n
-//!  - RS08  = BDCSCR, BDM Status & Control register \n
-//!  - CFV1  = XCSR[31..24], Extended Configuration/Status Register \n
-//!  - CFVx  = CSR, Configuration/Status Register (CSR)
+//!  - HCS12   = BDMSTS, BDM Status register \n
+//!  - HCS08   = BDCSCR, BDM Status & Control register \n
+//!  - RS08    = BDCSCR, BDM Status & Control register \n
+//!  - CFV1    = XCSR[31..24], Extended Configuration/Status Register \n
+//!  - CFVx    = CSR, Configuration/Status Register (CSR)
 //!
 //! @return \n
 //!     BDM_RC_OK  => OK \n
 //!     other      => Error code - see \ref USBDM_ErrorCode
 //!
 //! @note \n
-//!    The BDM may resynchronize with the target before doing this read.
+//!    The BDM may resynchronize/reconnect with the target before doing this read.
 //!
 USBDM_API
 USBDM_ErrorCode USBDM_ReadStatusReg(unsigned long *BDMStatusReg) {
@@ -1445,9 +1488,9 @@ USBDM_ErrorCode USBDM_WriteControlReg(unsigned int value) {
 //!        +RESET_SPECIAL/RESET_NORMAL
 //!
 static USBDM_ErrorCode resetHCS(TargetMode_t targetMode) {
-//   print("resetHCS() - original=(%s)\n", getTargetModeName(targetMode));
    TargetMode_t resetMethod = (TargetMode_t)(targetMode&RESET_METHOD_MASK);
    TargetMode_t resetMode   = (TargetMode_t)(targetMode&RESET_MODE_MASK);
+   print("resetHCS() - (%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    if (resetMethod == RESET_DEFAULT) {
       if (bdmOptions.targetType == T_HCS12) {
          resetMethod = RESET_HARDWARE;
@@ -1455,8 +1498,8 @@ static USBDM_ErrorCode resetHCS(TargetMode_t targetMode) {
       else {
          resetMethod = RESET_SOFTWARE;
       }
+      print("resetHCS() - modified=(%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    }
-   print("resetHCS() - modified=(%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    if (resetMethod == RESET_POWER) {
       print("resetHCS() - power reset\n");
       USBDM_SetTargetVdd(BDM_TARGET_VDD_DISABLE);
@@ -1511,10 +1554,11 @@ static USBDM_ErrorCode resetHCS(TargetMode_t targetMode) {
 static USBDM_ErrorCode resetCFVx(TargetMode_t targetMode) {
    TargetMode_t resetMethod = (TargetMode_t)(targetMode&RESET_METHOD_MASK);
    TargetMode_t resetMode   = (TargetMode_t)(targetMode&RESET_MODE_MASK);
+   print("resetCFVx() - (%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    if (resetMethod == RESET_DEFAULT) {
       resetMethod = RESET_HARDWARE;
+      print("resetCFVx() - modified=(%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    }
-   print("resetCFVx() - modified=(%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    if (resetMethod == RESET_POWER) {
       USBDM_SetTargetVdd(BDM_TARGET_VDD_DISABLE);
       milliSleep(bdmOptions.powerOffDuration);
@@ -1558,10 +1602,11 @@ static USBDM_ErrorCode resetCFVx(TargetMode_t targetMode) {
 static USBDM_ErrorCode resetOther(TargetMode_t targetMode) {
    TargetMode_t resetMethod = (TargetMode_t)(targetMode&RESET_METHOD_MASK);
    TargetMode_t resetMode   = (TargetMode_t)(targetMode&RESET_MODE_MASK);
+   print("resetOther() - (%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    if (resetMethod == RESET_DEFAULT) {
       resetMethod = RESET_HARDWARE;
+      print("resetOther() - modified=(%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    }
-   print("resetOther() - modified=(%s)\n", getTargetModeName((TargetMode_t)(resetMethod|resetMode)));
    if (resetMethod == RESET_POWER) {
       USBDM_SetTargetVdd(BDM_TARGET_VDD_DISABLE);
       milliSleep(bdmOptions.resetDuration);
@@ -1598,7 +1643,7 @@ USBDM_API
 USBDM_ErrorCode USBDM_TargetReset(TargetMode_t target_mode) {
 
    bdmState.activityFlag = BDM_ACTIVE;
-   print("USBDM_TargetReset(%s)\n",getTargetModeName(target_mode));
+   print("USBDM_TargetReset(%s)\n", getTargetModeName(target_mode));
 
    switch (bdmState.targetType) {
    case T_HC12:
@@ -1608,6 +1653,8 @@ USBDM_ErrorCode USBDM_TargetReset(TargetMode_t target_mode) {
       return resetHCS(target_mode);
    case T_CFVx:
       return resetCFVx(target_mode);
+   case T_ARM_SWD:
+      return resetARM_SWD(target_mode);
    default:
       return resetOther(target_mode);
    }
@@ -1764,11 +1811,13 @@ return rc;
 //! Write Target Control register
 //!
 //! @param regNo    Register #
-//!    - HCS12 = not used \n
-//!    - HCS08 = not used \n
-//!    - RS08  = not used \n
-//!    - CFV1  = Control register space, see \ref CFV1_CRegisters_t\n
-//!    - CFVx  = Control register space, see \ref CFVx_CRegisters_t
+//!    - HCS12     = not used \n
+//!    - HCS08     = not used \n
+//!    - RS08      = not used \n
+//!    - CFV1      = Control register space, see \ref CFV1_CRegisters_t\n
+//!    - CFVx      = Control register space, see \ref CFVx_CRegisters_t
+//!    - JTAG_SWD  = AP Registers see \ref ARM_CRegisters_t
+//!
 //! @param regValue 8/16/32-bit value
 //!
 //! @return error code \n
@@ -1783,22 +1832,41 @@ USBDM_ErrorCode USBDM_WriteCReg(unsigned int regNo, unsigned long regValue) {
 #ifdef LOG
    switch (bdmState.targetType) {
       case T_CFV1 :
-         print("USBDM_writeCReg(%s(0x%X), 0x%X)\n",
+         print("USBDM_WriteCReg(%s(0x%X), 0x%X)\n",
                getCFV1ControlRegName(regNo), regNo, regValue);
          break;
       case T_CFVx :
-         print("USBDM_writeCReg(%s(0x%X), 0x%X)\n",
+         print("USBDM_WriteCReg(%s(0x%X), 0x%X)\n",
                getCFVxControlRegName(regNo), regNo, regValue);
          break;
+      case T_ARM_SWD :
+         switch (regNo) {
+         case ARM_CRegMDM_AP_Status:
+            print("USBDM_WriteCReg(MDM-AP.Status,  %s(0x%08X)\n", getMDM_APStatusName(regValue), regValue);
+            break;
+         case ARM_CRegMDM_AP_Control:
+            print("USBDM_WriteCReg(MDM-AP.Control, %s(0x%08X)\n", getMDM_APControlName(regValue),regValue);
+            break;
+         default:
+            print("USBDM_WriteCReg(%s(0x%X), 0x%08X)\n", getARMControlRegName(regNo), regNo, regValue);
+            break;
+         }
+         break;
       default :
-         print("USBDM_writeCReg() - Illegal mode\n");
+         print("USBDM_WriteCReg() - Unknown mode, register(0x%4X) = 0x%X\n",
+               regNo, regValue);
          break;
    };
 #endif
 
    usb_data[0] = 0;
    usb_data[1] = CMD_USBDM_WRITE_CREG;
-   usb_data[2] = (uint8_t)(regNo>>8);
+   if (bdmState.targetType == T_ARM_SWD) {
+      usb_data[2] = (uint8_t)(regNo>>24);
+   }
+   else {
+      usb_data[2] = (uint8_t)(regNo>>8);
+   }
    usb_data[3] = (uint8_t)(regNo);
    usb_data[4] = (uint8_t)(regValue>>24);
    usb_data[5] = (uint8_t)(regValue>>16);
@@ -1809,12 +1877,14 @@ USBDM_ErrorCode USBDM_WriteCReg(unsigned int regNo, unsigned long regValue) {
 
 //! Read Target Control register
 //!
-//! @param regNo    Register #
-//!    - HCS12 = not used \n
-//!    - HCS08 = not used \n
-//!    - RS08  = not used \n
-//!    - CFV1  = Control register space, see \ref CFV1_CRegisters_t\n
-//!    - CFVx  = Control register space, see \ref CFVx_CRegisters_t
+//! @param regNo    Register # or address
+//!    - HCS12     = not used \n
+//!    - HCS08     = not used \n
+//!    - RS08      = not used \n
+//!    - CFV1      = Control register space, see \ref CFV1_CRegisters_t\n
+//!    - CFVx      = Control register space, see \ref CFVx_CRegisters_t \n
+//!    - JTAG_SWD  = AP Registers see \ref ARM_CRegisters_t
+//!
 //! @param regValue 8/16/32-bit value
 //!
 //! @return error code \n
@@ -1831,13 +1901,18 @@ USBDM_ErrorCode USBDM_ReadCReg(unsigned int regNo, unsigned long *regValue) {
 
    usb_data[0] = 0;
    usb_data[1] = CMD_USBDM_READ_CREG;
-   usb_data[2] = (uint8_t)(regNo>>8);
+   if (bdmState.targetType == T_ARM_SWD) {
+      usb_data[2] = (uint8_t)(regNo>>24);
+   }
+   else {
+      usb_data[2] = (uint8_t)(regNo>>8);
+   }
    usb_data[3] = (uint8_t)(regNo);
 
    rc = bdm_usb_transaction(4, 5, usb_data);
 
    if (rc != BDM_RC_OK) {
-      print("USBDM_readCReg(0x%X) - Failed\n", regNo);
+      print("USBDM_ReadCReg(0x%X) - Failed\n", regNo);
       *regValue = 0x0U;
    }
    else {
@@ -1849,19 +1924,31 @@ USBDM_ErrorCode USBDM_ReadCReg(unsigned int regNo, unsigned long *regValue) {
 #ifdef LOG
    switch (bdmState.targetType) {
       case T_CFV1 :
-         print("USBDM_readCReg(%s(0x%X), 0x%X)\n",
+         print("USBDM_ReadCReg(%s(0x%X), 0x%X)\n",
                getCFV1ControlRegName(regNo), regNo, *regValue);
          break;
       case T_CFVx :
-         print("USBDM_readCReg(%s(0x%X), 0x%X)\n",
+         print("USBDM_ReadCReg(%s(0x%X), 0x%X)\n",
                getCFVxControlRegName(regNo), regNo, *regValue);
          break;
+      case T_ARM_SWD :
+         switch (regNo) {
+         case ARM_CRegMDM_AP_Status:
+            print("USBDM_ReadCReg(MDM-AP.Status,  %s(0x%08X)\n", getMDM_APStatusName(*regValue), *regValue);
+            break;
+         case ARM_CRegMDM_AP_Control:
+            print("USBDM_ReadCReg(MDM-AP.Control, %s(0x%08X)\n", getMDM_APControlName(*regValue),*regValue);
+            break;
+         default:
+            print("USBDM_ReadCReg(%s(0x%X), 0x%08X)\n", getARMControlRegName(regNo), regNo, *regValue);
+            break;
+         }
+         break;
       default :
-         print("USBDM_readCReg() - Illegal mode\n");
+         print("USBDM_ReadCReg() - Unknown mode, register(0x%4X) = 0x%X\n", regNo, *regValue);
          break;
    };
 #endif
-
    return rc;
 }
 //! Write Target Debug register
@@ -1903,8 +1990,13 @@ USBDM_ErrorCode USBDM_WriteDReg(unsigned int regNo, unsigned long regValue) {
          print("USBDM_writeDReg(%s(0x%X), 0x%X)\n",
                getCFVxDebugRegName(regNo), regNo, regValue);
          break;
+      case T_ARM_SWD :
+         print("USBDM_writeDReg(%s(0x%X), 0x%X)\n",
+               getSWDDebugRegName(regNo), regNo, regValue);
+         break;
       default :
-         print("USBDM_writeDReg() - Illegal mode\n");
+         print("USBDM_writeDReg() - Unknown mode, register(0x%4X) = 0x%X\n",
+               regNo, regValue);
          break;
    };
 #endif
@@ -1984,8 +2076,13 @@ USBDM_ErrorCode USBDM_ReadDReg(unsigned int regNo, unsigned long *regValue) {
                   getCFVxDebugRegName(regNo), regNo, *regValue,
                   getCFVx_CSR_Name(*regValue));
          break;
+      case T_ARM_SWD :
+         print("USBDM_readDReg(%s(0x%X), 0x%X)\n",
+               getSWDDebugRegName(regNo), regNo, *regValue);
+         break;
       default :
-         print("USBDM_readDReg() - Illegal mode\n");
+         print("USBDM_readDReg() - Unknown mode, register(0x%4X) = 0x%X\n",
+               regNo, *regValue);
          break;
    };
 #endif
@@ -2056,7 +2153,8 @@ static const char *getMemorySpaceName(int memorySpace) {
       case MS_Global  : return "G:";
       case MS_Program : return "P:";
       case MS_Data    : return "X:";
-      default         : return "";
+      case MS_None    : return "";
+      default         : return "-:";
    }
 }
 
@@ -2118,7 +2216,15 @@ USBDM_ErrorCode USBDM_WriteMemory( unsigned int        memorySpace,
          // Make sure HCS12 Global access doesn't cross page boundary
          uint32_t nextPageBoundary = (address + 0x10000UL)&~0xFFFFUL;
          if ((address+blockSize-1) >= nextPageBoundary) {
-            print("USBDM_ReadMemory(): Access split due to Global boundary, A=0x%X, B=0x%X\n", address, nextPageBoundary);
+            print("USBDM_WriteMemory(): Access split due to Global boundary, A=0x%X, B=0x%X\n", address, nextPageBoundary);
+            blockSize = nextPageBoundary-address;
+         }
+      }
+      if (bdmState.targetType == T_ARM_SWD) {
+         // Make sure ARM memory access doesn't cross 2^10 boundary as limitation of MDM-AP
+         uint32_t nextPageBoundary = (address + (1UL<<10))&~((1UL<<10)-1);
+         if ((address+blockSize-1) >= nextPageBoundary) {
+            print("USBDM_WriteMemory(): Access split due to crossing 2^10 boundary, A=0x%X, B=0x%X\n", address, nextPageBoundary);
             blockSize = nextPageBoundary-address;
          }
       }
@@ -2201,6 +2307,14 @@ USBDM_ErrorCode USBDM_ReadMemory( unsigned int  memorySpace,
          uint32_t nextPageBoundary = (address + 0x10000UL)&~0xFFFFUL;
          if ((address+blockSize-1) >= nextPageBoundary) {
             print("USBDM_ReadMemory(): Access split due to Global boundary, A=0x%X, B=0x%X\n", address, nextPageBoundary);
+            blockSize = nextPageBoundary-address;
+         }
+      }
+      if (bdmState.targetType == T_ARM_SWD) {
+         // Make sure ARM memory access doesn't cross 2^10 boundary as limitation of MDM-AP
+         uint32_t nextPageBoundary = (address + (1UL<<10))&~((1UL<<10)-1);
+         if ((address+blockSize-1) >= nextPageBoundary) {
+            print("USBDM_ReadMemory(): Access split due to crossing 2^10 boundary, A=0x%X, B=0x%X\n", address, nextPageBoundary);
             blockSize = nextPageBoundary-address;
          }
       }

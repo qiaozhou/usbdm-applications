@@ -18,7 +18,7 @@
 using namespace std;
 
 #include "USBDM_API.h"
-#if TARGET == ARM
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
 #include "USBDM_ARM_API.h"
 #include "ARM_Definitions.h"
 #endif
@@ -50,6 +50,13 @@ using namespace std;
 #define USBDM_WriteSP(x)                     USBDM_WriteCReg(CFVx_CRegSP, x);
 #define USBDM_ReadSR(x)                      USBDM_ReadCReg(CFVx_CRegSR, x);
 #define USBDM_WriteSR(x)                     USBDM_WriteCReg(CFVx_CRegSR, x);
+#elif TARGET == ARM_SWD
+#define USBDM_ReadPC(x)                      USBDM_ReadReg(ARM_RegPC, x);
+#define USBDM_WritePC(x)                     USBDM_WriteReg(ARM_RegPC, x);
+#define USBDM_ReadSP(x)                      USBDM_ReadReg(ARM_RegSP, x);
+#define USBDM_WriteSP(x)                     USBDM_WriteReg(ARM_RegSP, x);
+#define USBDM_ReadSR(x)                      USBDM_ReadReg(ARM_RegSR, x);
+#define USBDM_WriteSR(x)                     USBDM_WriteReg(ARM_RegSR, x);
 #elif TARGET == ARM
 #define USBDM_ReadPC(x)                      ARM_ReadRegister(ARM_RegPC, x);
 #define USBDM_WritePC(x)                     ARM_WriteRegister(ARM_RegPC, x);
@@ -77,6 +84,8 @@ using namespace std;
 #define TARGET_TYPE T_CFVx
 #elif TARGET==ARM
 #define TARGET_TYPE T_ARM_JTAG
+#elif TARGET==ARM_SWD
+#define TARGET_TYPE T_ARM_SWD
 #else
 #error "Unhandled case"
 #endif
@@ -110,7 +119,7 @@ inline uint32_t unchanged32(uint32_t data) {
    return data;
 }
 
-#if TARGET == ARM
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
 #define targetToNative16(x)    unchanged16(x)
 #define targetToNative32(x)    unchanged32(x)
 #define nativeToTarget16(x)    unchanged16(x)
@@ -299,7 +308,7 @@ static const char targetXML[] =
       "<?xml version=\"1.0\"?>\n"
       "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">\n"
       "<target version=\"1.0\">\n"
-#if (TARGET == ARM) || (TARGET == CFV1) || (TARGET == CFVx)
+#if (TARGET == ARM) ||(TARGET == ARM_SWD) || (TARGET == CFV1) || (TARGET == CFVx)
       "   <xi:include href=\"targetRegs.xml\"/>\n"
 #endif
       "</target>\n"
@@ -446,7 +455,7 @@ typedef struct {
    int           size;
 } Register_t;
 
-#if TARGET == ARM
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
 // Maps GDB register numbers to USBDM register numbers (or -1 is invalid)
 int registerMap[] = {
       ARM_RegR0,   ARM_RegR1,   ARM_RegR2,  ARM_RegR3,
@@ -501,7 +510,7 @@ static int readReg(unsigned regNo, char *cPtr) {
    }
    int usbdmRegNo = registerMap[regNo];
 
-#if (TARGET == ARM)
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
    USBDM_ReadReg((ARM_Registers_t)usbdmRegNo, &regValue);
    print("%s(0x%02X) => %08lX\n", getARMRegName(usbdmRegNo), usbdmRegNo, regValue);
    regValue = bigendianToTarget32(regValue);
@@ -555,7 +564,7 @@ static void writeReg(unsigned regNo, unsigned long regValue) {
       return;
    int usbdmRegNo = registerMap[regNo];
 
-#if (TARGET == ARM)
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
    USBDM_WriteReg((ARM_Registers_t)usbdmRegNo, regValue);
    print("%s(0x%02X) <= %08lX\n", getARMRegName(usbdmRegNo), usbdmRegNo, regValue);
    regValue = bigendianToTarget32(regValue);
@@ -638,7 +647,7 @@ static void writeMemory(const char *ccPtr, uint32_t address, uint32_t numBytes) 
    gdbOutput->sendGdbString("OK");
 }
 
-#if TARGET == ARM
+#if (TARGET == ARM) || (TARGET == ARM_SWD)
 #define T_RUNNING (1<<0) // Executing
 #define T_HALT    (1<<1) // Debug halt
 #define T_SLEEP   (1<<2) // Low power sleep
@@ -748,7 +757,7 @@ static bool isTargetHalted(void) {
    unsigned long value;
    rc = USBDM_ReadReg(CFVx_RegD0, &value);
    return (rc == BDM_RC_OK);
-#elif TARGET == ARM
+#elif (TARGET == ARM) || (TARGET == ARM_SWD)
    int status;
    rc = getTargetStatus(&status);
    if (rc != BDM_RC_OK) {
@@ -970,7 +979,7 @@ static void reportLocation(char mode, int reason) {
    cPtr += sprintf(buff, "%c%2.2X", mode, reason);
 #if (TARGET == CFV1)||(TARGET == CFVx)
    static const int regsToReport[] = {17, 15, 14, 16}; // PC, SP, FP, SR
-#elif (TARGET == ARM)
+#elif (TARGET == ARM) || (TARGET == ARM_SWD)
    static const int regsToReport[] = {15, 14, 13, 16}; // PC, LR, SP, PSR
 #endif
    for (unsigned index=0; index<(sizeof(regsToReport)/sizeof(regsToReport[0])); index++) {

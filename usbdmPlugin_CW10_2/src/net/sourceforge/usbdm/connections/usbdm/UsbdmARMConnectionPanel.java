@@ -157,6 +157,7 @@ public class UsbdmARMConnectionPanel extends UsbdmConnectionPanel {
     * @param paramILaunchConfigurationWorkingCopy
     *           - Settings object to save to
     */
+   @Override
    public void saveSettings( ILaunchConfigurationWorkingCopy paramILaunchConfigurationWorkingCopy)throws PrefException {
 //      System.err.println("UsbdmARMConnectionPanel.saveSettings()");
 

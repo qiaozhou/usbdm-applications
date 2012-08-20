@@ -65,7 +65,8 @@ string AppSettings::getSettingsFilename(const string &rootFilename, TargetType_t
       case T_CFV1:         filename += "CFV1.cfg";      break;
       case T_CFVx:         filename += "CFVx.cfg";      break;
       case T_JTAG:         filename += "JTAG.cfg";      break;
-      case T_ARM_JTAG:     filename += "ARM.cfg";       break;
+      case T_ARM_JTAG:     filename += "ARM_JTAg.cfg";  break;
+      case T_ARM_SWD:      filename += "ARM_SWD.cfg";   break;
       case T_MC56F80xx :   filename += "MC56F80xx.cfg"; break;
       default:             filename += "generic.cfg";   break;
    }

@@ -98,6 +98,36 @@ public class UsbdmCommon {
     int             resetDuration;            //!< - How long to assert reset (ms)
     int             resetReleaseInterval;     //!< - How long to wait after reset release to release other signals (ms)
     int             resetRecoveryInterval;    //!< - How long to wait after reset sequence completes (ms)
+   public int getPowerOffDuration() {
+      return powerOffDuration;
+   }
+   public void setPowerOffDuration(int powerOffDuration) {
+      this.powerOffDuration = powerOffDuration;
+   }
+   public int getPowerOnRecoveryInterval() {
+      return powerOnRecoveryInterval;
+   }
+   public void setPowerOnRecoveryInterval(int powerOnRecoveryInterval) {
+      this.powerOnRecoveryInterval = powerOnRecoveryInterval;
+   }
+   public int getResetDuration() {
+      return resetDuration;
+   }
+   public void setResetDuration(int resetDuration) {
+      this.resetDuration = resetDuration;
+   }
+   public int getResetReleaseInterval() {
+      return resetReleaseInterval;
+   }
+   public void setResetReleaseInterval(int resetReleaseInterval) {
+      this.resetReleaseInterval = resetReleaseInterval;
+   }
+   public int getResetRecoveryInterval() {
+      return resetRecoveryInterval;
+   }
+   public void setResetRecoveryInterval(int resetRecoveryInterval) {
+      this.resetRecoveryInterval = resetRecoveryInterval;
+   }
  };
 
  // BDM options

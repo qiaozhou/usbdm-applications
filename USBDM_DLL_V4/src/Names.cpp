@@ -14,8 +14,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include "USBDM_API.h"
 #include "Names.h"
+#include "ARM_Definitions.h"
 #include "Log.h"
 
 //! Obtain a description of the hardware version
@@ -41,13 +43,14 @@ const char *getHardwareDescription(unsigned int hardwareVersion) {
   /* 13 */  "USBDM-JS16            - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ)",
   /* 14 */  "USBDM-AXIOM-M56F8006  - Axiom MC56F8006 Demo board",
   /* 15 */  "Custom                - Reserved for User created custom hardware",
-  /* 16 */  "USBDM-CF-SER-JS16     - Minimal BDM for DSC/CFVx/ARM (JS16CWJ) with serial",
-  /* 17 */  "USBDM-SER-JS16        - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ) wiuth serial",
-  /* 18 */  "USBDM-CF-SER-JMxx     - Deluxe BDM for RS08/HCS08/HCS12/DSC/CFVx/ARM (JMxxCLD)",
+  /* 16 */  "USBDM-CF-SER-JS16     - Minimal BDM for DSC,CFVx,ARM-JTAG (JS16CWJ) with serial",
+  /* 17 */  "USBDM-SER-JS16        - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ) with serial",
+  /* 18 */  "USBDM-CF-SER-JMxx     - Deluxe BDM for RS08,HCS08,HCS12,DSC,CFVx,ARM-JTAG (JMxxCLD)",
   /* 19 */  "USBDM_TWR_KINETIS     - Tower Kinetis boards",
   /* 20 */  "USBDM_TWR_CFV1        - Tower Coldfire V1 boards",
   /* 21 */  "USBDM_TWR_HCS08       - Tower HCS08 boards",
   /* 22 */  "USBDM_TWR_CFVx        - Tower CFVx boards",
+  /* 23 */  "USBDM-SWD-SER-JS16    - Minimal BDM for HCS08,HCS12,CFV1,ARM-SWD (JS16CWJ) with serial",
          };
    const char *hardwareName = "Unknown";
    hardwareVersion &= 0x3F; // mask out BDM processor type
@@ -85,6 +88,7 @@ const char *getBriefHardwareDescription(unsigned int hardwareVersion) {
     /* 20  */  "USBDM_TWR_CFV1",
     /* 21  */  "USBDM_TWR_HCS08",
     /* 22  */  "USBDM_TWR_CFVx",
+    /* 23  */  "USBDM-SWD-SER -(JS16CWJ-V2)",
          };
 
    const char *hardwareName = "unknown hardware";
@@ -126,7 +130,7 @@ const char *getICPErrorName(unsigned char error) {
 //!
 char const *getTargetTypeName( unsigned int type ) {
    static const char *names[] = {
-      "HCS12","HCS08","RS08","CFV1","CFVx","JTAG","EZFlash","MC56F80xx","ARM-JTAG",
+      "HCS12","HCS08","RS08","CFV1","CFVx","JTAG","EZFlash","MC56F80xx","ARM-JTAG","ARM-SWD"
       };
    const char *typeName = NULL;
    static char unknownBuffer[10];
@@ -269,24 +273,25 @@ const char *getCommandName(unsigned char command) {
 
 //! Debug command string from code
 static const char *const debugCommands[] = {
-   "ACKN",              // 0
-   "SYNC",              // 1
-   "Test Port",         // 2
-   "USB Disconnect",    // 3
-   "Find Stack size",   // 4
-   "Vpp Off",           // 5
-   "Vpp On",            // 6
-   "Flash 12V Off",     // 7
-   "Flash 12V On",      // 8
-   "Vdd Off",           // 9
-   "Vdd 3.3V On",       // 10
-   "Vdd 5V On",         // 11
-   "Cycle Vdd",         // 12
-   "Measure Vdd",       // 13
-   "Measure RS08 Trim - deleted", //
-   "Test WAITS",                  // 15, //!< - Tests the software counting delays used for BDM communication. (locks up BDM!)
-   "Test ALT Speed",              // 16,
-   "Test BDM Tx Routine",         // 17,
+   "ACKN",                        // 0
+   "SYNC",                        // 1
+   "Test Port",                   // 2
+   "USB Disconnect",              // 3
+   "Find Stack size",             // 4
+   "Vpp Off",                     // 5
+   "Vpp On",                      // 6
+   "Flash 12V Off",               // 7
+   "Flash 12V On",                // 8
+   "Vdd Off",                     // 9
+   "Vdd 3.3V On",                 // 10
+   "Vdd 5V On",                   // 11
+   "Cycle Vdd",                   // 12
+   "Measure Vdd",                 // 13
+   "Measure RS08 Trim - deleted", // 14
+   "Test WAITS",                  // 15 //!< - Tests the software counting delays used for BDM communication. (locks up BDM!)
+   "Test ALT Speed",              // 16
+   "Test BDM Tx Routine",         // 17
+   "SWD test",                    // 18
 };
 
 //! \brief Maps a Debug Command # to a string
@@ -393,6 +398,42 @@ const char *regName = NULL;
    return regName;
 }
 
+//! \brief Maps a ARM-SWD Debug register # to a string
+//!
+//! @param regAddr = register address
+//!
+//! @return pointer to static string describing the command
+//!
+char const *getARMControlRegName( unsigned int regAddr ) {
+   //! The regAddr is actually a AP bus address as follows:
+   //!    A[31:24]  => DP-AP-SELECT[31:24] (AP # Select) \n
+   //!    A[23:8]   => unused (0)
+   //!    A[7:4]    => DP-AP-SELECT[7:4]   (Bank select within AP) \n
+   //!    A[3:2]    => APACC[3:2]          (Register select within AP bank)
+   //!    A[1:0]    => unused (0)
+   //!
+   switch(regAddr) {
+      // AP#0 - Common ARM AHB-AP
+      case ARM_CRegAHB_AP_CSW     : return "AHB_AP.CSW";  // AHB-AP Control/Status Word register
+      case ARM_CRegAHB_AP_TAR     : return "AHB_AP.TAR";  // AHB-AP Transfer Address register
+      case ARM_CRegAHB_AP_DRW     : return "AHB_AP.DRW";  // AHB-AP Data Read/Write register
+
+      case ARM_CRegAHB_AP_CFG     : return "AHB_AP.CFG";  // AHB-AP Config register
+      case ARM_CRegAHB_AP_Base    : return "AHB_AP.Base"; // AHB-AP IDebug base address register
+      case ARM_CRegAHB_AP_Id      : return "AHB_AP.Id";   // AHB-AP ID Register
+
+      // AP#1 - Kinetis MDM-AP registers
+      case ARM_CRegMDM_AP_Status  : return "MDM_AP.Status";  //!< Status register
+      case ARM_CRegMDM_AP_Control : return "MDM_AP.Control"; //!< Control register
+      case ARM_CRegMDM_AP_Ident   : return "MDM_AP.Ident";   //!< Identifier register (should read 0x001C_0000)
+      default: break;
+   };
+   static char buff[100];
+   snprintf(buff, sizeof(buff), "0x%08X (AP#0x%02X:B#0x%1X:R#%d)",
+         regAddr, (regAddr>>24)&0xFF, (regAddr>>4)&0x0F, (regAddr>>2)&0x2);
+   return buff;
+}
+
 //! \brief Maps a Coldfire V1 Debug register # to a string
 //! (As used by WRITE_DREG/READ_DREG)
 //!
@@ -456,6 +497,30 @@ char const *getCFVxDebugRegName( unsigned int regAddr ){
       regName = "unknown";
 
    return regName;
+}
+
+//! \brief Maps a ARM-SWD Debug register # to a string
+//!
+//! @param regAddr = register address
+//!
+//! @return pointer to static string describing the command
+//!
+char const *getSWDDebugRegName( unsigned int regAddr ) {
+   static const char *names[] = {
+   "DP_IDCODE",    //!< IDCODE reg - read only
+   "DP_STATUS",    //!< STATUS reg - read only
+   "DP_RESEND",    //!< RESEND reg - read only
+   "DP_RDBUFF",    //!< RDBUFF reg - read only
+   "DP_ABORT",     //!< IDCODE reg - write only
+   "DP_CONTROL",   //!< IDCODE reg - write only
+   "DP_SELECT",    //!< IDCODE reg - write only
+   };
+   if (regAddr>=(sizeof(names)/sizeof(names[0]))) {
+      return "DP_Illegal register";
+   }
+   else {
+      return names[regAddr];
+   }
 }
 
 //! \brief Maps a Coldfire V2,3,4 Debug register # to a string
@@ -592,7 +657,6 @@ char const *getCFVxRegName( unsigned int regAddr ){
 }
 
 //! \brief Maps a register # to a string
-//! (As used by WAREG/RAREG,WDREG/RDREG)
 //!
 //! @param targetType = target type (T_HC12 etc)
 //! @param regNo      = register address
@@ -613,8 +677,10 @@ char const *getRegName( unsigned int targetType,
          return getCFV1RegName(regNo);
       case T_CFVx :
          return getCFVxRegName(regNo);
-      default :
-         break;
+      case T_ARM_JTAG :
+         return getARMRegName(regNo);
+      case T_ARM_SWD :
+         return getARMRegName(regNo);
    };
    return "Invalid target!";
 }
@@ -840,19 +906,13 @@ static char buff[100];
 
    buff[0] = '\0';
 
-   if (level == -1)
+   if (level == -1) {
       return "Release";
-
+   }
    switch (level & PIN_BKGD) {
       case PIN_BKGD_3STATE : strcat(buff, "PIN_BKGD_3STATE|"); break;
       case PIN_BKGD_HIGH   : strcat(buff, "PIN_BKGD_HIGH|");   break;
       case PIN_BKGD_LOW    : strcat(buff, "PIN_BKGD_LOW|");    break;
-   }
-   switch (level & PIN_TRST) {
-      case PIN_TRST_3STATE : strcat(buff, "PIN_TRST_3STATE|"); break;
-      case PIN_TRST_LOW    : strcat(buff, "PIN_TRST_LOW|");   break;
-      case PIN_TRST_NC     : break;
-      default              : strcat(buff, "PIN_TRST_??|");    break;
    }
    switch (level & PIN_RESET) {
       case PIN_RESET_3STATE : strcat(buff, "PIN_RESET_3STATE|"); break;
@@ -866,11 +926,22 @@ static char buff[100];
       case PIN_TA_NC     : break;
       default            : strcat(buff, "PIN_TA_??|");    break;
    }
+   switch (level & PIN_TRST) {
+      case PIN_TRST_3STATE : strcat(buff, "PIN_TRST_3STATE|"); break;
+      case PIN_TRST_LOW    : strcat(buff, "PIN_TRST_LOW|");   break;
+      case PIN_TRST_NC     : break;
+      default              : strcat(buff, "PIN_TRST_??|");    break;
+   }
    switch (level & PIN_BKPT) {
       case PIN_BKPT_3STATE : strcat(buff, "PIN_BKPT_3STATE|"); break;
       case PIN_BKPT_LOW    : strcat(buff, "PIN_BKPT_LOW|");    break;
       case PIN_BKPT_NC     : break;
       default              : strcat(buff, "PIN_BKPT_??|");    break;
+   }
+   switch (level & PIN_SWD) {
+      case PIN_SWD_3STATE : strcat(buff, "PIN_SWD_3STATE|"); break;
+      case PIN_SWD_HIGH   : strcat(buff, "PIN_SWD_HIGH|");   break;
+      case PIN_SWD_LOW    : strcat(buff, "PIN_SWD_LOW|");    break;
    }
    return buff;
 }
@@ -1017,6 +1088,237 @@ void printBdmOptions(const USBDM_ExtendedOptions_t *options) {
          options->usePSTSignals?"T":"F",
          options->useResetSignal?"T":"F"
          );
+}
+
+//! \brief Maps a ARM register # to a string
+//!
+//! @param regAddr = register number
+//!
+//! @return pointer to static string describing the register
+//!
+char const *getARMRegName( unsigned int regAddr ) {
+static const char *regs[] = {"R0","R1","R2","R3","R4","R5","R6","R7",
+                             "R8","R9","R10","R11","R12","SP","LR","PC",
+                             "PSR","MSP","PSP",
+                             "MISC/PRIMASK", "FAULTMASK", "BASEPRI", "CONTROL"};
+const char *regName = NULL;
+
+   if (regAddr < sizeof(regs)/sizeof(regs[0]))
+      regName = regs[regAddr];
+   else if (regAddr==ARM_RegFPSCR) {
+      regName = "FPSCR";
+   }
+   else if ((regAddr>=ARM_RegFPS0) && (regAddr<=ARM_RegFPS0+31)) {
+      regName = "FPSn";
+   }
+   if (regName == NULL) {
+      regName = "unknown";
+   }
+   return regName;
+}
+
+const char *getDpRegName(int reg) {
+   static const char *names[] = {"Reserved","CTRL/STAT","SELECT","RDBUFF",
+                                 "AP_REGx00", "AP_REGx04", "AP_REGx08", "AP_REGx0C", };
+   return names[reg&0x03];
+}
+
+const char *getDHCSRName(uint32_t dhcsrValue) {
+typedef struct {
+   const char *bitName;
+   const uint32_t   bitMask;
+} bitInfo;
+bitInfo bitNames[] = {
+      {"S_RESET|",     DHCSR_S_RESET_ST},
+      {"S_RETIRE|",    DHCSR_S_RETIRE_ST},
+      {"S_LOCKUP|",    DHCSR_S_LOCKUP},
+      {"S_SLEEP|",     DHCSR_S_SLEEP},
+      {"S_HALT|",      DHCSR_S_HALT},
+      {"S_REGRDY|",    DHCSR_S_REGRDY},
+      {"C_SNAPSTALL|", DHCSR_C_SNAPSTALL},
+      {"C_MASKINTS|",  DHCSR_C_MASKINTS},
+      {"C_STEP|",      DHCSR_C_STEP},
+      {"C_HALT|",      DHCSR_C_HALT},
+      {"C_DEBUGEN|",   DHCSR_C_DEBUGEN},
+      {NULL, 0},
+};
+bitInfo *bitPtr = bitNames;
+static char buffer[200];
+   buffer[0] = '\0';
+   while (bitPtr->bitMask != 0) {
+      if ((dhcsrValue & bitPtr->bitMask) != 0) {
+         strcat(buffer, bitPtr->bitName);
+      }
+      bitPtr++;
+   }
+   return buffer;
+}
+
+const char *getDEMCRName(uint32_t demcrValue) {
+typedef struct {
+   const char *bitName;
+   const uint32_t   bitMask;
+} bitInfo;
+bitInfo bitNames[] = {
+      {"TRCENA|",       DEMCR_TRCENA},
+      {"VC_HARDERR|",   DEMCR_VC_HARDERR},
+      {"VC_INTERR|",    DEMCR_VC_INTERR},
+      {"VC_BUSERR|",    DEMCR_VC_BUSERR},
+      {"VC_STATERR|",   DEMCR_VC_STATERR},
+      {"VC_CHKERR|",    DEMCR_VC_CHKERR},
+      {"VC_NOCPERR|",   DEMCR_VC_NOCPERR},
+      {"VC_MMERR|",     DEMCR_VC_MMERR},
+      {"VC_CORERESET|", DEMCR_VC_CORERESET},
+      {NULL, 0},
+};
+bitInfo *bitPtr = bitNames;
+static char buffer[200];
+   buffer[0] = '\0';
+   if ((demcrValue & DEMCR_VC_ALL_ERRORS) == DEMCR_VC_ALL_ERRORS) {
+      strcat(buffer, "ALL_ERRORS|");
+      demcrValue &= ~DEMCR_VC_ALL_ERRORS;
+   }
+   while (bitPtr->bitMask != 0) {
+      if ((demcrValue & bitPtr->bitMask) != 0) {
+         strcat(buffer, bitPtr->bitName);
+      }
+      bitPtr++;
+   }
+   return buffer;
+}
+
+const char *getMDM_APStatusName(uint32_t mdmApValue) {
+typedef struct {
+   const char *bitName;
+   const uint32_t   bitMask;
+} bitInfo;
+static const bitInfo bitNames[] = {
+      {"MASS_ERASE_ACK|",  MDM_AP_Flash_Mass_Erase_Ack},
+      {"FLASH_READY|",     MDM_AP_Flash_Ready},
+      {"SECURE|",          MDM_AP_System_Security},
+      {"RESET|",           MDM_AP_System_Security},
+      {"MASS_ERASE_EN|",   MDM_AP_Mass_Erase_Enable},
+      {"BACKDOOR_EN|",     MDM_AP_Backdoor_Access_Enable},
+      {"LOW_POWER_EN|",    MDM_AP_LP_Enable},
+      {"LLS_EXIT|",        MDM_AP_LLS_Mode_Exit},
+      {"VLLSx_EXIT|",      MDM_AP_VLLSx_Mode_Exit},
+      {"HALT|",            MDM_AP_Status_Core_Halted},
+      {"SLEEP_DEEP|",      MDM_AP_Status_Core_SLEEPDEEP},
+      {"SLEEPING|",        MDM_AP_Status_Core_SLEEPING},
+      {NULL, 0},
+};
+const bitInfo *bitPtr = bitNames;
+static char buffer[200];
+   buffer[0] = '\0';
+   while (bitPtr->bitMask != 0) {
+      if ((mdmApValue & bitPtr->bitMask) != 0) {
+         strcat(buffer, bitPtr->bitName);
+      }
+      bitPtr++;
+   }
+   return buffer;
+}
+const char *getMDM_APControlName(uint32_t mdmApValue) {
+typedef struct {
+   const char *bitName;
+   const uint32_t   bitMask;
+} bitInfo;
+static const bitInfo bitNames[] = {
+      {"MASS_ERASE|",    MDM_AP_Control_Flash_Mass_Erase},
+      {"DEBUG_DISABLE|", MDM_AP_Control_Debug_Disable},
+      {"DEBUG_REQUEST|", MDM_AP_Control_Debug_Request},
+      {"RESET_REQUEST|", MDM_AP_Control_System_Reset_Request},
+      {"CORE_HOLD|",     MDM_AP_Control_Core_Hold_Reset},
+      {"VLLDBGREQ|",     MDM_AP_Control_VLLDBGREQ},
+      {"VLLDBGACK|",     MDM_AP_Control_VLLDBGACK},
+      {"STATUS_ACK|",    MDM_AP_Control_Status_Ack},
+      {NULL, 0},
+};
+const bitInfo *bitPtr = bitNames;
+static char buffer[200];
+   buffer[0] = '\0';
+   while (bitPtr->bitMask != 0) {
+      if ((mdmApValue & bitPtr->bitMask) != 0) {
+         strcat(buffer, bitPtr->bitName);
+      }
+      bitPtr++;
+   }
+   return buffer;
+}
+
+const char *getSRSHName(uint32_t srshValue) {
+typedef struct {
+   const char *bitName;
+   const uint32_t   bitMask;
+} bitInfo;
+bitInfo bitNames[] = {
+      {"SW|",     1<<2},
+      {"LOCKUP|", 1<<1},
+      {"JTAG|",   1<<0},
+      {NULL, 0},
+};
+bitInfo *bitPtr = bitNames;
+static char buffer[200];
+   buffer[0] = '\0';
+   while (bitPtr->bitMask != 0) {
+      if ((srshValue & bitPtr->bitMask) != 0) {
+         strcat(buffer, bitPtr->bitName);
+      }
+      bitPtr++;
+   }
+   return buffer;
+}
+
+const char *getSRSLName(uint32_t srslValue) {
+typedef struct {
+   const char *bitName;
+   const uint32_t   bitMask;
+} bitInfo;
+bitInfo bitNames[] = {
+      {"POR|",    1<<7},
+      {"PIN|",    1<<6},
+      {"COP|",    1<<5},
+      {"LOC",     1<<2},
+      {"LVD|",    1<<1},
+      {"WAKEUP|", 1<<0},
+      {NULL, 0},
+};
+bitInfo *bitPtr = bitNames;
+static char buffer[200];
+   buffer[0] = '\0';
+   while (bitPtr->bitMask != 0) {
+      if ((srslValue & bitPtr->bitMask) != 0) {
+         strcat(buffer, bitPtr->bitName);
+      }
+      bitPtr++;
+   }
+   return buffer;
+}
+
+const char *getMemSpaceName(MemorySpace_t memSpace) {
+   static char buffer[100];
+   switch(memSpace) {
+     case MS_PWord   :  return "MS_PWord";
+     case MS_PLong   :  return "MS_PLong";
+     case MS_XByte   :  return "MS_XByte";
+     case MS_XWord   :  return "MS_XWord";
+     case MS_XLong   :  return "MS_XLong";
+     default: break;
+   };
+   switch(memSpace&MS_SPACE) {
+     case MS_None    :  strcpy(buffer,"-|");                 break;
+     case MS_Program :  strcpy(buffer,"MS_Program|");      break;
+     case MS_Data    :  strcpy(buffer,"MS_Data|");         break;
+     case MS_Global  :  strcpy(buffer,"MS_Global|");       break;
+     default         :  strcpy(buffer,"MS_UnknownSpace|"); break;
+   };
+   switch(memSpace&MS_SIZE) {
+     case MS_Byte   :  strcat(buffer,"MS_Byte");        break;
+     case MS_Word   :  strcat(buffer,"MS_Word");        break;
+     case MS_Long   :  strcat(buffer,"MS_Long");        break;
+     default        :  strcat(buffer,"-"); break;
+   };
+   return buffer;
 }
 #endif // LOG
 

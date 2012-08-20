@@ -1006,6 +1006,8 @@ static const uint8_t executeTargetInstructionSequence[] = {
 
 #endif
 
+static bool DSC_InitialiseDone = false;
+
 //! Initialise
 //!
 USBDM_DSC_API
@@ -1014,6 +1016,8 @@ USBDM_ErrorCode DSC_Initialise(void) {
    USBDM_ErrorCode rc = BDM_RC_OK;
 
    print("   DSC_Initialise()\n");
+
+   DSC_InitialiseDone = false;
 
    // Check for target power
    USBDMStatus_t status;
@@ -1039,6 +1043,10 @@ USBDM_ErrorCode DSC_Initialise(void) {
    bdmOptions.targetType = T_MC56F80xx;
    rc = USBDM_GetExtendedOptions(&bdmOptions);
 
+   if (rc != BDM_RC_OK) {
+      return rc;
+   }
+   DSC_InitialiseDone = true;
    return rc;
 }
 
@@ -2341,10 +2349,16 @@ USBDM_ErrorCode DSC_GetIdcode(uint32_t *idcode) {
 //!
 USBDM_DSC_API
 USBDM_ErrorCode DSC_Connect(void){
-USBDM_ErrorCode rc;
-uint32_t idCode;
-OnceStatus_t onceStatus;
+   USBDM_ErrorCode rc;
+   uint32_t idCode;
+   OnceStatus_t onceStatus;
 
+   if (!DSC_InitialiseDone) {
+      rc = DSC_Initialise();
+      if (rc != BDM_RC_OK) {
+         return  rc;
+      }
+   }
    print("   DSC_Connect()\n" );
 
    rc = readIDCODE(&idCode, JTAG_MASTER_COMMAND_LENGTH, true);
@@ -2381,6 +2395,12 @@ USBDM_ErrorCode rc;
 uint32_t idCode;
 OnceStatus_t status;
 
+   if (!DSC_InitialiseDone) {
+      rc = DSC_Initialise();
+      if (rc != BDM_RC_OK) {
+         return  rc;
+      }
+   }
    print("   DSC_TargetReset(%s)\n", getTargetModeName(targetMode));
 
    TargetMode_t resetMethod = (TargetMode_t)(targetMode&RESET_METHOD_MASK);

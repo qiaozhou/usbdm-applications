@@ -19,6 +19,7 @@
 #include "USBDM_API.h"
 #include "Names.h"
 #include "ARM_Definitions.h"
+//#include "Log.h"
 
 //! Obtain a description of the hardware version
 //!
@@ -27,29 +28,30 @@
 const char *getHardwareDescription(unsigned int hardwareVersion) {
    //! BDM hardware descriptions
    static const char *hardwareDescriptions[] = {
-  /*  0 */  "Reserved",                                                                        //  0
-  /*  1 */  "USBDM-JB16 - BDM for RS08, HCS08, HCS12, CFV1 (JB16DWE)",                         //  1
-  /*  2 */  "TBDML-JB16 - Minimal BDM for HCS08, HCS12 & CFV1 (JB16)",                         //  2
-  /*  3 */  "TBDML-JB16 - Minimal TBDML (Internal version)",                                   //  3
-  /*  4 */  "OSBDM-JB16 - Original OSBDM",                                                     //  4
-  /*  5 */  "TBDML-WITZ - Witztronics TBDML/OSBDM",                                            //  5
-  /*  6 */  "OSBDM-JB16+    - Extended OSBDM (RS08 support)",                                  //  6
-  /*  7 */  "USBDM-JMxx-CLD - BDM for RS08, HCS08, HCS12, CFV1 (JMxxCLD)",                     //  7
-  /*  8 */  "USBDM-JMxx-CLC - BDM for RS08, HCS08, HCS12, CFV1 (JMxxCLC)",                     //  8
-  /*  9 */  "USBSPYDER08    - SofTec USBSPYDER08",                                             //  9
-  /* 10 */  "USBDM_UF32     - BDM for RS08, HCS08, HCS12, CFV1 (UF32PBE)",                     //  10
-  /* 11 */  "USBDM-CF-JS16  - Minimal BDM for DSC & CFVx (JS16CWJ)",                           //  11
-  /* 12 */  "USBDM-CF-JMxx  - BDM for RS08, HCS08, HCS12, CFV1 & CFVx (JMxxCLD)",              //  12
-  /* 13 */  "USBDM-JS16     - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ)",                  //  13
-  /* 14 */  "USBDM-AXIOM-M56F8006  - Axiom MC56F8006 Demo board",                              //  14
-  /* 15 */  "Reserved for User created custom hardware",                                       //  15
-  /* 16 */  "USBDM-CF-SER-JS16 - Minimal BDM for DSC/CFVx/ARM (JS16CWJ) with serial",          //  16
-  /* 17 */  "USBDM-SER-JS16    - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ) wiuth serial",  //  17
-  /* 18 */  "USBDM-CF-SER-JMxx - Deluxe BDM for RS08/HCS08/HCS12/DSC/CFVx/ARM (JMxxCLD)",      //  18
-  /* 19 */  "USBDM_TWR_KINETIS - Tower Kinetis boards",                                          //  19
-  /* 20 */  "USBDM_TWR_CFV1    - Tower Coldfire V1 boards",                                      //  20
-  /* 21 */  "USBDM_TWR_HCS08   - Tower HCS08 boards",                                            //  21
-  /* 22 */  "USBDM_TWR_CFVx    - Tower CFVx boards",                                            //  21
+  /*  0 */  "Reserved",
+  /*  1 */  "USBDM-JB16            - BDM for RS08, HCS08, HCS12, CFV1 (JB16DWE)",
+  /*  2 */  "TBDML-JB16            - Minimal BDM for HCS08, HCS12 & CFV1 (JB16)",
+  /*  3 */  "TBDML-JB16            - Minimal TBDML (Internal version)",
+  /*  4 */  "OSBDM-JB16            - Original OSBDM",
+  /*  5 */  "TBDML-WITZ            - Witztronics TBDML/OSBDM",
+  /*  6 */  "OSBDM-JB16+           - Extended OSBDM (RS08 support)",
+  /*  7 */  "USBDM-JMxx-CLD        - BDM for RS08, HCS08, HCS12, CFV1 (JMxxCLD)",
+  /*  8 */  "USBDM-JMxx-CLC        - BDM for RS08, HCS08, HCS12, CFV1 (JMxxCLC)",
+  /*  9 */  "USBSPYDER08           - SofTec USBSPYDER08",
+  /* 10 */  "USBDM_UF32            - BDM for RS08, HCS08, HCS12, CFV1 (UF32PBE)",
+  /* 11 */  "USBDM-CF-JS16         - Minimal BDM for DSC & CFVx (JS16CWJ)",
+  /* 12 */  "USBDM-CF-JMxx         - BDM for RS08, HCS08, HCS12, CFV1 & CFVx (JMxxCLD)",
+  /* 13 */  "USBDM-JS16            - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ)",
+  /* 14 */  "USBDM-AXIOM-M56F8006  - Axiom MC56F8006 Demo board",
+  /* 15 */  "Custom                - Reserved for User created custom hardware",
+  /* 16 */  "USBDM-CF-SER-JS16     - Minimal BDM for DSC,CFVx,ARM-JTAG (JS16CWJ) with serial",
+  /* 17 */  "USBDM-SER-JS16        - Minimal BDM for HCS08, HCS12 & CFV1 (JS16CWJ) with serial",
+  /* 18 */  "USBDM-CF-SER-JMxx     - Deluxe BDM for RS08,HCS08,HCS12,DSC,CFVx,ARM-JTAG (JMxxCLD)",
+  /* 19 */  "USBDM_TWR_KINETIS     - Tower Kinetis boards",
+  /* 20 */  "USBDM_TWR_CFV1        - Tower Coldfire V1 boards",
+  /* 21 */  "USBDM_TWR_HCS08       - Tower HCS08 boards",
+  /* 22 */  "USBDM_TWR_CFVx        - Tower CFVx boards",
+  /* 23 */  "USBDM-SWD-SER-JS16    - Minimal BDM for HCS08,HCS12,CFV1,ARM-SWD (JS16CWJ) with serial",
          };
    const char *hardwareName = "Unknown";
    hardwareVersion &= 0x3F; // mask out BDM processor type
@@ -87,6 +89,7 @@ const char *getBriefHardwareDescription(unsigned int hardwareVersion) {
     /* 20  */  "USBDM_TWR_CFV1",
     /* 21  */  "USBDM_TWR_HCS08",
     /* 22  */  "USBDM_TWR_CFVx",
+    /* 23  */  "USBDM-SWD-SER -(JS16CWJ-V2)",
          };
 
    const char *hardwareName = "unknown hardware";
@@ -94,82 +97,6 @@ const char *getBriefHardwareDescription(unsigned int hardwareVersion) {
    if (hardwareVersion < sizeof(briefHardwareDescriptions)/sizeof(briefHardwareDescriptions[0]))
       hardwareName = briefHardwareDescriptions[hardwareVersion];
    return hardwareName;
-}
-
-//! Error message string from Error #
-static const char *const errorMessages[] = {
-    "No Error",                                          // 0
-    "Illegal BDM parameters",                            // 1
-    "General Fail (for compatibility)",                  // 2
-    "BDM is Busy",                                       // 3
-    "Illegal BDM command",                               // 4
-    "BDM has no connection to target",                   // 5
-    "BDM Communication overrun",                         // 6
-    "Illegal Command Response from target",              // 7
-    NULL,                                                // 8
-    NULL,                                                // 9
-    NULL,                                                // 10
-    NULL,                                                // 11
-    NULL,                                                // 12
-    NULL,                                                // 13
-    NULL,                                                // 14
-    "Target type is not supported by BDM",               // 15
-    "No BDM Tx routine was found",                       // 16
-    "No BDM Rx routine was found",                       // 17
-    "Target BDM Enable failed",                          // 18
-    "Target reset pin timeout (fall)",                   // 19
-    "Target BKGD pin timeout",                           // 20
-    "Target SYNC timeout",                               // 21
-    "Unable to determine target BDM speed",              // 22
-    "Wrong Flash programming mode",                      // 23
-    "BDM Busy Flash Programming",                        // 24
-    "Target Vdd not removed",                            // 25
-    "Target Vdd not present",                            // 26
-    "Vdd not controlled by BDM",                         // 27
-    "Target reported - Error terminated bus cycle",      // 28
-    "USB Transfer error",                                // 29
-    "Expected BDM command ACK missing",                  // 30
-    "BDM Trimming of target clock failed",               // 31
-    "Feature not supported by BDM",                      // 32
-    "Target reset pin timeout (rise)",                   // 33
-
-    // The following are used by additional USBDM code
-    "BDM Firmware version is incompatible with driver/program",  // 34
-    "Program is incompatible with DLL version",          // 35
-    "No suitable USBDM debug interface was located",     // 36
-
-    "Unmatched REPEAT-END_REPEAT in JTAG sequence",      // 37
-    "Unmatched CALL-RETURN in JTAG sequence",            // 38
-    "Unmatched IF-END_IF in JTAG sequence",              // 39
-    "Stack error in JTAG sequence",                      // 40
-    "Illegal JTAG sequence",                             // 41
-    "Target busy",                                       // 42
-    "Subroutine is too large to cache",                  // 43
-    "USBDM device is not open",                          // 44
-
-    "Unknown or not supported device",                   // 45
-    "Device database error (not found/incorrect)",       // 46
-
-    "ARM target failed to power up",                     // 47
-    "ARM memory access error (illegal/readonly etc)",    // 48
-    "JTAG Chain contains too many devices (or open)",    // 49
-    "Device appears secured",                            // 50
-};
-
-//! \brief Maps an ICP Error Code # to a string
-//!
-//! @param error Error number
-//!
-//! @return pointer to static string describing the error
-//!
-const char *getErrorName(unsigned int error) {
-   char const *errorName = NULL;
-
-   if (error < sizeof(errorMessages)/sizeof(errorMessages[0]))
-      errorName = errorMessages[error];
-   if (errorName == NULL)
-      errorName = "UNKNOWN";
-   return errorName;
 }
 
 //! ICP Error message string from Error #
@@ -204,7 +131,7 @@ const char *getICPErrorName(unsigned char error) {
 //!
 char const *getTargetTypeName( unsigned int type ) {
    static const char *names[] = {
-      "HCS12","HCS08","RS08","CFV1","CFVx","JTAG","EZFlash","MC56F80xx","ARM-JTAG",
+      "HCS12","HCS08","RS08","CFV1","CFVx","JTAG","EZFlash","MC56F80xx","ARM-JTAG","ARM-SWD"
       };
    const char *typeName = NULL;
    static char unknownBuffer[10];
@@ -221,6 +148,15 @@ char const *getTargetTypeName( unsigned int type ) {
    return typeName;
 }
 
+char const *getVoltageStatusName(TargetVddState_t level) {
+   switch (level) {
+      case BDM_TARGET_VDD_NONE : return "Vdd-None";
+      case BDM_TARGET_VDD_INT  : return "Vdd-Internal";
+      case BDM_TARGET_VDD_EXT  : return "Vdd-External";
+      case BDM_TARGET_VDD_ERR  : return "Vdd-Overload";
+      default  :                 return "Vdd-??";
+   }
+}
 
 char const *getConnectionStateName(SpeedMode_t level) {
    switch (level) {
@@ -231,29 +167,6 @@ char const *getConnectionStateName(SpeedMode_t level) {
       default                    : return "Speed-??";
    }
 }
-
-#if 0
-char const *getConnectionRetryName(RetryMode mode) {
-   static char buff[150] = "";
-
-   switch (mode & retryMask) {
-   case retryAlways     : strcpy(buff,"ALWAYS");      break;
-   case retryNever      : strcpy(buff,"NEVER");       break;
-   case retryNotPartial : strcpy(buff,"NOTPARTIAL");  break;
-   default              : strcpy(buff,"UNKNOWN!!!");  break;
-   }
-   if (mode & retryWithInit) {
-      strcat(buff,"+INIT");
-   }
-   if (mode & retryByPower) {
-      strcat(buff,"+POWER");
-   }
-   if (mode & retryByReset) {
-      strcat(buff,"+RESET");
-   }
-   return buff;
-}
-#endif
 
 //! \brief Maps the BDM status to text
 //!
@@ -361,24 +274,25 @@ const char *getCommandName(unsigned char command) {
 
 //! Debug command string from code
 static const char *const debugCommands[] = {
-   "ACKN",              // 0
-   "SYNC",              // 1
-   "Test Port",         // 2
-   "USB Disconnect",    // 3
-   "Find Stack size",   // 4
-   "Vpp Off",           // 5
-   "Vpp On",            // 6
-   "Flash 12V Off",     // 7
-   "Flash 12V On",      // 8
-   "Vdd Off",           // 9
-   "Vdd 3.3V On",       // 10
-   "Vdd 5V On",         // 11
-   "Cycle Vdd",         // 12
-   "Measure Vdd",       // 13
-   "Measure RS08 Trim - deleted", //
-   "Test WAITS",                  // 15, //!< - Tests the software counting delays used for BDM communication. (locks up BDM!)
-   "Test ALT Speed",              // 16,
-   "Test BDM Tx Routine",         // 17,
+   "ACKN",                        // 0
+   "SYNC",                        // 1
+   "Test Port",                   // 2
+   "USB Disconnect",              // 3
+   "Find Stack size",             // 4
+   "Vpp Off",                     // 5
+   "Vpp On",                      // 6
+   "Flash 12V Off",               // 7
+   "Flash 12V On",                // 8
+   "Vdd Off",                     // 9
+   "Vdd 3.3V On",                 // 10
+   "Vdd 5V On",                   // 11
+   "Cycle Vdd",                   // 12
+   "Measure Vdd",                 // 13
+   "Measure RS08 Trim - deleted", // 14
+   "Test WAITS",                  // 15 //!< - Tests the software counting delays used for BDM communication. (locks up BDM!)
+   "Test ALT Speed",              // 16
+   "Test BDM Tx Routine",         // 17
+   "SWD test",                    // 18
 };
 
 //! \brief Maps a Debug Command # to a string
@@ -395,6 +309,38 @@ const char *getDebugCommandName(unsigned char cmd) {
       cmdName = "UNKNOWN";
    return cmdName;
 }
+
+char const *getAutoConnectName(AutoConnect_t mode) {
+   static char buff[40] = "";
+   switch(mode) {
+   case AUTOCONNECT_NEVER  : strcpy(buff,"NEVER");      break;
+   case AUTOCONNECT_ALWAYS : strcpy(buff,"ALWAYS");      break;
+   case AUTOCONNECT_STATUS : strcpy(buff,"STATUS");      break;
+   }
+   return buff;
+}
+#if 0
+char const *getConnectionRetryName(RetryMode mode) {
+   static char buff[150] = "";
+
+   switch (mode & retryMask) {
+   case retryAlways     : strcpy(buff,"ALWAYS");      break;
+   case retryNever      : strcpy(buff,"NEVER");       break;
+   case retryNotPartial : strcpy(buff,"NOTPARTIAL");  break;
+   default              : strcpy(buff,"UNKNOWN!!!");  break;
+   }
+   if (mode & retryWithInit) {
+      strcat(buff,"+INIT");
+   }
+   if (mode & retryByPower) {
+      strcat(buff,"+POWER");
+   }
+   if (mode & retryByReset) {
+      strcat(buff,"+RESET");
+   }
+   return buff;
+}
+#endif
 
 //! \brief Maps a Coldfire V1 Control register # to a string
 //! (As used by WRITE_CREG/READ_CREG)
@@ -452,6 +398,42 @@ const char *regName = NULL;
       regName = "unknown";
 
    return regName;
+}
+
+//! \brief Maps a ARM-SWD Debug register # to a string
+//!
+//! @param regAddr = register address
+//!
+//! @return pointer to static string describing the command
+//!
+char const *getARMControlRegName( unsigned int regAddr ) {
+   //! The regAddr is actually a AP bus address as follows:
+   //!    A[31:24]  => DP-AP-SELECT[31:24] (AP # Select) \n
+   //!    A[23:8]   => unused (0)
+   //!    A[7:4]    => DP-AP-SELECT[7:4]   (Bank select within AP) \n
+   //!    A[3:2]    => APACC[3:2]          (Register select within AP bank)
+   //!    A[1:0]    => unused (0)
+   //!
+   switch(regAddr) {
+      // AP#0 - Common ARM AHB-AP
+      case ARM_CRegAHB_AP_CSW     : return "AHB_AP_CSW";  // AHB-AP Control/Status Word register
+      case ARM_CRegAHB_AP_TAR     : return "AHB_AP_TAR";  // AHB-AP Transfer Address register
+      case ARM_CRegAHB_AP_DRW     : return "AHB_AP_DRW";  // AHB-AP Data Read/Write register
+
+      case ARM_CRegAHB_AP_CFG     : return "AHB_AP_CFG";  // AHB-AP Config register
+      case ARM_CRegAHB_AP_Base    : return "AHB_AP_Base"; // AHB-AP IDebug base address register
+      case ARM_CRegAHB_AP_Id      : return "AHB_AP_Id";   // AHB-AP ID Register
+
+      // AP#1 - Kinetis MDM-AP registers
+      case ARM_CRegMDM_AP_Status  : return "MDM_AP_Status";  //!< Status register
+      case ARM_CRegMDM_AP_Control : return "MDM_AP_Control"; //!< Control register
+      case ARM_CRegMDM_AP_Ident   : return "MDM_AP_Ident";   //!< Identifier register (should read 0x001C_0000)
+      default: break;
+   };
+   static char buff[100];
+   snprintf(buff, sizeof(buff), "0x%08X (AP#0x%02X:B#0x%1X:R#%d)",
+         regAddr, (regAddr>>24)&0xFF, (regAddr>>4)&0x0F, (regAddr>>2)&0x2);
+   return buff;
 }
 
 //! \brief Maps a Coldfire V1 Debug register # to a string
@@ -517,6 +499,30 @@ char const *getCFVxDebugRegName( unsigned int regAddr ){
       regName = "unknown";
 
    return regName;
+}
+
+//! \brief Maps a ARM-SWD Debug register # to a string
+//!
+//! @param regAddr = register address
+//!
+//! @return pointer to static string describing the command
+//!
+char const *getSWDDebugRegName( unsigned int regAddr ) {
+   static const char *names[] = {
+   "DP_IDCODE",    //!< IDCODE reg - read only
+   "DP_STATUS",    //!< STATUS reg - read only
+   "DP_RESEND",    //!< RESEND reg - read only
+   "DP_RDBUFF",    //!< RDBUFF reg - read only
+   "DP_ABORT",     //!< IDCODE reg - write only
+   "DP_CONTROL",   //!< IDCODE reg - write only
+   "DP_SELECT",    //!< IDCODE reg - write only
+   };
+   if (regAddr>=(sizeof(names)/sizeof(names[0]))) {
+      return "DP_Illegal register";
+   }
+   else {
+      return names[regAddr];
+   }
 }
 
 //! \brief Maps a Coldfire V2,3,4 Debug register # to a string
@@ -652,28 +658,6 @@ char const *getCFVxRegName( unsigned int regAddr ){
    return regName;
 }
 
-//! \brief Maps a ARM register # to a string
-//!
-//! @param regAddr = register address
-//!
-//! @return pointer to static string describing the command
-//!
-char const *getARMRegName( unsigned int regAddr ){
-   static const char *names[] = {
-      "R0","R1","R2","R3","R4","R5","R6","R7",
-      "R8","R9","R10","R11","R12","MSP","LR","PC",
-      };
-   const char *regName = NULL;
-
-   if (regAddr < sizeof(names)/sizeof(names[0]))
-       regName = names[regAddr];
-
-   if (regName == NULL)
-      regName = "unknown";
-
-   return regName;
-}
-
 char const *getDSCRegName( unsigned int regNum) {
    static const char *const regNames[] =  {
       // Core registers
@@ -747,7 +731,6 @@ char const *getDSCRegName( unsigned int regNum) {
 }
 
 //! \brief Maps a register # to a string
-//! (As used by WAREG/RAREG,WDREG/RDREG)
 //!
 //! @param targetType = target type (T_HC12 etc)
 //! @param regNo      = register address
@@ -769,6 +752,8 @@ char const *getRegName( unsigned int targetType,
       case T_CFVx :
          return getCFVxRegName(regNo);
       case T_ARM_JTAG :
+         return getARMRegName(regNo);
+      case T_ARM_SWD :
          return getARMRegName(regNo);
       case T_MC56F80xx:
          return getDSCRegName(regNo);
@@ -997,19 +982,13 @@ static char buff[100];
 
    buff[0] = '\0';
 
-   if (level == -1)
+   if (level == -1) {
       return "Release";
-
+   }
    switch (level & PIN_BKGD) {
       case PIN_BKGD_3STATE : strcat(buff, "PIN_BKGD_3STATE|"); break;
       case PIN_BKGD_HIGH   : strcat(buff, "PIN_BKGD_HIGH|");   break;
       case PIN_BKGD_LOW    : strcat(buff, "PIN_BKGD_LOW|");    break;
-   }
-   switch (level & PIN_TRST) {
-      case PIN_TRST_3STATE : strcat(buff, "PIN_TRST_3STATE|"); break;
-      case PIN_TRST_LOW    : strcat(buff, "PIN_TRST_LOW|");   break;
-      case PIN_TRST_NC     : break;
-      default              : strcat(buff, "PIN_TRST_??|");    break;
    }
    switch (level & PIN_RESET) {
       case PIN_RESET_3STATE : strcat(buff, "PIN_RESET_3STATE|"); break;
@@ -1023,11 +1002,22 @@ static char buff[100];
       case PIN_TA_NC     : break;
       default            : strcat(buff, "PIN_TA_??|");    break;
    }
+   switch (level & PIN_TRST) {
+      case PIN_TRST_3STATE : strcat(buff, "PIN_TRST_3STATE|"); break;
+      case PIN_TRST_LOW    : strcat(buff, "PIN_TRST_LOW|");   break;
+      case PIN_TRST_NC     : break;
+      default              : strcat(buff, "PIN_TRST_??|");    break;
+   }
    switch (level & PIN_BKPT) {
       case PIN_BKPT_3STATE : strcat(buff, "PIN_BKPT_3STATE|"); break;
       case PIN_BKPT_LOW    : strcat(buff, "PIN_BKPT_LOW|");    break;
       case PIN_BKPT_NC     : break;
       default              : strcat(buff, "PIN_BKPT_??|");    break;
+   }
+   switch (level & PIN_SWD) {
+      case PIN_SWD_3STATE : strcat(buff, "PIN_SWD_3STATE|"); break;
+      case PIN_SWD_HIGH   : strcat(buff, "PIN_SWD_HIGH|");   break;
+      case PIN_SWD_LOW    : strcat(buff, "PIN_SWD_LOW|");    break;
    }
    return buff;
 }
@@ -1079,16 +1069,6 @@ char const *getVppSelectName(TargetVppSelect_t level) {
       case BDM_TARGET_VPP_ON        : return "Vpp-On";
       case BDM_TARGET_VPP_ERROR     : return "Vpp-Error";
       default :                       return "Vpp-??";
-   }
-}
-
-char const *getVoltageStatusName(TargetVddState_t level) {
-   switch (level) {
-      case BDM_TARGET_VDD_NONE : return "Vdd-None";
-      case BDM_TARGET_VDD_INT  : return "Vdd-Internal";
-      case BDM_TARGET_VDD_EXT  : return "Vdd-External";
-      case BDM_TARGET_VDD_ERR  : return "Vdd-Overload";
-      default  :                 return "Vdd-??";
    }
 }
 
@@ -1166,7 +1146,7 @@ void printBdmOptions(const USBDM_ExtendedOptions_t *options) {
          "usePSTSignals         => %s\n"
          "useResetSignal        => %s\n"
          "========================================\n",
-         options->autoReconnect?"T":"F",
+         getAutoConnectName(options->autoReconnect),
          getClockSelectName(options->bdmClockSource),
          options->cycleVddOnConnect?"T":"F",
          options->cycleVddOnReset?"T":"F",
@@ -1194,26 +1174,24 @@ void printBdmOptions(const USBDM_ExtendedOptions_t *options) {
 //!
 //! @return pointer to static string describing the register
 //!
-char const *ARM_GetRegisterName( unsigned int regAddr ) {
+char const *getARMRegName( unsigned int regAddr ) {
 static const char *regs[] = {"R0","R1","R2","R3","R4","R5","R6","R7",
-                             "R8","R9","R10","R11","R12","SP","LR","PC","PSR","MSP","PSP",
+                             "R8","R9","R10","R11","R12","SP","LR","PC",
+                             "PSR","MSP","PSP",
                              "MISC/PRIMASK", "FAULTMASK", "BASEPRI", "CONTROL"};
 const char *regName = NULL;
 
    if (regAddr < sizeof(regs)/sizeof(regs[0]))
       regName = regs[regAddr];
-   else if (regAddr==ARM_RegMISC) {
-      regName = "MISC";
-   }
    else if (regAddr==ARM_RegFPSCR) {
       regName = "FPSCR";
    }
    else if ((regAddr>=ARM_RegFPS0) && (regAddr<=ARM_RegFPS0+31)) {
       regName = "FPSn";
    }
-   else
+   if (regName == NULL) {
       regName = "unknown";
-
+   }
    return regName;
 }
 
@@ -1392,6 +1370,32 @@ static char buffer[200];
       }
       bitPtr++;
    }
+   return buffer;
+}
+
+const char *getMemSpaceName(MemorySpace_t memSpace) {
+   static char buffer[100];
+   switch(memSpace) {
+     case MS_PWord   :  return "MS_PWord";
+     case MS_PLong   :  return "MS_PLong";
+     case MS_XByte   :  return "MS_XByte";
+     case MS_XWord   :  return "MS_XWord";
+     case MS_XLong   :  return "MS_XLong";
+     default: break;
+   };
+   switch(memSpace&MS_SPACE) {
+     case MS_None    :  strcpy(buffer,"-|");                 break;
+     case MS_Program :  strcpy(buffer,"MS_Program|");      break;
+     case MS_Data    :  strcpy(buffer,"MS_Data|");         break;
+     case MS_Global  :  strcpy(buffer,"MS_Global|");       break;
+     default         :  strcpy(buffer,"MS_UnknownSpace|"); break;
+   };
+   switch(memSpace&MS_SIZE) {
+     case MS_Byte   :  strcat(buffer,"MS_Byte");        break;
+     case MS_Word   :  strcat(buffer,"MS_Word");        break;
+     case MS_Long   :  strcat(buffer,"MS_Long");        break;
+     default        :  strcat(buffer,"-"); break;
+   };
    return buffer;
 }
 #endif // LOG

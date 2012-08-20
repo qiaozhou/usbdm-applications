@@ -3,40 +3,16 @@
 */
 
 //! Program versions e.g. Flash programmers
-#define PROGRAM_VERSION	     0x49    //!< Version of the DLL in Hex
-#define PROGRAM_VERSION_MAJOR  4     //!< DLL Major version #
-#define PROGRAM_VERSION_MINOR  9     //!< DLL Minor version #
-#define PROGRAM_VERSION_MICRO  5     //!< DLL Micro version #
-#ifdef LOG
-#define PROGRAM_VERSION_STRING "4.9.5-Debug" //!< Version as string
-#else
-#define PROGRAM_VERSION_STRING "4.9.5"       //!< Version as string
-#endif
+#define USBDM_VERSION	     0x49    //!< Version of the DLL in Hex
+#define USBDM_VERSION_MAJOR  4     //!< DLL Major version #
+#define USBDM_VERSION_MINOR  9     //!< DLL Minor version #
+#define USBDM_VERSION_MICRO  5     //!< DLL Micro version #
+#define USBDM_VERSION_NANO   4     //!< DLL Nano version #
 
-//! GDI DLL Version
-#define GDI_DLL_VERSION	     0x49    //!< Version of the DLL in Hex
-#define GDI_DLL_VERSION_MAJOR  4     //!< DLL Major version #
-#define GDI_DLL_VERSION_MINOR  9     //!< DLL Minor version #
-#define GDI_DLL_VERSION_MICRO  5     //!< DLL Micro version #
 #ifdef LOG
-#define GDI_DLL_VERSION_STRING "4.9.5-Debug" //!< Version as string
-//#define GDI_DLL_NAME "libhcs08-gdi-debug.so.4"
+#define USBDM_VERSION_STRING "4.9.5-Debug" //!< Version as string
 #else
-#define GDI_DLL_VERSION_STRING "4.9.5"       //!< Version as string
-//#define GDI_DLL_NAME "libhcs08-gdi.so.4"
-#endif
-
-//! USBDM DLL version
-//#define USBDM_DLL_VERSION	    0x49    //!< Version of the DLL in Hex
-#define USBDM_DLL_VERSION_MAJOR  4     //!< DLL Major version #
-#define USBDM_DLL_VERSION_MINOR  9     //!< DLL Minor version #
-#define USBDM_DLL_VERSION_MICRO  5     //!< DLL Micro version #
-#ifdef LOG
-#define USBDM_DLL_VERSION_STRING "4.9.5-Debug"  //!< DLL Version as string
-//#define USBDM_DLL_NAME "libusbdm-debug.so.4"
-#else
-#define USBDM_DLL_VERSION_STRING "4.9.5"        //!< DLL Version as string
-//#define USBDM_DLL_NAME "libusbdm.so.4"
+#define USBDM_VERSION_STRING "4.9.5"       //!< Version as string
 #endif
 
 // The version of the GDI standard implemented
@@ -45,17 +21,10 @@
 //! Name of directory to create in %APPDATA% for usbdm settings
 #define CONFIGURATION_DIRECTORY_NAME "usbdm"
 
-#if defined(GDI)
-#define VERSION_STRING GDI_DLL_VERSION_STRING
-#elif defined(DLL)
-#define VERSION_STRING USBDM_DLL_VERSION_STRING
-#else
-#define VERSION_STRING PROGRAM_VERSION_STRING
-#endif
-
-
 //----------------------------------------------------------------------------
 // Revision History
+//-----------+----------------------------------------------------------------
+//    Juk 12 | 4.9.5 Various Fixes, new flash handling etc               - pgo
 //-----------+----------------------------------------------------------------
 //    Mar 12 | 4.9.4 Various Fixes, BDM configuration changes            - pgo
 //-----------+----------------------------------------------------------------
